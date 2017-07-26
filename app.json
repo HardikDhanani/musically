@@ -1,4 +1,5 @@
 {
-  "name": "musically",
-  "displayName": "Musically"
+  "expo": {
+    "sdkVersion": "19.0.0"
+  }
 }
