@@ -1,27 +1,35 @@
 import React, { Component } from 'react';
-import { createStore, applyMiddleware } from 'redux';
-import { Provider } from 'react-redux';
-import thunk from 'redux-thunk';
+import { connect } from 'react-redux';
 
-import reducer from '../reducers/index';
-import Home from './Home';
+import { View } from 'react-native';
 
-// const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
-// const store = createStoreWithMiddleware(reducer);
+import Navigator from './Navigator';
+import * as appActions from '../redux/actions/appActions';
 
-const store = createStore(
-  reducer,
-  applyMiddleware(
-    thunk
-  )
-)
+class Root extends Component {
+  componentWillMount() {
+    this.props.start();
+  }
 
-export default class App extends Component {
   render() {
     return (
-      <Provider store={store}>
-        <Home />
-      </Provider>
+      <View style={{ flex: 1 }}>
+        <Navigator />
+      </View>
     );
   }
 }
+
+const mapStateToProps = state => {
+  return {
+    isReady: state.app.isReady
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    start: () => appActions.start()(dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Root);
