@@ -223,8 +223,6 @@ export const playPause = (currentSong) => {
     if (isPlaying) {
       PlayerService.pause()
         .then(() => {
-          // isPlaying = false;
-          // dispatch(pause());
           stopAndStopNotifyProgress(dispatch);
         });
     } else {
@@ -232,15 +230,11 @@ export const playPause = (currentSong) => {
         PlayerService.loadSong(currentSong.path)
           .then(() => PlayerService.play(() => next()(dispatch)))
           .then(() => {
-            // isPlaying = true;
-            // dispatch(play());
             playAndNotifyProgress(dispatch);
           });
       } else {
         PlayerService.play(() => next()(dispatch))
           .then(() => {
-            // isPlaying = true;
-            // dispatch(play());
             playAndNotifyProgress(dispatch);
           });
       }
