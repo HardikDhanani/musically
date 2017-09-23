@@ -119,7 +119,7 @@ class Player extends Component {
         </View>
         <View style={{ marginTop: 30 }}>
           {this._progressBar()}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={{ paddingTop: 30, flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ lineHeight: 25, color: 'gray' }}>{elapsedTime}</Text>
             <Text style={{ lineHeight: 25, color: 'gray' }}>{duration}</Text>
           </View>
@@ -150,6 +150,16 @@ class Player extends Component {
         width={Dimensions.get('window').width}
         color={'#ffa500'}
         backgroundColor={'gray'}
+        showButton={true}
+        onProgressChange={percentage => {
+          if (this.props.playing)
+            this.props.playPause(this.props.currentSong);
+
+          if (percentage) {
+            let newElapsed = total * percentage;
+            this.props.progressChanged(newElapsed);
+          }
+        }}
       />
     );
   }
@@ -322,6 +332,7 @@ const mapDispatchToProps = dispatch => {
     playPause: (currentSong) => playerActions.playPause(currentSong)(dispatch),
     next: () => playerActions.next()(dispatch),
     prev: () => playerActions.prev()(dispatch),
+    progressChanged: (newElapsed) => dispatch(playerActions.progressChanged(newElapsed)),
     like: (song) => dispatch(favoritesActions.like('song', song)),
   }
 }

@@ -1,5 +1,12 @@
 import LocalService from '../../services/LocalService';
 import PlayerService from '../../services/PlayerService';
+import MusicControl from 'react-native-music-control';
+
+MusicControl.enableControl('play', true);
+MusicControl.enableControl('pause', true);
+MusicControl.enableControl('stop', false);
+MusicControl.enableControl('nextTrack', true);
+MusicControl.enableControl('previousTrack', true);
 
 const loading = () => {
   return {
@@ -53,6 +60,15 @@ const timeElapsed = (elapsedTime) => {
     type: 'PLAYER_TIME_ELAPSED',
     payload: {
       elapsedTime
+    }
+  }
+}
+
+export const progressChanged = (newElapsed) => {
+  return {
+    type: 'PLAYER_PROGRESS_CHANGED',
+    payload: {
+      newElapsed
     }
   }
 }
@@ -230,11 +246,40 @@ export const playPause = (currentSong) => {
         PlayerService.loadSong(currentSong.path)
           .then(() => PlayerService.play(() => next()(dispatch)))
           .then(() => {
+
+            MusicControl.setNowPlaying({
+              title: currentSong.title,
+              artwork: currentSong.cover, // URL or RN's image require()
+              artist: currentSong.artist,
+              album: currentSong.album,
+              genre: currentSong.genre,
+              duration: parseFloat(currentSong.duration) / 1000, // (Seconds)
+              // description: '', // Android Only
+              color: 0x2E2E2E, // Notification Color - Android Only
+              // date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
+              // rating: 84, // Android Only (Boolean or Number depending on the type)
+              // notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
+            });
+
             playAndNotifyProgress(dispatch);
           });
       } else {
         PlayerService.play(() => next()(dispatch))
           .then(() => {
+            MusicControl.setNowPlaying({
+              title: currentSong.title,
+              artwork: currentSong.cover, // URL or RN's image require()
+              artist: currentSong.artist,
+              album: currentSong.album,
+              genre: currentSong.genre,
+              duration: parseFloat(currentSong.duration) / 1000, // (Seconds)
+              // description: '', // Android Only
+              color: 0x2E2E2E, // Notification Color - Android Only
+              // date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
+              // rating: 84, // Android Only (Boolean or Number depending on the type)
+              // notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
+            });
+
             playAndNotifyProgress(dispatch);
           });
       }

@@ -88,6 +88,11 @@ export default function artist(state = initialState, action = {}) {
         ...state,
         elapsedTime: state.elapsedTime + action.payload.elapsedTime
       }
+    case 'PLAYER_PROGRESS_CHANGED':
+      return {
+        ...state,
+        elapsedTime: action.payload.newElapsed
+      }
     case 'PLAYER_ADD_TO_QUEUE':
       return {
         ...state,

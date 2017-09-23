@@ -2,26 +2,119 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
+  PanResponder,
+  Animated
 } from 'react-native';
 
 export default class ProgressBar extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      pan: new Animated.ValueXY(),
+    };
+
+    this._currentPosition = 0;
+    this._maxPosition = 320 - 20;
+    this._isPanWorking = false;
+
+    this._onProgressChange = this._onProgressChange.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!this._isPanWorking && this.props.elapsed !== nextProps.elapsed) {
+      let percentage = this.props.total ? ((nextProps.elapsed * 100) / this.props.total) / 100 : 0;
+      let newdx = this._maxPosition * percentage;
+      this._currentPosition = newdx;
+      this.state.pan.setOffset({ x: newdx, y: 0 });
+    } else if (this.props.elapsed !== nextProps.elapsed && nextProps.elapsed === 0) {
+      this.state.pan.setOffset({ x: -this._currentPosition, y: 0 });
+      this._currentPosition = 0;
+    }
+  }
+
+  componentWillMount() {
+    this._panResponder = PanResponder.create({
+      onMoveShouldSetResponderCapture: () => true, //Tell iOS that we are allowing the movement
+      onMoveShouldSetPanResponderCapture: () => true, // Same here, tell iOS that we allow dragging
+      onPanResponderGrant: (e, gestureState) => {
+        this.state.pan.setOffset({ x: this.state.pan.x._value, y: 0 });
+        //this.state.pan.setValue({ x: 0, y: 0 }); //Initial value
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        this._isPanWorking = true;
+        if (gestureState.dx !== 0) {
+          let newdx = gestureState.dx;
+          let position = this._currentPosition + gestureState.dx;
+
+          if (position < 0) {
+            newdx = -1 * this._currentPosition;
+            position = 0;
+          } else if (position > this._maxPosition) {
+            newdx = this._maxPosition - this._currentPosition;
+            position = this._maxPosition;
+          }
+
+          Animated.event([
+            null, { dx: this.state.pan.x, dy: 0 },
+          ])(evt, { dx: newdx, dy: 0 });
+
+          this._onProgressChange(position);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (this._currentPosition + gestureState.dx < 0)
+          this._currentPosition = 0;
+        else if (this._currentPosition + gestureState.dx > this._maxPosition)
+          this._currentPosition = this._maxPosition;
+        else
+          this._currentPosition += gestureState.dx;
+
+        this._isPanWorking = false;
+        this.state.pan.flattenOffset(); // Flatten the offset so it resets the default positioning
+      }
+    });
+  }
+
   render() {
     let percentage = this.props.total ? ((this.props.elapsed * 100) / this.props.total) / 100 : 0;
-
     let elapsedWidth = this.props.width * percentage;
     let leftWidth = this.props.width - elapsedWidth;
+    let imageStyle = { transform: [{ translateX: this.state.pan.x }, { translateY: 0 }] };
 
     return (
-      <View style={{ flexDirection: 'row' }}>
-        <View style={[styles.progressBar, { flex: elapsedWidth, backgroundColor: this.props.color }]} />
-        <View style={[styles.progressBar, { flex: leftWidth, backgroundColor: this.props.backgroundColor }]} />
+      <View style={styles.container}>
+        <View style={[styles.progressBar, { flex: elapsedWidth, backgroundColor: this.props.color }]} onLayout={evt => { }} />
+        <View style={[styles.progressBar, { flex: leftWidth, backgroundColor: this.props.backgroundColor }]} onLayout={evt => { }} />
+        {
+          this.props.showButton
+            ? <Animated.View hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }} style={[styles.button, imageStyle, { borderColor: this.props.color }]} {...this._panResponder.panHandlers} />
+            : null
+        }
       </View>
     );
+  }
+
+  _onProgressChange(position) {
+    let percentage = ((position * 100) / this._maxPosition) / 100;
+    console.log('percentage: ' + percentage);
+    this.props.onProgressChange(percentage);
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
   progressBar: {
     height: 4,
+  },
+  button: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 5,
+    position: 'absolute'
   }
 });
