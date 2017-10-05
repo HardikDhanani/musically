@@ -20,8 +20,8 @@ export default function home(state = initialState, action = {}) {
     case 'LOADING_SONGS_ERROR':
       return {
         ...state,
-        isLoading: true,
-        error: 'Something went wrong loading items'
+        isLoading: false,
+        error: 'Something went wrong loading songs'
       }
     case 'SECTION_CHANGED':
       return {

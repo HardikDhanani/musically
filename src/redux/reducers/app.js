@@ -1,18 +1,24 @@
 const initialState = {
   isReady: false,
+  goHome: false,
   session: null,
   songs: [],
   albums: [],
   artists: [],
   genres: [],
   showMenu: false,
-  targetMenu: false,
+  targetMenu: null,
   menuPositionX: null,
   menuPositionY: null,
 };
 
 export default function app(state = initialState, action = {}) {
   switch (action.type) {
+    case 'APP_GO_HOME':
+      return {
+        ...state,
+        goHome: true
+      }
     case 'APP_STARTING_SUCCESS':
       return {
         ...state,
@@ -21,7 +27,7 @@ export default function app(state = initialState, action = {}) {
         songs: action.payload.songs,
         albums: action.payload.albums,
         artists: action.payload.artists,
-        genres: action.payload.genres,
+        genres: action.payload.genres
       }
     case 'APP_SET_MENU':
       return {

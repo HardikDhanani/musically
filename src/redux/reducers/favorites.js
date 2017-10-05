@@ -1,4 +1,4 @@
-import * as songsSelector from '../selectors/songs';
+import songsSelector from '../selectors/songs';
 
 const initialState = {
   songs: [],
@@ -26,7 +26,7 @@ export default function search(state = initialState, action = {}) {
         albums: songsSelector.orderBy(action.payload.favorites.albums, a => a.album),
         genres: songsSelector.orderBy(action.payload.favorites.genres, a => a.genre),
       }
-    case 'QUEUE_LOADING_ERROR':
+    case 'FAVORITES_LOADING_ERROR':
       return {
         ...state,
         isLoading: false,

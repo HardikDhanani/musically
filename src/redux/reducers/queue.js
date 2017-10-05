@@ -1,5 +1,3 @@
-import * as songsSelector from '../selectors/songs';
-
 const initialState = {
   queue: [],
   isLoading: false,

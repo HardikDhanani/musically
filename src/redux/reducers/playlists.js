@@ -1,8 +1,8 @@
 const initialState = {
-  isLoading: false,
+  isLoading: false
 };
 
-export default function album(state = initialState, action = {}) {
+export default function playlist(state = initialState, action = {}) {
   switch (action.type) {
     case 'PLAYLISTS_LOADING':
       return {

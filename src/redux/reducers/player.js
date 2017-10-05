@@ -99,16 +99,12 @@ export default function artist(state = initialState, action = {}) {
         queue: state.queue.concat(action.payload.queue || [])
       }
     case 'FAVORITES_LIKE_SUCCESS':
-      if (!state.currentSong)
+      if (!state.currentSong || action.payload.type !== 'song')
         return state;
 
-      let curSong = state.currentSong;
-      curSong.isFavorite = action.payload.type === 'song' ? action.payload.target.isFavorite : state.currentSong.isFavorite;
+      state.currentSong.isFavorite = action.payload.target.isFavorite;
 
-      return {
-        ...state,
-        currentSong: curSong
-      }
+      return { ...state }
     default:
       return state;
   }

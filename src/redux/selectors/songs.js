@@ -1,11 +1,13 @@
 let _ = require('underscore-node');
 
+let songs = {};
+
 const _getCover = (group) => {
   let elem = group.find(g => g.cover !== null && g.cover !== undefined);
   return elem ? (elem.cover || null) : null;
 }
 
-export function groupByAlbum(songs) {
+songs.groupByAlbum = (songs) => {
   if (!songs || !songs.length)
     return [];
 
@@ -27,7 +29,7 @@ export function groupByAlbum(songs) {
   return ret;
 }
 
-export function groupByArtists(songs) {
+songs.groupByArtists = (songs) => {
   if (!songs || !songs.length)
     return [];
 
@@ -50,7 +52,7 @@ export function groupByArtists(songs) {
   return ret;
 }
 
-export function groupByGenre(songs) {
+songs.groupByGenre = (songs) => {
   if (!songs || !songs.length)
     return [];
 
@@ -73,6 +75,8 @@ export function groupByGenre(songs) {
   return ret;
 }
 
-export function orderBy(group, criteria) {
+songs.orderBy = (group, criteria) => {
   return _.sortBy(group, criteria);
 }
+
+module.exports = songs;

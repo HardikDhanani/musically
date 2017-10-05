@@ -1,5 +1,6 @@
 import { StackNavigator } from 'react-navigation';
 
+import Splash from './Splash';
 import Home from './Home';
 import Search from './Search';
 import Artist from './Artist';
@@ -12,6 +13,7 @@ import Playlists from './Playlists';
 
 const AppNavigator = StackNavigator(
     {
+        Splash: { screen: Splash },
         Home: { screen: Home },
         Search: { screen: Search },
         Artist: { screen: Artist },
@@ -23,7 +25,7 @@ const AppNavigator = StackNavigator(
         Playlists: { screen: Playlists },
     },
     {
-        initialRouteName: "Home",
+        initialRouteName: "Splash",
         headerMode: 'none',
     }
 );

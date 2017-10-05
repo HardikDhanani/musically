@@ -43,6 +43,12 @@ const starting = () => {
   }
 }
 
+const goHome = () => {
+  return {
+    type: 'APP_GO_HOME'
+  }
+}
+
 const startingSuccess = (songs, artists, albums, genres, session) => {
   return {
     type: 'APP_STARTING_SUCCESS',
@@ -77,6 +83,10 @@ export function start() {
   return (dispatch) => {
     try {
       dispatch(starting());
+
+      setTimeout(() => {
+        dispatch(goHome());
+      }, 3000)
 
       LocalService.isFirstTime()
         .then(resp => {
