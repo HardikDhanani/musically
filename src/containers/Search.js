@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as searchActions from '../redux/actions/searchActions';
 import * as appActions from '../redux/actions/appActions';
 
-import { StyleSheet, StatusBar, FlatList, ScrollView, TextInput, View, Text, Dimensions, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
+
+import StyleManager from '../styles/StyleManager';
 
 import Header from '../components/Header';
+import Body from '../components/Body';
+import SearchHeader from '../components/SearchHeader';
+import SearchSection from '../components/SearchSection';
 import SongCard from '../components/SongCard';
 import AlbumCard from '../components/AlbumCard';
 import ArtistCard from '../components/ArtistCard';
 import GenreCard from '../components/GenreCard';
 import FloatMenu from '../components/FloatMenu';
+import FloatMenuOption from '../components/FloatMenuOption';
 import PlayerFooter from './PlayerFooter';
 import ThreeColumnContainer from '../components/ThreeColumnContainer';
 
@@ -28,45 +33,29 @@ class Search extends Component {
     this._renderGenres = this._renderGenres.bind(this);
     this._renderGenre = this._renderGenre.bind(this);
     this._groupItems = this._groupItems.bind(this);
-    this._keyExtractor = this._keyExtractor.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
     this._playSongs = this._playSongs.bind(this);
+
+    this._container = StyleManager.getStyle('SearchContainer');
+    this._messageText = StyleManager.getStyle('SearchMessageText');
+    this._songCardContainer = StyleManager.getStyle('SearchSongCardContainer');
+    this._songCardItemText = StyleManager.getStyle('SearchSongCardItemText');
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        <Header style={styles.header}>
-          <View style={styles.left}>
-            <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.goBack()}>
-              <Text style={styles.buttonText}>{'<<'}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.criteria}>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder={'Search'}
-                style={styles.input}
-                onChangeText={text => this.props.search(text)}
-                value={this.props.criteria}
-                underlineColorAndroid={'transparent'}
-                placeholderTextColor={'gray'}
-              />
-            </View>
-            <TouchableOpacity style={styles.button} onPress={() => this.props.search(null)}>
-              <Text style={styles.buttonText}>{this.props.criteria ? 'x' : ''}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={[styles.right, styles.row]}>
-            <TouchableOpacity style={styles.button} onPress={() => this.props.setMenu({ target: 'MENU' })}>
-              <Text style={styles.buttonText}>{'+'}</Text>
-            </TouchableOpacity>
-          </View>
-        </Header>
-        <View style={[styles.body, { height: this._getHeight() }]}>
+      <View style={this._container}>
+        <SearchHeader
+          onBackPress={() => this.props.navigation.goBack()}
+          search={text => this.props.search(text)}
+          deleteSearch={() => this.props.search(null)}
+          onMorePress={() => this.props.setMenu({ target: 'MENU' })}
+          criteria={this.props.criteria}
+        />
+        <Body>
           {
             this.props.mustCompleteCriteria ?
-              <Text style={[styles.itemText, { fontStyle: 'italic', marginTop: 20 }]}>{'Enter some text to search...'}</Text> :
+              <Text style={this._messageText}>{'Enter some text to search...'}</Text> :
               <ScrollView>
                 {this.props.songs.length ? this._renderSongs() : null}
                 {this.props.albums.length ? this._renderAlbums() : null}
@@ -74,79 +63,54 @@ class Search extends Component {
                 {this.props.genres.length ? this._renderGenres() : null}
               </ScrollView>
           }
-        </View>
+        </Body>
         {this._renderMenu()}
         <PlayerFooter navigation={this.props.navigation} />
       </View>
     );
   }
 
-  _getHeight() {
-    let footerHeight = 60;
-    let headerHeight = Header.currentHeight;
-    let statusBarHeight = StatusBar.currentHeight;
-    let windowHeight = Dimensions.get('window').height;
-
-    return windowHeight - (headerHeight + footerHeight + statusBarHeight);
-  }
-
   _renderSongs() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Songs'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })}
-          data={this.props.songs}
-          renderItem={this._renderSong}
-          keyExtractor={(item, index) => item.id} />
-      </View>
+      <SearchSection
+        title={'Songs'}
+        getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })}
+        data={this.props.songs}
+        renderItem={this._renderSong}
+        keyExtractor={(item, index) => item.id} />
     );
   }
 
   _renderAlbums() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Albums'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-          data={this._groupItems(this.props.albums)}
-          renderItem={album => this._renderItem(album, this._renderAlbum)}
-          keyExtractor={this._keyExtractor} />
-      </View>
+      <SearchSection
+        title={'Albums'}
+        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
+        data={this._groupItems(this.props.albums)}
+        renderItem={album => this._renderItem(album, this._renderAlbum)}
+        keyExtractor={(item, index) => index} />
     );
   }
 
   _renderArtists() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Artists'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-          data={this._groupItems(this.props.artists)}
-          renderItem={artist => this._renderItem(artist, this._renderArtist)}
-          keyExtractor={this._keyExtractor} />
-      </View>
+      <SearchSection
+        title={'Artists'}
+        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
+        data={this._groupItems(this.props.artists)}
+        renderItem={artist => this._renderItem(artist, this._renderArtist)}
+        keyExtractor={(item, index) => index} />
     );
   }
 
   _renderGenres() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Genres'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-          data={this._groupItems(this.props.genres)}
-          renderItem={genre => this._renderItem(genre, this._renderGenre)}
-          keyExtractor={this._keyExtractor} />
-      </View>
+      <SearchSection
+        title={'Genres'}
+        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
+        data={this._groupItems(this.props.genres)}
+        renderItem={genre => this._renderItem(genre, this._renderGenre)}
+        keyExtractor={(item, index) => index} />
     );
   }
 
@@ -159,7 +123,7 @@ class Search extends Component {
     return (
       <View key={song.index}>
         <SongCard
-          styles={{ container: styles.item, text: styles.itemText }}
+          styles={{ container: this._songCardContainer, text: this._songCardItemText }}
           id={song.item.id}
           name={song.item.title}
           artist={song.item.artist}
@@ -200,9 +164,11 @@ class Search extends Component {
     };
 
     let songCount = 0;
+
     for (let i = 0; i < artist.albums.length; i++) {
       songCount += artist.albums[i].songs.length;
     }
+
     let albumCount = (artist && artist.albums) ? artist.albums.length : 0;
 
     return (
@@ -226,9 +192,11 @@ class Search extends Component {
     };
 
     let songCount = 0;
+
     for (let i = 0; i < genre.albums.length; i++) {
       songCount += genre.albums[i].songs.length;
     }
+
     let albumCount = (genre && genre.albums) ? genre.albums.length : 0;
 
     return (
@@ -257,10 +225,6 @@ class Search extends Component {
     return (
       <ThreeColumnContainer items={items.item} renderItem={renderCard} />
     );
-  }
-
-  _keyExtractor(item, index) {
-    return index;
   }
 
   _playSongs(song) {
@@ -303,138 +267,21 @@ class Search extends Component {
 
   _getMenu() {
     return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Sort Order'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'View Mode'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Rescan Library'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={4} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Playlist Queue'}</Text>
-        </TouchableOpacity>
-      )
+      (<FloatMenuOption key={1} text={'Sort Order'} haveContent={true} />),
+      (<FloatMenuOption key={2} text={'View Mode'} haveContent={true} />),
+      (<FloatMenuOption key={3} text={'Rescan Library'} />),
+      (<FloatMenuOption key={4} text={'Playlist Queue'} />)
     ];
   }
 
   _getArtistMenu() {
     return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Play'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Add to playlist'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Add to queue'}</Text>
-        </TouchableOpacity>
-      )
+      (<FloatMenuOption key={1} text={'Play'} />),
+      (<FloatMenuOption key={2} text={'Add to playlist'} />),
+      (<FloatMenuOption key={3} text={'Add to queue'} />)
     ]
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#4c4c4c',
-  },
-  header: {
-    backgroundColor: '#2E2E2E'
-  },
-  body: {
-    alignItems: 'center',
-    alignSelf: 'center',
-  },
-  left: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-  },
-  right: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-end',
-  },
-  criteria: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  inputContainer: {
-    width: Dimensions.get('window').width - ((Header.currentHeight * 0.7) * 4),
-    justifyContent: 'center',
-  },
-  input: {
-    fontSize: 20,
-    color: '#fff',
-  },
-  button: {
-    height: Header.currentHeight * 0.7,
-    width: Header.currentHeight * 0.7,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 20,
-  },
-  item: {
-    flexDirection: 'row',
-    width: Dimensions.get('window').width,
-    height: Header.currentHeight,
-    backgroundColor: '#4c4c4c',
-    alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 10
-  },
-  sectionTitle: {
-    width: Dimensions.get('window').width,
-    height: Header.currentHeight * 0.7,
-    backgroundColor: '#4c4c4c',
-    borderBottomWidth: 1,
-    borderBottomColor: 'gray',
-    justifyContent: 'center',
-    paddingLeft: 10,
-    marginBottom: 5
-  },
-  sectionTitleText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  itemText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  floatMenuOption: {
-    flexDirection: 'row',
-    height: Header.currentHeight * 0.8,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10
-  },
-  floatMenuOptionText: {
-    fontSize: 15,
-    color: 'white'
-  }
-});
 
 const mapStateToProps = state => {
   return {

@@ -7,7 +7,7 @@ const _getCover = (group) => {
   return elem ? (elem.cover || null) : null;
 }
 
-songs.groupByAlbum = (songs) => {
+const groupByAlbum = (songs) => {
   if (!songs || !songs.length)
     return [];
 
@@ -29,7 +29,7 @@ songs.groupByAlbum = (songs) => {
   return ret;
 }
 
-songs.groupByArtists = (songs) => {
+const groupByArtists = (songs) => {
   if (!songs || !songs.length)
     return [];
 
@@ -52,7 +52,7 @@ songs.groupByArtists = (songs) => {
   return ret;
 }
 
-songs.groupByGenre = (songs) => {
+const groupByGenre = (songs) => {
   if (!songs || !songs.length)
     return [];
 
@@ -75,8 +75,13 @@ songs.groupByGenre = (songs) => {
   return ret;
 }
 
-songs.orderBy = (group, criteria) => {
+const orderBy = (group, criteria) => {
   return _.sortBy(group, criteria);
 }
+
+songs.groupByAlbum = groupByAlbum;
+songs.groupByArtists = groupByArtists;
+songs.groupByGenre = groupByGenre;
+songs.orderBy = orderBy;
 
 module.exports = songs;

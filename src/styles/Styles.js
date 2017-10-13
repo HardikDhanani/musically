@@ -6,23 +6,6 @@ import { Dimensions, StyleSheet } from 'react-native';
 //    Background 
 
 class Styles {
-  getButtonStyle() {
-    let height = 40;
-
-    return StyleSheet.create({
-      button: {
-        width: height,
-        height: height,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      text: {
-        fontSize: 30,
-        color: 'white'
-      }
-    });
-  }
-
   getFooterStyle() {
     let height = 60;
 

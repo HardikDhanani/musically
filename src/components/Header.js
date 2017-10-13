@@ -1,27 +1,27 @@
 import React, { PureComponent } from 'react';
 import {
-  StyleSheet,
   View,
   Platform
 } from 'react-native';
 
+import StyleManager from '../styles/StyleManager';
+
 export default class Header extends PureComponent {
+  constructor(props) {
+    super(props);
+
+    this._style = StyleManager.getStyle('Header');
+  }
+
   render() {
     return (
-      <View style={[styles.header, this.props.style]}>
+      <View style={this._style}>
         {this.props.children}
       </View>
     );
   }
 
-  static get currentHeight(){
+  static get currentHeight() {
     return Platform.OS === "ios" ? 64 : 56;
   }
 }
-
-const styles = StyleSheet.create({
-  header: {
-    height: Header.currentHeight,
-    flexDirection: 'row',
-  }
-});

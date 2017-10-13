@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -8,7 +7,7 @@ import {
   Animated
 } from 'react-native';
 
-import Header from '../components/Header';
+import StyleManager from '../styles/StyleManager';
 
 export default class PaginationHeader extends Component {
   constructor(props) {
@@ -17,6 +16,12 @@ export default class PaginationHeader extends Component {
     this.state = {
       left: new Animated.Value(this.props.currentIndex)
     }
+
+    this._pageButtonWidth = Dimensions.get('window').width / this.props.total;
+    this._containerStyle = StyleManager.getStyle('PaginationHeaderContainer');
+    this._titleStyle = StyleManager.getStyle('PaginationHeaderTitle');
+    this._pageButtonStyle = StyleManager.getStyle('PaginationHeaderPageButton');
+    this._pageButtonStyle.width = this._pageButtonWidth;
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -24,21 +29,20 @@ export default class PaginationHeader extends Component {
   }
 
   render() {
-    let width = Dimensions.get('window').width / this.props.total;
     Animated.timing(
       this.state.left,
       {
-        toValue: width * this.props.currentIndex,
+        toValue: this._pageButtonWidth * this.props.currentIndex,
         duration: 300
       }
     ).start();
 
     return (
-      <View style={styles.pagination}>
+      <View style={this._containerStyle}>
         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', }}>
           {this._renderPaginationHeaders()}
         </View>
-        <Animated.View style={{ left: this.state.left, width: width, height: 5, backgroundColor: '#ffa500', }} />
+        <Animated.View style={[{ left: this.state.left }, this._pageButtonStyle]} />
       </View>
     );
   }
@@ -48,7 +52,7 @@ export default class PaginationHeader extends Component {
     for (let i = 0; i < this.props.total; i++) {
       ret.push(
         <TouchableOpacity key={i} style={{ flex: 1, flexDirection: 'column' }} onPress={() => this.props.onPageChange(i)}>
-          <Text style={[styles.title, { flex: 1, textAlign: 'center', textAlignVertical: 'center' }]}>
+          <Text style={this._titleStyle}>
             {this.props.sectionTextGenerator(i)}
           </Text>
         </TouchableOpacity>
@@ -57,26 +61,4 @@ export default class PaginationHeader extends Component {
 
     return ret;
   }
-
-  static get currentHeight() {
-    return Header.currentHeight * 0.7;
-  }
 }
-
-const styles = StyleSheet.create({
-  pagination: {
-    flexDirection: 'column',
-    width: Dimensions.get('window').width,
-    height: PaginationHeader.currentHeight,
-    backgroundColor: '#2E2E2E',
-    paddingLeft: 2,
-    paddingRight: 2,
-    position: 'absolute',
-    top: 0,
-  },
-  title: {
-    color: 'white',
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
-  },
-});

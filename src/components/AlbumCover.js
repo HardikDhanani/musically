@@ -1,25 +1,22 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
-  View,
-  Dimensions
+  View
 } from 'react-native';
 
+import StyleManager from '../styles/StyleManager';
+
 export default class AlbumCover extends Component {
+  constructor(props) {
+    super(props);
+
+    this._containerStyle = StyleManager.getStyle('AlbumCoverContainer');
+  }
+
   render() {
     return (
-      <View style={styles.cover}>
+      <View style={this._containerStyle}>
         {this.props.children}
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  cover: { 
-    margin: 1, 
-    padding: 2, 
-    width: (Dimensions.get('window').width / 3) - 4, 
-    height: 160 
-  }
-});

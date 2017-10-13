@@ -8,22 +8,22 @@ import * as favoritesActions from '../redux/actions/favoritesActions';
 
 import { TouchableWithoutFeedback, Animated, ActivityIndicator, StyleSheet, StatusBar, Image, View, Text, FlatList, Dimensions, Platform, TouchableOpacity, ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';
-import Styles from '../styles/Styles';
 
 import ControlPanel from './ControlPanel';
-import Header from '../components/Header';
-import Title from '../components/Title';
+import Body from '../components/Body';
+import FloatMenuOption from '../components/FloatMenuOption';
+import HomeHeader from '../components/HomeHeader';
 import ArtistCard from '../components/ArtistCard';
 import AlbumCard from '../components/AlbumCard';
 import GenreCard from '../components/GenreCard';
 import SongCard from '../components/SongCard';
 import FloatMenu from '../components/FloatMenu';
 import PlayerFooter from './PlayerFooter';
-import Button from '../components/Button';
 import ThreeColumnContainer from '../components/ThreeColumnContainer';
 import PaginationHeader from '../components/PaginationHeader';
 import SongMenu from '../components/SongMenu';
 import ItemMenu from '../components/ItemMenu';
+import Container from '../components/Container';
 
 class Home extends Component {
   constructor(props) {
@@ -58,58 +58,50 @@ class Home extends Component {
   render() {
     return (
       <ControlPanel onRef={this._onRef} navigation={this.props.navigation}>
-        <View style={styles.container}>
-          <Header style={styles.header}>
-            <View style={[styles.left, styles.row]}>
-              <Button text={'M'} onPress={() => this._drawer.open()} />
-            </View>
-            <View style={{ alignSelf: 'center', flex: 1 }}>
-              <Title style={styles.title}>Musically</Title>
-            </View>
-            <View style={[styles.right, styles.row]}>
-              <Button text={'S'} onPress={() => this.props.navigation.navigate('Search', {})} />
-              <Button text={'+'} onPress={() => this.props.setMenu({ target: 'MENU' })} />
-            </View>
-          </Header>
-          <View style={[{ height: this._swiperHeight() }]}>
-            <Swiper
-              showsPagination={true}
-              loop={false}
-              renderPagination={(index, total, context) => <PaginationHeader currentIndex={index} total={total} sectionTextGenerator={this._getSectionText} onPageChange={this._onPageChange} />}
-              ref={component => this._swiper = component}>
-              <View style={styles.page}>
-                {
-                  !this.props.isReady ?
-                    <ActivityIndicator animating={true} size='large' /> :
-                    <FlatList initialNumToRender={4} getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })} data={this._groupItems(this.props.artists)} renderItem={this._renderArtist} keyExtractor={this._keyExtractor} />
-                }
-              </View>
-              <View style={styles.page}>
-                {
-                  !this.props.isReady ?
-                    <ActivityIndicator animating={true} size='large' /> :
-                    <FlatList initialNumToRender={4} getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })} data={this._groupItems(this.props.albums)} renderItem={this._renderAlbum} keyExtractor={this._keyExtractor} />
-                }
-              </View>
-              <View style={styles.page}>
-                {
-                  !this.props.isReady ?
-                    <ActivityIndicator animating={true} size='large' /> :
-                    <FlatList initialNumToRender={4} getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })} data={this._groupItems(this.props.genres)} renderItem={this._renderGenre} keyExtractor={this._keyExtractor} />
-                }
-              </View>
-              <View style={styles.page}>
-                {
-                  !this.props.isReady ?
-                    <ActivityIndicator animating={true} size='large' /> :
-                    <FlatList initialNumToRender={10} getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })} data={this.props.songs} renderItem={this._renderSong} keyExtractor={this._keyExtractor} />
-                }
-              </View>
-            </Swiper>
-          </View>
+        <Container>
+          <HomeHeader
+            title={'Musically'}
+            onMenuPress={() => this._drawer.open()}
+            onMorePress={() => this.props.setMenu({ target: 'MENU' })}
+            onSearchPress={() => this.props.navigation.navigate('Search', {})} />
+          <Swiper
+            style={styles.page}
+            showsPagination={true}
+            loop={false}
+            renderPagination={(index, total, context) => <PaginationHeader currentIndex={index} total={total} sectionTextGenerator={this._getSectionText} onPageChange={this._onPageChange} />}
+            ref={component => this._swiper = component}>
+            <Body hasPaginationHeader={true}>
+              {
+                !this.props.isReady ?
+                  <ActivityIndicator animating={true} size='large' /> :
+                  <FlatList initialNumToRender={4} getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })} data={this._groupItems(this.props.artists)} renderItem={this._renderArtist} keyExtractor={this._keyExtractor} />
+              }
+            </Body>
+            <Body hasPaginationHeader={true}>
+              {
+                !this.props.isReady ?
+                  <ActivityIndicator animating={true} size='large' /> :
+                  <FlatList initialNumToRender={4} getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })} data={this._groupItems(this.props.albums)} renderItem={this._renderAlbum} keyExtractor={this._keyExtractor} />
+              }
+            </Body>
+            <Body hasPaginationHeader={true}>
+              {
+                !this.props.isReady ?
+                  <ActivityIndicator animating={true} size='large' /> :
+                  <FlatList initialNumToRender={4} getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })} data={this._groupItems(this.props.genres)} renderItem={this._renderGenre} keyExtractor={this._keyExtractor} />
+              }
+            </Body>
+            <Body hasPaginationHeader={true}>
+              {
+                !this.props.isReady ?
+                  <ActivityIndicator animating={true} size='large' /> :
+                  <FlatList initialNumToRender={10} getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })} data={this.props.songs} renderItem={this._renderSong} keyExtractor={this._keyExtractor} />
+              }
+            </Body>
+          </Swiper>
           {this._renderMenu()}
           <PlayerFooter navigation={this.props.navigation} />
-        </View>
+        </Container>
       </ControlPanel>
     );
   }
@@ -161,7 +153,7 @@ class Home extends Component {
 
   _swiperHeight() {
     let footerHeight = 60;
-    return Dimensions.get('window').height - (Header.currentHeight + footerHeight + StatusBar.currentHeight);
+    return Dimensions.get('window').height - (HomeHeader.currentHeight + footerHeight + StatusBar.currentHeight);
   }
 
   _groupItems(items) {
@@ -306,28 +298,10 @@ class Home extends Component {
 
   _getMenu() {
     return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Sort Order'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'View Mode'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Rescan Library'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={4} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Playlist Queue'}</Text>
-        </TouchableOpacity>
-      )
+      (<FloatMenuOption key={1} text={'Sort Order'} haveContent={true} />),
+      (<FloatMenuOption key={2} text={'View Mode'} haveContent={true} />),
+      (<FloatMenuOption key={3} text={'Rescan Library'} />),
+      (<FloatMenuOption key={4} text={'Playlist Queue'} />)
     ];
   }
 
@@ -400,27 +374,11 @@ class Home extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f1f1f1',
-  },
-  header: {
-    backgroundColor: '#2E2E2E',
-    flexDirection: 'row'
-  },
   body: {
     flex: 1,
   },
   icon: {
     color: 'white'
-  },
-  left: {
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-  },
-  right: {
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
   },
   row: {
     flexDirection: 'row',
@@ -428,43 +386,13 @@ const styles = StyleSheet.create({
   column: {
     flexDirection: 'column',
   },
-  title: {
-    color: 'white',
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
-  },
   page: {
-    flex: 1,
-    marginTop: Header.currentHeight * 0.7,
-    alignItems: 'center'
+    marginTop: HomeHeader.currentHeight * 0.7,
   },
   text: {
     color: '#fff',
     fontSize: 30,
     fontWeight: 'bold',
-  },
-  button: {
-    height: Header.currentHeight * 0.7,
-    width: Header.currentHeight * 0.7,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 20,
-  },
-  floatMenuOption: {
-    flexDirection: 'row',
-    height: Header.currentHeight * 0.8,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10
-  },
-  floatMenuOptionText: {
-    fontSize: 15,
-    color: 'white'
   }
 });
 

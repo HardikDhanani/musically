@@ -1,18 +1,22 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as playerActions from '../redux/actions/playerActions';
 
-import { StyleSheet, Text, TouchableWithoutFeedback, View, Platform, Dimensions, Image } from 'react-native';
+import { Text, TouchableWithoutFeedback, View, Dimensions, Image } from 'react-native';
+import StyleManager from '../styles/StyleManager';
 
 import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
+import PlayerFooterSongSection from '../components/PlayerFooterSongSection';
+import PlayerFooterControlsSection from '../components/PlayerFooterControlsSection';
 
 class PlayerFooter extends Component {
   constructor(props) {
     super(props);
 
     this._progressBar = this._progressBar.bind(this);
+    this._containerStyle = StyleManager.getStyle('PlayerFooterContainer');
+    this._imageStyle = StyleManager.getStyle('PlayerFooterImage');
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -31,20 +35,17 @@ class PlayerFooter extends Component {
 
     return (
       <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Player', { initialSong: this.props.currentSong })}>
-        <View style={[styles.footer, this.props.style]}>
-          <Image source={source} style={styles.image} />
+        <View style={this._containerStyle}>
+          <Image source={source} style={this._imageStyle} />
           <View style={{ flex: 1, flexDirection: 'column' }}>
             {this._progressBar()}
             <View style={{ flex: 1, flexDirection: 'row' }}>
-              <View style={styles.songSection}>
-                <Text numberOfLines={1} style={styles.songSectionTitle}>{title}</Text>
-                <Text numberOfLines={1} style={styles.songSectionText}>{artist}</Text>
-              </View>
-              <View style={styles.controlSection}>
-                <Button text={'<<'} onPress={this.props.prev} />
-                <Button text={this.props.playing ? '||' : '>'} onPress={() => this.props.playPause(this.props.currentSong)} />
-                <Button text={'>>'} onPress={this.props.next} />
-              </View>
+              <PlayerFooterSongSection title={title} artist={artist} />
+              <PlayerFooterControlsSection
+                playPauseText={this.props.playing ? '||' : '>'}
+                onPrevPress={this.props.prev}
+                onPlayPausePress={() => this.props.playPause(this.props.currentSong)}
+                onNextPress={this.props.next} />
             </View>
           </View>
         </View>
@@ -66,41 +67,6 @@ class PlayerFooter extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  footer: {
-    height: 60,
-    width: Dimensions.get('window').width,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    position: 'absolute',
-    bottom: 0,
-    backgroundColor: '#2E2E2E'
-  },
-  image: {
-    width: 60,
-    height: 60,
-  },
-  songSection: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 15
-  },
-  songSectionTitle: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold'
-  },
-  songSectionText: {
-    fontSize: 13,
-    color: 'white',
-  },
-  controlSection: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  }
-});
 
 const mapStateToProps = state => {
   return {

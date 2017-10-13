@@ -7,7 +7,7 @@ import * as playerActions from '../redux/actions/playerActions';
 import { StyleSheet, View, TouchableOpacity, Text, ActivityIndicator, FlatList, StatusBar, Dimensions } from 'react-native';
 
 import Header from '../components/Header';
-import Title from '../components/Title';
+import HeaderTitle from '../components/HeaderTitle';
 import SongCard from '../components/SongCard';
 import FloatMenu from '../components/FloatMenu';
 import PlayerFooter from './PlayerFooter';
@@ -35,7 +35,7 @@ class Queue extends Component {
             </TouchableOpacity>
           </View>
           <View style={{ alignSelf: 'center', flex: 1 }}>
-            <Title style={styles.title}>List Queue</Title>
+            <HeaderTitle>List Queue</HeaderTitle>
           </View>
           <View style={[styles.right, styles.row]}>
             <TouchableOpacity style={styles.button} onPress={() => this.props.setMenu({ target: 'MENU' })}>
@@ -195,11 +195,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'center',
     alignItems: 'flex-end',
-  },
-  title: {
-    color: 'white',
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
   },
   button: {
     height: Header.currentHeight * 0.7,

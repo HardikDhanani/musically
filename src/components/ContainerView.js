@@ -1,37 +1,49 @@
 import React, { Component } from 'react';
 
-import { StyleSheet, ScrollView, StatusBar, Image, View, Text, FlatList, Dimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, ScrollView, StatusBar, View, Text, FlatList, Dimensions, TouchableOpacity } from 'react-native';
 
 import Header from '../components/Header';
 import FloatMenu from '../components/FloatMenu';
-import Title from '../components/Title';
+import HeaderTitle from '../components/HeaderTitle';
+import Container from '../components/Container';
+import Body from '../components/Body';
+import ContainerViewHeader from '../components/ContainerViewHeader';
+import ContainerViewCover from '../components/ContainerViewCover';
 
 export default class ContainerView extends Component {
   constructor(props) {
     super(props);
 
-    this._keyExtractor = this._keyExtractor.bind(this);
-    this._renderCover = this._renderCover.bind(this);
     this._renderContent = this._renderContent.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
+
+    throw new Error('Finish this');
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        {this._renderHeader()}
-        <View style={styles.body}>
-          {this._renderCover()}
+      <Container>
+        <ContainerViewHeader
+          title={this.props.title}
+          liked={this.props.like}
+          onBackPress={() => this.props.onBackPress()}
+          onSearchPress={() => this.props.onSearchPress()}
+          onLikePress={() => this.props.onLikePress()}
+          onMenuPress={() => this.props.onMenuPress()} />
+        <Body>
+          <ContainerViewCover
+            coverContent={this.props.coverContent}
+            source={this.props.imageUri ? { uri: this.props.imageUri } : this.props.source} />
           <View style={{ alignItems: 'center', alignSelf: 'center', height: this._getHeight() }}>
             <ScrollView>
               {this._renderContent()}
             </ScrollView>
           </View>
-        </View>
-        <TouchableOpacity style={styles.mixButton} onPress={this.props.onPlayPress}></TouchableOpacity>
+        </Body>
+        <TouchableOpacity style={styles.mixButton} onPress={this.props.onPlayPress} />
         {this._renderMenu()}
         {this.props.footer}
-      </View>
+      </Container>
     );
   }
 
@@ -45,43 +57,6 @@ export default class ContainerView extends Component {
     return windowHeight - (headerHeight + footerHeight + statusBarHeight + coverHeight);
   }
 
-  _renderHeader() {
-    return (
-      <Header style={styles.header}>
-        <View style={styles.left}>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.onBackPress()}>
-            <Text style={styles.buttonText}>{'<'}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ alignSelf: 'center', flex: 1 }}>
-          <Title style={styles.title}>{this.props.title}</Title>
-        </View>
-        <View style={[styles.right, styles.row]}>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.onSearchPress()}>
-            <Text style={styles.buttonText}>{'S'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.onLikePress()}>
-            <Text style={[styles.buttonText, { color: this.props.like ? 'orange' : 'white' }]}>{'L'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.onMenuPress()}>
-            <Text style={styles.buttonText}>{'+'}</Text>
-          </TouchableOpacity>
-        </View>
-      </Header>
-    );
-  }
-
-  _renderCover() {
-    return (
-      <View style={styles.cover}>
-        <Image source={this.props.imageUri ? { uri: this.props.imageUri } : this.props.source} style={styles.image} />
-        <View style={{ flex: 1, paddingLeft: 15 }}>
-          {this.props.coverContent}
-        </View>
-      </View>
-    );
-  }
-
   _renderContent() {
     let ret = [];
 
@@ -93,7 +68,7 @@ export default class ContainerView extends Component {
               <Text style={[styles.coverText, { color: 'gray', fontSize: 15 }]}>{section.title}</Text>
             </View>
             <View style={styles.page}>
-              <FlatList data={section.data} renderItem={section.renderItem} keyExtractor={this._keyExtractor} />
+              <FlatList data={section.data} renderItem={section.renderItem} keyExtractor={(item, index) => index} />
             </View>
           </View>
         );
@@ -101,10 +76,6 @@ export default class ContainerView extends Component {
     }
 
     return ret;
-  }
-
-  _keyExtractor(item, index) {
-    return index;
   }
 
   _renderMenu() {
@@ -125,54 +96,6 @@ export default class ContainerView extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    backgroundColor: '#2E2E2E'
-  },
-  body: {
-    flex: 1,
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: '#f1f1f1',
-  },
-  left: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-  },
-  right: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-end',
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  button: {
-    height: Header.currentHeight * 0.7,
-    width: Header.currentHeight * 0.7,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 20,
-  },
-  cover: {
-    flexDirection: 'row',
-    width: Dimensions.get('window').width,
-    height: ContainerView.currentCoverHeight,
-    backgroundColor: '#2E2E2E',
-  },
-  image: {
-    width: Header.currentHeight * 2,
-    height: Header.currentHeight * 2,
-    marginLeft: 20,
-  },
   section: {
     flex: 1
   },

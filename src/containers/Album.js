@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as albumActions from '../redux/actions/albumActions';
 import * as appActions from '../redux/actions/appActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
 
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import Swiper from 'react-native-swiper';
 
 import ContainerView from '../components/ContainerView';
-
 import Header from '../components/Header';
 import SongCard from '../components/SongCard';
+import FloatMenuOption from '../components/FloatMenuOption';
 import PlayerFooter from './PlayerFooter';
 
 class Album extends Component {
@@ -61,9 +60,9 @@ class Album extends Component {
 
     return (
       <View>
-        <Text style={[styles.coverText, { color: 'white', fontSize: 17 }]}>{album}</Text>
-        <Text style={[styles.coverText, { color: 'gray' }]}>{artist}</Text>
-        <Text style={[styles.coverText, { color: 'gray' }]}>{songs.length + ' songs'}</Text>
+        <Text style={{ color: 'white', fontSize: 17 }}>{album}</Text>
+        <Text style={{ color: 'gray' }}>{artist}</Text>
+        <Text style={{ color: 'gray' }}>{songs.length + ' songs'}</Text>
       </View>
     );
   }
@@ -111,48 +110,18 @@ class Album extends Component {
 
   _getMenu() {
     return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Sort Order'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'View Mode'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Rescan Library'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={4} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Playlist Queue'}</Text>
-        </TouchableOpacity>
-      )
+      (<FloatMenuOption key={1} text={'Sort Order'} haveContent={true} />),
+      (<FloatMenuOption key={2} text={'View Mode'} haveContent={true} />),
+      (<FloatMenuOption key={3} text={'Rescan Library'} />),
+      (<FloatMenuOption key={4} text={'Playlist Queue'} />)
     ];
   }
 
   _getSongMenu() {
     return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Play'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Add to playlist'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Add to queue'}</Text>
-        </TouchableOpacity>
-      )
+      (<FloatMenuOption key={1} text={'Play'} />),
+      (<FloatMenuOption key={2} text={'Add to playlist'} />),
+      (<FloatMenuOption key={3} text={'Add to queue'} />)
     ]
   }
 
@@ -162,20 +131,6 @@ class Album extends Component {
     this.props.navigation.navigate('Player', { queue, initialSong });
   }
 }
-
-const styles = StyleSheet.create({
-  floatMenuOption: {
-    flexDirection: 'row',
-    height: Header.currentHeight * 0.8,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10
-  },
-  floatMenuOptionText: {
-    fontSize: 15,
-    color: 'white'
-  }
-});
 
 const mapStateToProps = state => {
   return {

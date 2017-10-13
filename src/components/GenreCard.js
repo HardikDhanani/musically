@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   Text
 } from 'react-native';
+
+import StyleManager from '../styles/StyleManager';
 
 import CoverCard from '../components/CoverCard';
 
 export default class GenreCard extends Component {
+  constructor(props) {
+    super(props);
+
+    this._infoTextStyle = StyleManager.getStyle('CoverCardInfoText');
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     return this.props.id !== nextProps.id;
   }
@@ -19,15 +26,9 @@ export default class GenreCard extends Component {
         imageUri={this.props.imageUri}
         title={this.props.name}
         onOptionPressed={this.props.onOptionPressed}>
-        <Text numberOfLines={1} style={styles.infoText}>{this.props.albums + ' albums'}</Text>
-        <Text numberOfLines={1} style={styles.infoText}>{this.props.songs + ' songs'}</Text>
+        <Text numberOfLines={1} style={this._infoTextStyle}>{this.props.albums + ' albums'}</Text>
+        <Text numberOfLines={1} style={this._infoTextStyle}>{this.props.songs + ' songs'}</Text>
       </CoverCard>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  infoText: {
-    fontSize: 12
-  }
-});

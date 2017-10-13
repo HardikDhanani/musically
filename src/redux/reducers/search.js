@@ -1,4 +1,4 @@
-import * as songsSelector from '../selectors/songs';
+import songsSelector from '../selectors/songs';
 
 const initialState = {
   criteria: null,

@@ -7,7 +7,7 @@ import * as appActions from '../redux/actions/appActions';
 import { StyleSheet, StatusBar, FlatList, ScrollView, View, Text, Dimensions, TouchableOpacity } from 'react-native';
 
 import Header from '../components/Header';
-import Title from '../components/Title';
+import HeaderTitle from '../components/HeaderTitle';
 import SongCard from '../components/SongCard';
 import AlbumCard from '../components/AlbumCard';
 import ArtistCard from '../components/ArtistCard';
@@ -53,7 +53,7 @@ class Favorites extends Component {
             </TouchableOpacity>
           </View>
           <View style={{ alignSelf: 'center', flex: 1 }}>
-            <Title style={styles.title}>Favorites</Title>
+            <HeaderTitle>Favorites</HeaderTitle>
           </View>
           <View style={[styles.right, styles.row]}>
             <TouchableOpacity style={styles.button} onPress={() => this.props.setMenu({ target: 'MENU' })}>
@@ -369,19 +369,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'flex-end',
   },
-  // criteria: {
-  //   flex: 1,
-  //   flexDirection: 'row',
-  //   justifyContent: 'center',
-  // },
-  // inputContainer: {
-  //   width: Dimensions.get('window').width - ((Header.currentHeight * 0.7) * 4),
-  //   justifyContent: 'center',
-  // },
-  // input: {
-  //   fontSize: 20,
-  //   color: '#fff',
-  // },
   button: {
     height: Header.currentHeight * 0.7,
     width: Header.currentHeight * 0.7,
@@ -393,15 +380,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
   },
-  // item: {
-  //   flexDirection: 'row',
-  //   width: Dimensions.get('window').width,
-  //   height: Header.currentHeight,
-  //   backgroundColor: '#4c4c4c',
-  //   alignItems: 'center',
-  //   paddingLeft: 10,
-  //   paddingRight: 10
-  // },
   sectionTitle: {
     width: Dimensions.get('window').width,
     height: Header.currentHeight * 0.7,
@@ -417,10 +395,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold'
   },
-  // itemText: {
-  //   color: 'white',
-  //   fontSize: 16,
-  // },
   floatMenuOption: {
     flexDirection: 'row',
     height: Header.currentHeight * 0.8,

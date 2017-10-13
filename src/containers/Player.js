@@ -8,7 +8,7 @@ import { StyleSheet, Image, View, Text, Dimensions, TouchableOpacity, Platform }
 import Swiper from 'react-native-swiper';
 
 import Header from '../components/Header';
-import Title from '../components/Title';
+import HeaderTitle from '../components/HeaderTitle';
 import ProgressBar from '../components/ProgressBar';
 import FloatMenu from '../components/FloatMenu';
 
@@ -83,7 +83,7 @@ class Player extends Component {
           </TouchableOpacity>
         </View>
         <View style={{ alignSelf: 'center', flex: 1 }}>
-          <Title style={styles.title}>{''}</Title>
+          <HeaderTitle>{''}</HeaderTitle>
         </View>
         <View style={[styles.right, styles.row]}>
           <TouchableOpacity style={styles.button} onPress={() => this.props.like(this.props.currentSong)}>

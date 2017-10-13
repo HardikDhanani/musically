@@ -7,7 +7,7 @@ import { StyleSheet, View } from 'react-native';
 
 import Header from '../components/Header';
 import Button from '../components/Button';
-import Title from '../components/Title';
+import HeaderTitle from '../components/HeaderTitle';
 import PlayerFooter from './PlayerFooter';
 
 class Playlists extends Component {
@@ -19,7 +19,7 @@ class Playlists extends Component {
             <Button text={'<'} onPress={() => this.props.navigation.goBack()} />
           </View>
           <View style={{ alignSelf: 'center', flex: 1 }}>
-            <Title style={styles.title}>Playlists</Title>
+            <HeaderTitle>Playlists</HeaderTitle>
           </View>
           <View style={[styles.right, styles.row]}>
             <Button text={'S'} onPress={() => this.props.navigation.navigate('Search', {})} />
@@ -49,11 +49,6 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row'
-  },
-  title: {
-    color: 'white',
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
   },
 });
 

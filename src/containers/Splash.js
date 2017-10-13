@@ -1,11 +1,18 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import StyleManager from '../styles/StyleManager';
 
 import * as appActions from '../redux/actions/appActions';
 
-import { StyleSheet, View, Text } from 'react-native';
+import { View, Text } from 'react-native';
 
 class Splash extends Component {
+  constructor(props) {
+    super(props);
+
+    this._containerStyle = StyleManager.getStyle('SplashContainer');
+  }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.goHome)
       this.props.navigation.navigate('Home');
@@ -13,26 +20,12 @@ class Splash extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.text}>Musically</Text>
+      <View style={this._containerStyle}>
+        <Text style={{ fontSize: 40, color: 'white' }}>Musically</Text>
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#2E2E2E',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  text: {
-    fontSize: 40,
-    color: 'white'
-  }
-});
 
 const mapStateToProps = state => {
   return {

@@ -1,5 +1,5 @@
 import LocalService from '../../services/LocalService';
-import * as songsSelector from '../selectors/songs';
+import songsSelector from '../selectors/songs';
 
 async function _load(dispatch) {
   let session = await LocalService.getSession();
