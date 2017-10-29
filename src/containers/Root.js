@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { View } from 'react-native';
-
-import Navigator from './Navigator';
 import * as appActions from '../redux/actions/appActions';
+
+import {
+  View
+} from 'react-native';
+import Navigator from './Navigator';
 
 class Root extends Component {
   componentWillMount() {
@@ -31,5 +34,10 @@ const mapDispatchToProps = dispatch => {
     start: () => appActions.start()(dispatch)
   }
 }
+
+Root.propTypes = {
+  isReady: PropTypes.bool.isRequired,
+  start: PropTypes.func.isRequired
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Root);

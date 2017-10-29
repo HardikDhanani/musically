@@ -1,9 +1,9 @@
 // @flow
 
 const style = {
-  fontSize: 16,
+  lineHeight: 25,
   color: 'white',
-  fontWeight: 'bold'
+  fontSize: 17
 };
 
 export default style;

@@ -1,16 +1,23 @@
 import React, { Component } from 'react';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
   View
 } from 'react-native';
 
-import StyleManager from '../styles/StyleManager';
+const styles = EStyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignSelf: 'center'
+  }
+});
 
 export default class HeaderCenterSection extends Component {
   render() {
-    let style = StyleManager.getStyle('HeaderCenterSection');
-
     return (
-      <View style={style}>
+      <View style={styles.container}>
         {this.props.children}
       </View>
     );

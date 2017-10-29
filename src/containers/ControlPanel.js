@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import * as homeActions from '../redux/actions/homeActions';
 
-import { StyleSheet, StatusBar, Image, View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import Drawer from 'react-native-drawer'
+import {
+  View,
+  ScrollView
+} from 'react-native';
+import Drawer from 'react-native-drawer';
+import ControlPanelSection from '../components/ControlPanelSection';
+import ControlPanelButton from '../components/ControlPanelButton';
+import ControlPanelCover from '../components/ControlPanelCover';
 
 class ControlPanel extends Component {
   constructor(props) {
@@ -12,65 +19,45 @@ class ControlPanel extends Component {
 
     this._renderControlPanel = this._renderControlPanel.bind(this);
     this._onRef = this._onRef.bind(this);
-    this._renderSections = this._renderSections.bind(this);
     this._selectedSectionChanged = this._selectedSectionChanged.bind(this);
-    this._navigateToQueue = this._navigateToQueue.bind(this);
-    this._navigateToFavorites = this._navigateToFavorites.bind(this);
-    this._navigateToPlaylists = this._navigateToPlaylists.bind(this);
+    this._navigateTo = this._navigateTo.bind(this);
   }
 
   render() {
     return (
       <Drawer
         ref={this._onRef}
-        content={this._renderControlPanel(() => this._drawer.close())}
-        type="overlay"
+        content={this._renderControlPanel()}
+        type='overlay'
         tapToClose={true}
-        openDrawerOffset={0.15}
-      >
+        openDrawerOffset={0.15}>
         {this.props.children}
       </Drawer>
     );
   }
 
-  _renderControlPanel(closeDrawer) {
-    let currentSongName = this.props.currentSong ? this.props.currentSong.name : null;
+  _renderControlPanel() {
+    let currentSongName = this.props.currentSong ? this.props.currentSong.title : null;
     let currentSongArtist = this.props.currentSong ? this.props.currentSong.artist : null;
 
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.albumCover}>
-          <Image source={require('../images/music.png')} style={{ flex: 1/*height: 95, width: null*/ }} />
-          <View style={styles.albumInfo}>
-            <Text style={[styles.albumInfoText, { fontWeight: 'bold' }]}>{currentSongName}</Text>
-            <Text style={styles.albumInfoText}>{currentSongArtist}</Text>
-          </View>
-        </View>
-        {this._renderSections()}
-        <View style={styles.section}>
-          <TouchableOpacity style={styles.sectionButton} onPress={this._navigateToQueue}>
-            {/*<Icon style={[styles.sectionIcon, { color: 'gray' }]} name="list" />*/}
-            <Text style={[styles.sectionText, { color: 'gray' }]}>Queue</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.sectionButton} onPress={this._navigateToPlaylists}>
-            {/*<Icon style={[styles.sectionIcon, { color: 'gray' }]} name="list-box" />*/}
-            <Text style={[styles.sectionText, { color: 'gray' }]}>Play Lists</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.sectionButton} onPress={this._navigateToFavorites}>
-            {/*<Icon style={[styles.sectionIcon, { color: 'gray' }]} name="fav" />*/}
-            <Text style={[styles.sectionText, { color: 'gray' }]}>Favorites</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={[styles.section, { borderBottomWidth: 0 }]}>
-          <TouchableOpacity style={styles.sectionButton}>
-            {/*<Icon style={[styles.sectionIcon, { color: 'gray' }]} name="options" />*/}
-            <Text style={[styles.sectionText, { color: 'gray' }]}>Equalizer</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.sectionButton}>
-            {/*<Icon style={[styles.sectionIcon, { color: 'gray' }]} name="settings" />*/}
-            <Text style={[styles.sectionText, { color: 'gray' }]}>Settings</Text>
-          </TouchableOpacity>
-        </View>
+      <ScrollView>
+        <ControlPanelCover source={require('../images/music.png')} song={currentSongName} artist={currentSongArtist} />
+        <ControlPanelSection>
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('artists')} text={'Artists'} isActive={this.props.selectedSection === 'artists'} icon='person' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('albums')} text={'Albums'} isActive={this.props.selectedSection === 'albums'} icon='album' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('genres')} text={'Genres'} isActive={this.props.selectedSection === 'genres'} icon='music-note' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('songs')} text={'Songs'} isActive={this.props.selectedSection === 'songs'} icon='music-note' />
+        </ControlPanelSection>
+        <ControlPanelSection>
+          <ControlPanelButton onPress={() => this._navigateTo('Queue')} text={'Queue'} isActive={false} icon='queue-music' />
+          <ControlPanelButton onPress={() => this._navigateTo('Playlists')} text={'Play Lists'} isActive={false} icon='playlist-play' />
+          <ControlPanelButton onPress={() => this._navigateTo('Favorites')} text={'Favorites'} isActive={false} icon='favorite' />
+        </ControlPanelSection>
+        <ControlPanelSection>
+          <ControlPanelButton onPress={() => { }} text={'Equalizer'} isActive={false} icon='equalizer' />
+          <ControlPanelButton onPress={() => { }} text={'Settings'} isActive={false} icon='settings' />
+        </ControlPanelSection>
       </ScrollView>
     );
   }
@@ -80,103 +67,16 @@ class ControlPanel extends Component {
     this.props.onRef(component);
   }
 
-  _renderSections() {
-    return (
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.sectionButton} onPress={() => this._selectedSectionChanged('artists')}>
-          {/*<Icon style={[styles.sectionIcon, this.props.selectedSection === 'artists' ? styles.sectionSelected : styles.sectionUnselected]} name="person" />*/}
-          <Text style={[styles.sectionText, this.props.selectedSection === 'artists' ? styles.sectionSelected : styles.sectionUnselected]}>Artists</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.sectionButton} onPress={() => this._selectedSectionChanged('albums')}>
-          {/*<Icon style={[styles.sectionIcon, this.props.selectedSection === 'albums' ? styles.sectionSelected : styles.sectionUnselected]} name="disc" />*/}
-          <Text style={[styles.sectionText, this.props.selectedSection === 'albums' ? styles.sectionSelected : styles.sectionUnselected]}>Albums</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.sectionButton} onPress={() => this._selectedSectionChanged('genres')}>
-          {/*<Icon style={[styles.sectionIcon, this.props.selectedSection === 'genres' ? styles.sectionSelected : styles.sectionUnselected]} name="musical-notes" />*/}
-          <Text style={[styles.sectionText, this.props.selectedSection === 'genres' ? styles.sectionSelected : styles.sectionUnselected]}>Genres</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.sectionButton} onPress={() => this._selectedSectionChanged('songs')}>
-          {/*<Icon style={[styles.sectionIcon, this.props.selectedSection === 'songs' ? styles.sectionSelected : styles.sectionUnselected]} name="musical-note" />*/}
-          <Text style={[styles.sectionText, this.props.selectedSection === 'songs' ? styles.sectionSelected : styles.sectionUnselected]}>Songs</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   _selectedSectionChanged(section) {
     this.props.selectedSectionChanged(section);
     this._drawer.close();
   }
 
-  _navigateToQueue() {
-    this.props.navigation.navigate('Queue');
-    this._drawer.close();
-  }
-
-  _navigateToFavorites() {
-    this.props.navigation.navigate('Favorites');
-    this._drawer.close();
-  }
-
-  _navigateToPlaylists() {
-    this.props.navigation.navigate('Playlists');
+  _navigateTo(target) {
+    this.props.navigation.navigate(target);
     this._drawer.close();
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#2E2E2E',
-    flexDirection: 'column',
-  },
-  controlText: {
-    color: 'white',
-  },
-  section: {
-    borderBottomColor: 'gray',
-    borderBottomWidth: 1,
-    paddingLeft: 15
-  },
-  sectionIcon: {
-    marginRight: 30,
-    height: 30,
-    width: 30
-  },
-  sectionButton: {
-    flexDirection: 'row',
-    padding: 10,
-  },
-  sectionSelected: {
-    color: '#ffa500'
-  },
-  sectionUnselected: {
-    color: 'gray'
-  },
-  sectionText: {
-    fontSize: 16,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    fontWeight: 'bold'
-  },
-  albumCover: {
-    flex: 1,
-    height: 200,
-    backgroundColor: 'blue'
-  },
-  albumInfo: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    flexDirection: 'column',
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-    marginLeft: 15,
-  },
-  albumInfoText: {
-    fontSize: 16
-  }
-});
 
 const mapStateToProps = state => {
   return {
@@ -190,5 +90,11 @@ const mapDispatchToProps = dispatch => {
     selectedSectionChanged: (section) => homeActions.selectedSectionChanged(section)(dispatch),
   }
 }
+
+ControlPanel.propTypes = {
+  selectedSection: PropTypes.string,
+  currentSong: PropTypes.object,
+  selectedSectionChanged: PropTypes.func
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ControlPanel);

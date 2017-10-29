@@ -1,12 +1,38 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
-  StyleSheet,
   View,
   PanResponder,
-  Animated
+  Animated,
+  Dimensions
 } from 'react-native';
 
-export default class ProgressBar extends Component {
+const styles = EStyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  elapsed: {
+    height: 4,
+    backgroundColor: '$elementActive'
+  },
+  left: {
+    height: 4,
+    backgroundColor: '$elementInactive'
+  },
+  button: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 5,
+    position: 'absolute',
+    borderColor: '$elementActive'
+  }
+});
+
+class ProgressBar extends Component {
   constructor(props) {
     super(props);
 
@@ -17,6 +43,7 @@ export default class ProgressBar extends Component {
     this._currentPosition = 0;
     this._maxPosition = 320 - 20;
     this._isPanWorking = false;
+    this._width = Dimensions.get('window').width;
 
     this._onProgressChange = this._onProgressChange.bind(this);
   }
@@ -78,17 +105,17 @@ export default class ProgressBar extends Component {
 
   render() {
     let percentage = this.props.total ? ((this.props.elapsed * 100) / this.props.total) / 100 : 0;
-    let elapsedWidth = this.props.width * percentage;
-    let leftWidth = this.props.width - elapsedWidth;
+    let elapsedWidth = this._width * percentage;
+    let leftWidth = this._width - elapsedWidth;
     let imageStyle = { transform: [{ translateX: this.state.pan.x }, { translateY: 0 }] };
 
     return (
       <View style={styles.container}>
-        <View style={[styles.progressBar, { flex: elapsedWidth, backgroundColor: this.props.color }]} onLayout={evt => { }} />
-        <View style={[styles.progressBar, { flex: leftWidth, backgroundColor: this.props.backgroundColor }]} onLayout={evt => { }} />
+        <View style={[styles.elapsed, { flex: elapsedWidth }]} />
+        <View style={[styles.left, { flex: leftWidth }]} />
         {
           this.props.showButton
-            ? <Animated.View hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }} style={[styles.button, imageStyle, { borderColor: this.props.color }]} {...this._panResponder.panHandlers} />
+            ? <Animated.View hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }} style={[styles.button, imageStyle]} {...this._panResponder.panHandlers} />
             : null
         }
       </View>
@@ -102,19 +129,11 @@ export default class ProgressBar extends Component {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  progressBar: {
-    height: 4,
-  },
-  button: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 5,
-    position: 'absolute'
-  }
-});
+ProgressBar.propTypes = {
+  elapsed: PropTypes.number.isRequired,
+  total: PropTypes.string.isRequired,
+  showButton: PropTypes.bool,
+  onProgressChange: PropTypes.func
+};
+
+export default ProgressBar;

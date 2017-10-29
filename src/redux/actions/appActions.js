@@ -1,6 +1,8 @@
 import LocalService from '../../services/LocalService';
 import songsSelector from '../selectors/songs';
 
+let _isLoaded = false;
+
 async function _load(dispatch) {
   let session = await LocalService.getSession();
   let songs = await LocalService.getSongs();
@@ -82,23 +84,28 @@ export const setMenu = (target, positionX, positionY) => {
 export function start() {
   return (dispatch) => {
     try {
-      dispatch(starting());
-
-      setTimeout(() => {
+      if (_isLoaded) {
         dispatch(goHome());
-      }, 3000)
+      } else {
+        dispatch(starting());
 
-      LocalService.isFirstTime()
-        .then(resp => {
-          if (resp) {
-            LocalService.scanForSongs()
-              .then(_groupAndSaveMusic)
-              .then(LocalService.firstTimeDone)
-              .then(() => _load(dispatch));
-          } else {
-            _load(dispatch)
-          }
-        });
+        setTimeout(() => {
+          _isLoaded = true;
+          dispatch(goHome());
+        }, 3000);
+
+        LocalService.isFirstTime()
+          .then(resp => {
+            if (resp) {
+              LocalService.scanForSongs()
+                .then(_groupAndSaveMusic)
+                .then(LocalService.firstTimeDone)
+                .then(() => _load(dispatch));
+            } else {
+              _load(dispatch)
+            }
+          });
+      }
     } catch (error) {
       console.log(error);
     }

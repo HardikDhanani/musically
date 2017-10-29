@@ -1,34 +1,49 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
-  Dimensions,
   View,
   TouchableWithoutFeedback,
 } from 'react-native';
 
-import Styles from '../styles/Styles';
+const styles = EStyleSheet.create({
+  container: {
+    position: 'absolute',
+    height: '$appHeight',
+    width: '$appWidth',
+    backgroundColor: 'transparent',
+    alignItems: 'flex-end',
+    padding: 5
+  },
+  content: {
+    width: '$appWidth * 0.5',
+    backgroundColor: '$floatMenuContentBackgroundColor',
+  },
+  footer: {
+    height: '$footerHeight'
+  }
+});
 
-export default class FloatMenu extends PureComponent {
+class FloatMenu extends PureComponent {
   render() {
-    let style = Styles.getFloatMenuStyle();
-
-    let currentHeight = this.props.contentHeight;
     let top = this.props.positionY;
-    let windowHeight = Dimensions.get('window').height;
-    let footerHeight = 60;
-
     let right = this.props.positionX;
-    let windowWidth = Dimensions.get('window').width;
 
-    if (currentHeight > (windowHeight - footerHeight - top))
-      top = (windowHeight - footerHeight - currentHeight);
+    let windowHeight = styles._container.height;
+    let windowWidth = styles._container.width;
+    let footerHeight = styles._footer.height;
+
+    if (this.props.contentHeight > (windowHeight - footerHeight - top))
+      top = (windowHeight - footerHeight - this.props.contentHeight);
 
     if ((windowWidth / 2) > right)
       right = windowWidth / 2;
 
     return (
-      <TouchableWithoutFeedback onPress={this.props.onPress} style={style.menuBackground}>
-        <View style={style.menuContainer}>
-          <View style={[style.menuContent, { top: top, right: windowWidth - right }]}>
+      <TouchableWithoutFeedback onPress={this.props.onPress}>
+        <View style={styles.container}>
+          <View style={[styles.content, { top: top, right: windowWidth - right }]}>
             {this.props.children}
           </View>
         </View>
@@ -36,3 +51,12 @@ export default class FloatMenu extends PureComponent {
     );
   }
 }
+
+FloatMenu.propTypes = {
+  contentHeight: PropTypes.number.isRequired,
+  positionX: PropTypes.number.isRequired,
+  positionY: PropTypes.number.isRequired,
+  onPress: PropTypes.func
+};
+
+export default FloatMenu;

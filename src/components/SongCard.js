@@ -1,17 +1,58 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
-  StyleSheet,
   View,
-  TouchableOpacity,
   TouchableWithoutFeedback,
-  Text,
-  Platform,
-  Dimensions
+  Text
 } from 'react-native';
+import IconButton from './common/buttons/IconButton';
 
-import Button from './Button';
+const styles = EStyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    width: '$appWidth',
+    height: '$headerHeight',
+    backgroundColor: '$headerBackgroundColor',
+    alignItems: 'center',
+    paddingLeft: 10,
+    paddingRight: 10
+  },
+  text: {
+    color: '$headerColor',
+    fontSize: '$textFontSize',
+  },
+  textBold: {
+    color: '$headerColor',
+    fontSize: '$bigTextFontSize',
+    fontWeight: 'bold'
+  },
+  button: {
+    color: '$elementInactive',
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize'
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    flex: 1,
+    paddingHorizontal: 5
+  },
+  songInformation: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    height: '$headerHeight * 0.7'
+  },
+  durationContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '$headerHeight * 0.7',
+    width: '$headerHeight * 0.7'
+  }
+});
 
-export default class SongCard extends Component {
+class SongCard extends Component {
   constructor(props) {
     super(props);
 
@@ -23,31 +64,36 @@ export default class SongCard extends Component {
   }
 
   render() {
-    let buttonTextStyle = [styles.itemText, this.props.styles.text, { fontSize: 25 }];
-    let duration = null;
-    if (this.props.duration) {
-      let d = new Date(parseInt(this.props.duration));
-      let minutes = "00" + d.getMinutes().toString();
-      let seconds = "00" + d.getSeconds().toString();
-      duration = minutes.substring(minutes.length - 2, minutes.length) + ":" + seconds.substring(seconds.length - 2, seconds.length);
-    }
+    let duration = this._getDuration(this.props.duration);
+
     return (
       <TouchableWithoutFeedback onPress={this.props.onPress}>
-        <View style={[styles.songCard, this.props.styles.container]}>
-          <Button text={'>'} textStyle={buttonTextStyle} />
-          <View style={{ flexDirection: 'row', flex: 1, paddingHorizontal: 5 }}>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-start', height: SongCard.currentHeight * 0.7, width: SongCard.currentHeight * 0.7 }}>
-              <Text numberOfLines={1} style={[styles.itemText, this.props.styles.text, { fontSize: 16, fontWeight: 'bold' }]}>{this.props.name}</Text>
-              <Text numberOfLines={1} style={[styles.itemText, this.props.styles.text, { fontSize: 12 }]}>{this.props.artist}</Text>
+        <View style={[styles.container, this.props.styles.container]}>
+          <IconButton iconName='play-arrow' onPress={this.props.onPlayPress} style={styles._button} iconSize={styles._button.fontSize} />
+          <View style={styles.infoContainer}>
+            <View style={styles.songInformation}>
+              <Text numberOfLines={1} style={[styles.textBold, this.props.styles.text]}>{this.props.name}</Text>
+              <Text numberOfLines={1} style={[styles.text, this.props.styles.text]}>{this.props.artist}</Text>
             </View>
-            <View style={{ justifyContent: 'center', alignItems: 'center', height: SongCard.currentHeight * 0.7, width: SongCard.currentHeight * 0.7 }}>
-              <Text numberOfLines={1} style={[styles.itemText, this.props.styles.text, { fontSize: 12 }]}>{duration || "00:00"}</Text>
+            <View style={styles.durationContainer}>
+              <Text numberOfLines={1} style={[styles.text, this.props.styles.text]}>{duration || '00:00'}</Text>
             </View>
           </View>
-          <Button onRef={ref => this._options = ref} onPress={this._onOptionPressed} text={'+'} textStyle={buttonTextStyle} />
+          <IconButton iconName='more-vert' onPress={this._onOptionPressed} onRef={ref => this._options = ref} style={styles._button} iconSize={styles._button.fontSize} />
         </View>
       </TouchableWithoutFeedback>
     );
+  }
+
+  _getDuration(duration) {
+    if (duration) {
+      let d = new Date(parseInt(duration));
+      let minutes = "00" + d.getMinutes().toString();
+      let seconds = "00" + d.getSeconds().toString();
+      return minutes.substring(minutes.length - 2, minutes.length) + ":" + seconds.substring(seconds.length - 2, seconds.length);
+    }
+
+    return null;
   }
 
   _onOptionPressed() {
@@ -63,24 +109,16 @@ export default class SongCard extends Component {
         });
     });
   }
-
-  static get currentHeight() {
-    return (Platform.OS === "ios" ? 64 : 56);
-  }
 }
 
-const styles = StyleSheet.create({
-  itemText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  songCard: {
-    flexDirection: 'row',
-    width: Dimensions.get('window').width,
-    height: SongCard.currentHeight,
-    backgroundColor: '#4c4c4c',
-    alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 10
-  },
-});
+SongCard.propTypes = {
+  id: PropTypes.string.isRequired,
+  duration: PropTypes.string,
+  name: PropTypes.string,
+  artist: PropTypes.string,
+  onPress: PropTypes.func,
+  onOptionPressed: PropTypes.func,
+  onPlayPress: PropTypes.func
+};
+
+export default SongCard;

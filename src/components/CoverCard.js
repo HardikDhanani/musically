@@ -1,16 +1,58 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
-  StyleSheet,
   View,
-  Dimensions,
   TouchableOpacity,
   Text,
   Image
 } from 'react-native';
+import IconButton from './common/buttons/IconButton';
 
-import Button from './Button';
+const styles = EStyleSheet.create({
+  $containerWidth: '$appWidth / 3',
+  container: {
+    margin: 1,
+    padding: 2,
+    width: '$containerWidth - 4',
+    height: 160
+  },
+  imageContainer: {
+    flex: 6
+  },
+  image: {
+    height: 95,
+    width: null
+  },
+  body: {
+    paddingLeft: 5,
+    flexDirection: 'column',
+    backgroundColor: '$body_1_backgroundColor',
+    flex: 4
+  },
+  title: {
+    flex: 1,
+    fontWeight: 'bold',
+    fontSize: 12,
+    paddingRight: 5
+  },
+  texts: {
+    flexDirection: 'row',
+    flex: 2
+  },
+  info: {
+    flexDirection: 'column',
+    flex: 10
+  },
+  button: {
+    color: '$headerColor',
+    backgroundColor: 'transparent',
+    fontSize: '$iconSize'
+  }
+});
 
-export default class CoverCard extends PureComponent {
+class CoverCard extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -19,8 +61,8 @@ export default class CoverCard extends PureComponent {
 
   render() {
     return (
-      <View style={styles.card}>
-        <TouchableOpacity style={styles.button} onPress={this.props.onPress}>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.imageContainer} onPress={this.props.onPress}>
           <Image source={this.props.imageUri ? { uri: this.props.imageUri } : this.props.source} style={styles.image} />
         </TouchableOpacity>
         <View style={styles.body}>
@@ -29,7 +71,7 @@ export default class CoverCard extends PureComponent {
             <View style={styles.info}>
               {this.props.children}
             </View>
-            <Button onRef={ref => this._options = ref} onPress={this._onOptionPressed} text={'+'} textStyle={styles.itemText} />
+            <IconButton iconName='more-vert' onPress={this._onOptionPressed} onRef={ref => this._options = ref} style={styles._button} iconSize={styles._button.fontSize} />
           </View>
         </View>
       </View>
@@ -49,48 +91,13 @@ export default class CoverCard extends PureComponent {
         });
     });
   }
-
-  static get currentHeight() {
-    return 160;
-  }
 }
 
-const styles = StyleSheet.create({
-  card: {
-    margin: 1,
-    padding: 2,
-    width: (Dimensions.get('window').width / 3) - 4,
-    height: CoverCard.currentHeight
-  },
-  button: {
-    flex: 6
-  },
-  image: {
-    height: 95,
-    width: null
-  },
-  body: {
-    paddingLeft: 5,
-    flexDirection: 'column',
-    backgroundColor: '#d3d3d3',
-    flex: 4
-  },
-  title: {
-    flex: 1,
-    fontWeight: 'bold',
-    fontSize: 12,
-    paddingRight: 5
-  },
-  texts: {
-    flexDirection: 'row',
-    flex: 2
-  },
-  info: {
-    flexDirection: 'column',
-    flex: 10
-  },
-  itemText: {
-    color: 'gray',
-    fontSize: 16,
-  },
-});
+CoverCard.propTypes = {
+  imageUri: PropTypes.string,
+  title: PropTypes.string,
+  onPress: PropTypes.func,
+  onOptionPressed: PropTypes.func,
+};
+
+export default CoverCard;

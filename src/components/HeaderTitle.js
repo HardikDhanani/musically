@@ -1,16 +1,24 @@
 import React, { Component } from 'react';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
   Text
 } from 'react-native';
 
-import StyleManager from '../styles/StyleManager';
+const styles = EStyleSheet.create({
+  container: {
+    fontFamily: '$fontFamily',
+    fontSize: '$titleFontSize',
+    color: '$headerColor',
+    alignSelf: 'center',
+    justifyContent: 'flex-end',
+  }
+});
 
 export default class HeaderTitle extends Component {
   render() {
-    let style = StyleManager.getStyle('HeaderTitle');
-    
     return (
-      <Text style={style}>
+      <Text style={styles.container}>
         {this.props.children}
       </Text>
     );

@@ -1,20 +1,34 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import * as favoritesActions from '../redux/actions/favoritesActions';
 import * as appActions from '../redux/actions/appActions';
 
-import { StyleSheet, StatusBar, FlatList, ScrollView, View, Text, Dimensions, TouchableOpacity } from 'react-native';
+import {
+  ScrollView,
+  View
+} from 'react-native';
 
-import Header from '../components/Header';
-import HeaderTitle from '../components/HeaderTitle';
+import FavoritesHeader from '../components/FavoritesHeader';
+import Body from '../components/Body';
 import SongCard from '../components/SongCard';
 import AlbumCard from '../components/AlbumCard';
 import ArtistCard from '../components/ArtistCard';
 import GenreCard from '../components/GenreCard';
-import FloatMenu from '../components/FloatMenu';
-import PlayerFooter from './PlayerFooter';
 import ThreeColumnContainer from '../components/ThreeColumnContainer';
+import PlayerFooter from './PlayerFooter';
+import SongMenu from '../components/SongMenu';
+import HeaderMenu from '../components/HeaderMenu';
+import GroupSection from '../components/GroupSection';
+
+const styles = EStyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '$bodySecondaryBackgroundColor'
+  }
+});
 
 class Favorites extends Component {
   constructor(props) {
@@ -28,9 +42,8 @@ class Favorites extends Component {
     this._renderAlbum = this._renderAlbum.bind(this);
     this._renderGenres = this._renderGenres.bind(this);
     this._renderGenre = this._renderGenre.bind(this);
-    this._groupItems = this._groupItems.bind(this);
-    this._keyExtractor = this._keyExtractor.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
+    this._groupItems = this._groupItems.bind(this);
     this._playSongs = this._playSongs.bind(this);
   }
 
@@ -46,105 +59,64 @@ class Favorites extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Header style={styles.header}>
-          <View style={styles.left}>
-            <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.goBack()}>
-              <Text style={styles.buttonText}>{'<<'}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{ alignSelf: 'center', flex: 1 }}>
-            <HeaderTitle>Favorites</HeaderTitle>
-          </View>
-          <View style={[styles.right, styles.row]}>
-            <TouchableOpacity style={styles.button} onPress={() => this.props.setMenu({ target: 'MENU' })}>
-              <Text style={styles.buttonText}>{'+'}</Text>
-            </TouchableOpacity>
-          </View>
-        </Header>
-        <View style={[styles.body, { height: this._getHeight() }]}>
-          {
-            this.props.mustCompleteCriteria ?
-              <Text style={[styles.itemText, { fontStyle: 'italic', marginTop: 20 }]}>{'Enter some text to search...'}</Text> :
-              <ScrollView>
-                {this.props.songs.length ? this._renderSongs() : null}
-                {this.props.albums.length ? this._renderAlbums() : null}
-                {this.props.artists.length ? this._renderArtists() : null}
-                {this.props.genres.length ? this._renderGenres() : null}
-              </ScrollView>
-          }
-        </View>
+        <FavoritesHeader
+          onBackPress={() => this.props.navigation.goBack()}
+          onMorePress={() => this.props.setMenu({ type: 'MENU' })} />
+        <Body>
+          <ScrollView>
+            {this.props.songs.length ? this._renderSongs() : null}
+            {this.props.albums.length ? this._renderAlbums() : null}
+            {this.props.artists.length ? this._renderArtists() : null}
+            {this.props.genres.length ? this._renderGenres() : null}
+          </ScrollView>
+        </Body>
         {this._renderMenu()}
         <PlayerFooter navigation={this.props.navigation} />
       </View>
     );
   }
 
-  _getHeight() {
-    let footerHeight = 60;
-    let headerHeight = Header.currentHeight;
-    let statusBarHeight = StatusBar.currentHeight;
-    let windowHeight = Dimensions.get('window').height;
-
-    return windowHeight - (headerHeight + footerHeight + statusBarHeight);
-  }
-
   _renderSongs() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Songs'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })}
-          data={this.props.songs}
-          renderItem={this._renderSong}
-          keyExtractor={(item, index) => item.id} />
-      </View>
+      <GroupSection
+        title={'Songs'}
+        getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })}
+        data={this.props.songs}
+        renderItem={this._renderSong}
+        keyExtractor={(item, index) => item.id} />
     );
   }
 
   _renderAlbums() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Albums'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-          data={this._groupItems(this.props.albums)}
-          renderItem={album => this._renderItem(album, this._renderAlbum)}
-          keyExtractor={this._keyExtractor} />
-      </View>
+      <GroupSection
+        title={'Albums'}
+        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
+        data={this._groupItems(this.props.albums)}
+        renderItem={album => this._renderItem(album, this._renderAlbum)}
+        keyExtractor={(item, index) => index} />
     );
   }
 
   _renderArtists() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Artists'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-          data={this._groupItems(this.props.artists)}
-          renderItem={artist => this._renderItem(artist, this._renderArtist)}
-          keyExtractor={this._keyExtractor} />
-      </View>
+      <GroupSection
+        title={'Artists'}
+        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
+        data={this._groupItems(this.props.artists)}
+        renderItem={artist => this._renderItem(artist, this._renderArtist)}
+        keyExtractor={(item, index) => index} />
     );
   }
 
   _renderGenres() {
     return (
-      <View>
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>{'Genres'}</Text>
-        </View>
-        <FlatList
-          getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-          data={this._groupItems(this.props.genres)}
-          renderItem={genre => this._renderItem(genre, this._renderGenre)}
-          keyExtractor={this._keyExtractor} />
-      </View>
+      <GroupSection
+        title={'Genres'}
+        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
+        data={this._groupItems(this.props.genres)}
+        renderItem={genre => this._renderItem(genre, this._renderGenre)}
+        keyExtractor={(item, index) => index} />
     );
   }
 
@@ -243,12 +215,20 @@ class Favorites extends Component {
     );
   }
 
-  _groupItems(items) {
-    let grupedItems = [];
-    for (let i = 0; i < items.length; i += 3) {
-      grupedItems.push(items.slice(i, 3 + i));
+  _renderMenu() {
+    if (!this.props.showMenu)
+      return null;
+
+    switch (this.props.targetMenu.type.toLowerCase()) {
+      case 'song':
+      case 'artist':
+      case 'album':
+      case 'genre':
+        return <SongMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} isFavorite={true} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
+
+      default:
+        return <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
     }
-    return grupedItems;
   }
 
   _renderItem(items, renderCard) {
@@ -257,8 +237,14 @@ class Favorites extends Component {
     );
   }
 
-  _keyExtractor(item, index) {
-    return index;
+  _groupItems(items) {
+    let grupedItems = [];
+
+    for (let i = 0; i < items.length; i += 3) {
+      grupedItems.push(items.slice(i, 3 + i));
+    }
+
+    return grupedItems;
   }
 
   _playSongs(song) {
@@ -274,144 +260,7 @@ class Favorites extends Component {
 
     this.props.navigation.navigate('Player', { queue })
   }
-
-  _renderMenu() {
-    if (!this.props.showMenu)
-      return null;
-
-    return (
-      <FloatMenu positionY={this.props.menuPositionY} positionX={this.props.menuPositionX} onPress={() => this.props.setMenu(null, 0, 0)}>
-        {this._getTargetMenu(this.props.targetMenu.type)}
-      </FloatMenu>
-    );
-  }
-
-  _getTargetMenu(target) {
-    switch (target) {
-      case 'ARTIST':
-      case 'ALBUM':
-      case 'GENRE':
-      case 'SONG':
-        return this._getArtistMenu();
-
-      default:
-        return this._getMenu();
-    }
-  }
-
-  _getMenu() {
-    return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Sort Order'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'View Mode'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Rescan Library'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={4} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Playlist Queue'}</Text>
-        </TouchableOpacity>
-      )
-    ];
-  }
-
-  _getArtistMenu() {
-    return [
-      (
-        <TouchableOpacity key={1} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Play'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={2} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Add to playlist'}</Text>
-        </TouchableOpacity>
-      ),
-      (
-        <TouchableOpacity key={3} style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Add to queue'}</Text>
-        </TouchableOpacity>
-      )
-    ]
-  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#4c4c4c',
-  },
-  header: {
-    backgroundColor: '#2E2E2E'
-  },
-  body: {
-    alignItems: 'center',
-    alignSelf: 'center',
-  },
-  left: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-  },
-  right: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-end',
-  },
-  button: {
-    height: Header.currentHeight * 0.7,
-    width: Header.currentHeight * 0.7,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 20,
-  },
-  sectionTitle: {
-    width: Dimensions.get('window').width,
-    height: Header.currentHeight * 0.7,
-    backgroundColor: '#4c4c4c',
-    borderBottomWidth: 1,
-    borderBottomColor: 'gray',
-    justifyContent: 'center',
-    paddingLeft: 10,
-    marginBottom: 5
-  },
-  sectionTitleText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold'
-  },
-  floatMenuOption: {
-    flexDirection: 'row',
-    height: Header.currentHeight * 0.8,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10
-  },
-  floatMenuOptionText: {
-    fontSize: 15,
-    color: 'white'
-  },
-  title: {
-    color: 'white',
-    alignSelf: 'center',
-    justifyContent: 'flex-end',
-  },
-});
 
 const mapStateToProps = state => {
   return {
@@ -434,5 +283,20 @@ const mapDispatchToProps = dispatch => {
     setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
   }
 }
+
+Favorites.propTypes = {
+  isLoading: PropTypes.bool,
+  update: PropTypes.bool,
+  songs: PropTypes.array,
+  albums: PropTypes.array,
+  artists: PropTypes.array,
+  genres: PropTypes.array,
+  showMenu: PropTypes.bool,
+  targetMenu: PropTypes.object,
+  menuPositionX: PropTypes.number,
+  menuPositionY: PropTypes.number,
+  load: PropTypes.func,
+  setMenu: PropTypes.func
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Favorites);

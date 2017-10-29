@@ -1,26 +1,48 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
   Text,
   View
 } from 'react-native';
 
-import StyleManager from '../styles/StyleManager';
+const styles = EStyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 15
+  },
+  title: {
+    fontSize: '$titleFontSize',
+    color: '$footerColor',
+    fontWeight: 'bold'
+  },
+  text: {
+    fontSize: '$textFontSize',
+    color: '$footerColor'
+  }
+});
 
-export default class PlayerFooterSongSection extends PureComponent {
-  constructor(props) {
-    super(props);
-
-    this._containerStyle = StyleManager.getStyle('PlayerFooterSongSection');
-    this._titleStyle = StyleManager.getStyle('PlayerFooterSongSectionTitle');
-    this._textStyle = StyleManager.getStyle('PlayerFooterSongSectionText');
+class PlayerFooterSongSection extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.title !== this.props.title
+      || nextProps.artist !== this.props.artist;
   }
 
   render() {
     return (
-      <View style={this._containerStyle}>
-        <Text numberOfLines={1} style={this._titleStyle}>{this.props.title}</Text>
-        <Text numberOfLines={1} style={this._textStyle}>{this.props.artist}</Text>
+      <View style={styles.container}>
+        <Text numberOfLines={1} style={styles.title}>{this.props.title}</Text>
+        <Text numberOfLines={1} style={styles.text}>{this.props.artist}</Text>
       </View>
     );
   }
 }
+
+PlayerFooterSongSection.propTypes = {
+  title: PropTypes.string,
+  artist: PropTypes.string
+};
+
+export default PlayerFooterSongSection;

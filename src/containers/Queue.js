@@ -1,10 +1,18 @@
 import React, { Component } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  TouchableOpacity, 
+  Text, 
+  ActivityIndicator, 
+  FlatList, 
+  StatusBar, 
+  Dimensions } from 'react-native';
 import { connect } from 'react-redux';
+
 import * as queueActions from '../redux/actions/queueActions';
 import * as appActions from '../redux/actions/appActions';
 import * as playerActions from '../redux/actions/playerActions';
-
-import { StyleSheet, View, TouchableOpacity, Text, ActivityIndicator, FlatList, StatusBar, Dimensions } from 'react-native';
 
 import Header from '../components/Header';
 import HeaderTitle from '../components/HeaderTitle';

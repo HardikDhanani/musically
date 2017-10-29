@@ -1,22 +1,35 @@
 import React, { PureComponent } from 'react';
+import EStyleSheet from 'react-native-extended-stylesheet';
 
-import { Image, View } from 'react-native';
-import StyleManager from '../styles/StyleManager';
+import {
+  Image,
+  View
+} from 'react-native';
+
+const styles = EStyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    width: '$appWidth',
+    height: '$appHeight * 0.21',
+    backgroundColor: '$headerBackgroundColor',
+  },
+  content: {
+    flex: 1,
+    paddingLeft: 15
+  },
+  image: {
+    width: '$headerHeight * 2',
+    height: '$headerHeight * 2',
+    marginLeft: 20,
+  }
+});
 
 export default class ContainerViewCover extends PureComponent {
-  constructor(props) {
-    super(props);
-
-    this._containerStyle = StyleManager.getStyle('ContainerViewCoverContainer');
-    this._imageStyle = StyleManager.getStyle('ContainerViewCoverImage');
-    this._contentStyle = StyleManager.getStyle('ContainerViewCoverContent');
-  }
-
   render() {
     return (
-      <View style={this._containerStyle}>
-        <Image source={this.props.source} style={this._imageStyle} />
-        <View style={this._contentStyle}>
+      <View style={styles.container}>
+        <Image source={this.props.source} style={styles.image} />
+        <View style={styles.content}>
           {this.props.coverContent}
         </View>
       </View>

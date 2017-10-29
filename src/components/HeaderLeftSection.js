@@ -1,16 +1,22 @@
 import React, { Component } from 'react';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
   View
 } from 'react-native';
 
-import StyleManager from '../styles/StyleManager';
+const styles = EStyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    alignItems: 'flex-start'
+  }
+});
 
 export default class HeaderLeftSection extends Component {
   render() {
-    let style = StyleManager.getStyle('HeaderLeftSection');
-
     return (
-      <View style={style}>
+      <View style={styles.container}>
         {this.props.children}
       </View>
     );

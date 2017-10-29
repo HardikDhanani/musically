@@ -1,31 +1,50 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import * as genreActions from '../redux/actions/genreActions';
 import * as appActions from '../redux/actions/appActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
 
-import { View, Text } from 'react-native';
-
+import {
+  View,
+  Text
+} from 'react-native';
 import ContainerView from '../components/ContainerView';
-import Header from '../components/Header';
 import SongCard from '../components/SongCard';
 import AlbumCard from '../components/AlbumCard';
-import FloatMenuOption from '../components/FloatMenuOption';
 import PlayerFooter from './PlayerFooter';
+import ThreeColumnContainer from '../components/ThreeColumnContainer';
+
+const styles = EStyleSheet.create({
+  container: {
+    backgroundColor: '$bodyBackgroundColor'
+  },
+  text: {
+    color: '$textColor'
+  },
+  coverContentTitle: {
+    color: '$floatMenuOptionTextColor',
+    fontSize: '$titleFontSize'
+  },
+  coverContentText: {
+    color: '$textColor'
+  }
+});
 
 class Genre extends Component {
   constructor(props) {
     super(props);
 
     this._renderSong = this._renderSong.bind(this);
-    this._coverContent = this._coverContent.bind(this);
-    this._getSections = this._getSections.bind(this);
-    this._getTargetMenu = this._getTargetMenu.bind(this);
-    this._getMenu = this._getMenu.bind(this);
-    this._playSongs = this._playSongs.bind(this);
-    this._groupItems = this._groupItems.bind(this);
+    this._renderCoverContent = this._renderCoverContent.bind(this);
     this._renderAlbum = this._renderAlbum.bind(this);
     this._renderItem = this._renderItem.bind(this);
+    this._renderMenu = this._renderMenu.bind(this);
+    this._getSections = this._getSections.bind(this);
+    this._playSongs = this._playSongs.bind(this);
+    this._groupItems = this._groupItems.bind(this);
   }
 
   componentDidMount() {
@@ -40,13 +59,12 @@ class Genre extends Component {
         onBackPress={() => this.props.navigation.goBack()}
         onSearchPress={() => this.props.navigation.navigate('Search', {})}
         onLikePress={() => this.props.like(this.props.genre)}
-        onMenuPress={() => this.props.setMenu({ target: 'MENU' })}
         onPlayPress={() => this._playSongs()}
-        coverContent={this._coverContent()}
+        coverContent={this._renderCoverContent()}
         sections={this._getSections()}
         source={require('../images/music.png')}
         showMenu={this.props.showMenu}
-        menuContent={this._getTargetMenu()}
+        menuContent={this._renderMenu()}
         menuPositionX={this.props.menuPositionX}
         menuPositionY={this.props.menuPositionY}
         like={this.props.isFavorite}
@@ -55,37 +73,18 @@ class Genre extends Component {
     );
   }
 
-  _coverContent() {
+  _renderCoverContent() {
     let genre = this.props.genre ? this.props.genre.genre : null;
     let albums = this.props.genre ? this.props.genre.albums : [];
     let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
 
     return (
       <View>
-        <Text style={{ color: 'white', fontSize: 17 }}>{genre}</Text>
-        <Text style={{ color: 'gray' }}>{albums.length + ' albums'}</Text>
-        <Text style={{ color: 'gray' }}>{songs.length + ' songs'}</Text>
+        <Text style={styles.coverContentTitle}>{genre}</Text>
+        <Text style={styles.coverContentText}>{albums.length + ' albums'}</Text>
+        <Text style={styles.coverContentText}>{songs.length + ' songs'}</Text>
       </View>
     );
-  }
-
-  _getSections() {
-    let albums = this.props.genre ? this.props.genre.albums : []
-    let albumsSongs = albums ? albums.map(a => a.songs) : [];
-    let songs = albumsSongs ? [].concat.apply([], albumsSongs) : [];
-
-    return [
-      {
-        data: songs,
-        renderItem: this._renderSong,
-        title: 'TRACKS'
-      },
-      {
-        data: this._groupItems(albums),
-        renderItem: items => this._renderItem(items, this._renderAlbum),
-        title: 'ALBUMS'
-      },
-    ];
   }
 
   _renderSong(song) {
@@ -96,7 +95,7 @@ class Genre extends Component {
 
     return (
       <SongCard
-        styles={{ container: { backgroundColor: '#f1f1f1' }, text: { color: 'gray' } }}
+        styles={{ container: styles.container, text: styles.text }}
         key={song.index}
         id={song.item.id}
         name={song.item.name}
@@ -137,45 +136,47 @@ class Genre extends Component {
     );
   }
 
+  _renderMenu() {
+    if (!this.props.showMenu)
+      return null;
+
+    switch (this.props.targetMenu.type.toLowerCase()) {
+      case 'song':
+      case 'album':
+        return <SongMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
+
+      default:
+        return <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
+    }
+  }
+
   _groupItems(items) {
     let grupedItems = [];
 
     for (let i = 0; i < items.length; i += 3) {
       grupedItems.push(items.slice(i, 3 + i));
     }
-    
+
     return grupedItems;
   }
 
-  _getTargetMenu() {
-    if (!this.props.showMenu)
-      return null;
+  _getSections() {
+    let albums = this.props.genre ? this.props.genre.albums : []
+    let albumsSongs = albums ? albums.map(a => a.songs) : [];
+    let songs = albumsSongs ? [].concat.apply([], albumsSongs) : [];
 
-    switch (this.props.targetMenu.type) {
-      case 'SONG':
-      case 'ALBUM':
-        return this._getSongMenu();
-
-      default:
-        return this._getMenu();
-    }
-  }
-
-  _getMenu() {
     return [
-      (<FloatMenuOption key={1} text={'Sort Order'} haveContent={true} />),
-      (<FloatMenuOption key={2} text={'View Mode'} haveContent={true} />),
-      (<FloatMenuOption key={3} text={'Rescan Library'} />),
-      (<FloatMenuOption key={4} text={'Playlist Queue'} />)
+      {
+        data: songs,
+        renderItem: this._renderSong,
+        title: 'TRACKS'
+      },
+      {
+        data: this._groupItems(albums),
+        renderItem: items => (<ThreeColumnContainer items={items.item} renderItem={this._renderAlbum} />),
+        title: 'ALBUMS'
+      },
     ];
-  }
-
-  _getSongMenu() {
-    return [
-      (<FloatMenuOption key={1} text={'Play'} />),
-      (<FloatMenuOption key={2} text={'Add to playlist'} />),
-      (<FloatMenuOption key={3} text={'Add to queue'} />)
-    ]
   }
 
   _playSongs(initialSong) {
@@ -204,5 +205,17 @@ const mapDispatchToProps = dispatch => {
     like: (genre) => dispatch(favoritesActions.like('genre', genre)),
   }
 }
+
+Genre.propTypes = {
+  genre: PropTypes.object,
+  targetMenu: PropTypes.object,
+  isFavorite: PropTypes.bool,
+  showMenu: PropTypes.bool,
+  menuPositionX: PropTypes.number,
+  menuPositionY: PropTypes.number,
+  load: PropTypes.func,
+  setMenu: PropTypes.func,
+  like: PropTypes.func
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Genre);

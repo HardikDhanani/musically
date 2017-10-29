@@ -1,7 +1,8 @@
 // @flow
+
 export default class Cache {
   _cache: { [string]: any };
-  
+
   constructor() {
     this._cache = {};
   }
@@ -10,7 +11,7 @@ export default class Cache {
     return this._cache.hasOwnProperty(key) && this._cache[key];
   }
 
-  get(key: string) {
+  get(key: string): any {
     return this._cache[key];
   }
 

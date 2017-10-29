@@ -1,4 +1,5 @@
 const initialState = {
+  isFavorite: false,
   currentSong: null,
   currentIndex: -1,
   elapsedTime: 0,
@@ -19,8 +20,10 @@ export default function artist(state = initialState, action = {}) {
       let currentIndex = (action.payload.session && action.payload.session.queue && currentSong)
         ? action.payload.session.queue.findIndex(song => song.name === currentSong.name)
         : -1;
+      let isFavorite = (currentSong && currentSong.isFavorite);
       return {
         ...state,
+        isFavorite,
         currentSong,
         currentIndex,
         queue,
@@ -34,6 +37,7 @@ export default function artist(state = initialState, action = {}) {
     case 'PLAYER_LOADING_SUCCESS':
       return {
         ...state,
+        isFavorite: action.payload.currentSong.isFavorite,
         currentSong: action.payload.currentSong,
         currentIndex: action.payload.currentIndex,
         queue: action.payload.queue,
@@ -47,6 +51,7 @@ export default function artist(state = initialState, action = {}) {
     case 'PLAYER_SONG_CHANGED':
       return {
         ...state,
+        isFavorite: action.payload.currentSong.isFavorite,
         currentSong: action.payload.currentSong,
         currentIndex: action.payload.currentIndex,
         elapsedTime: 0
@@ -102,9 +107,10 @@ export default function artist(state = initialState, action = {}) {
       if (!state.currentSong || action.payload.type !== 'song')
         return state;
 
-      state.currentSong.isFavorite = action.payload.target.isFavorite;
-
-      return { ...state }
+      return {
+        ...state,
+        isFavorite: action.payload.target.isFavorite
+      }
     default:
       return state;
   }

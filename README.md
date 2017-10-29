@@ -49,6 +49,7 @@
   - [ ] Recent played Playlist
   - [ ] Splash Screen
   - [ ] Share this App
+  - [ ] Go to Player if playing and put in background
 
 ## Bugs
 

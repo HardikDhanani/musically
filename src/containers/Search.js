@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
+import {
+  ScrollView,
+  View,
+  Text
+} from 'react-native';
 import { connect } from 'react-redux';
 import * as searchActions from '../redux/actions/searchActions';
 import * as appActions from '../redux/actions/appActions';
-
-import { ScrollView, View, Text } from 'react-native';
 
 import StyleManager from '../styles/StyleManager';
 
 import Header from '../components/Header';
 import Body from '../components/Body';
 import SearchHeader from '../components/SearchHeader';
-import SearchSection from '../components/SearchSection';
+import GroupSection from '../components/GroupSection';
 import SongCard from '../components/SongCard';
 import AlbumCard from '../components/AlbumCard';
 import ArtistCard from '../components/ArtistCard';
@@ -72,7 +75,7 @@ class Search extends Component {
 
   _renderSongs() {
     return (
-      <SearchSection
+      <GroupSection
         title={'Songs'}
         getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })}
         data={this.props.songs}
@@ -83,7 +86,7 @@ class Search extends Component {
 
   _renderAlbums() {
     return (
-      <SearchSection
+      <GroupSection
         title={'Albums'}
         getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
         data={this._groupItems(this.props.albums)}
@@ -94,7 +97,7 @@ class Search extends Component {
 
   _renderArtists() {
     return (
-      <SearchSection
+      <GroupSection
         title={'Artists'}
         getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
         data={this._groupItems(this.props.artists)}
@@ -105,7 +108,7 @@ class Search extends Component {
 
   _renderGenres() {
     return (
-      <SearchSection
+      <GroupSection
         title={'Genres'}
         getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
         data={this._groupItems(this.props.genres)}

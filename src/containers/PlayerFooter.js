@@ -42,7 +42,7 @@ class PlayerFooter extends Component {
             <View style={{ flex: 1, flexDirection: 'row' }}>
               <PlayerFooterSongSection title={title} artist={artist} />
               <PlayerFooterControlsSection
-                playPauseText={this.props.playing ? '||' : '>'}
+                playing={this.props.playing}
                 onPrevPress={this.props.prev}
                 onPlayPausePress={() => this.props.playPause(this.props.currentSong)}
                 onNextPress={this.props.next} />

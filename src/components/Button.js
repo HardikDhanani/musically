@@ -1,19 +1,42 @@
 import React, { PureComponent } from 'react';
-import { TouchableOpacity, Text } from 'react-native';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
 
-import StyleManager from '../styles/StyleManager';
+import {
+  TouchableOpacity,
+  Text
+} from 'react-native';
 
-export default class Button extends PureComponent {
+const styles = EStyleSheet.create({
+  button: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 30,
+    color: '$headerColor'
+  }
+});
+
+class Button extends PureComponent {
   render() {
-    let buttonStyle = StyleManager.getStyle('HeaderButton');
-    let textButtonStyle = StyleManager.getStyle('HeaderButtonText');
-
     return (
-      <TouchableOpacity ref={this.props.onRef} style={buttonStyle} onPress={this.props.onPress}>
+      <TouchableOpacity ref={this.props.onRef} style={styles.button} onPress={this.props.onPress}>
         {this.props.children}
-        {this.props.icon ? <Text style={textButtonStyle}>{this.props.text}</Text> : null}
-        {this.props.text ? <Text style={textButtonStyle}>{this.props.text}</Text> : null}
+        {this.props.icon ? <Text style={styles.buttonText}>{this.props.text}</Text> : null}
+        {this.props.text ? <Text style={styles.buttonText}>{this.props.text}</Text> : null}
       </TouchableOpacity>
     );
   }
 }
+
+Button.propTypes = {
+  icon: PropTypes.string,
+  text: PropTypes.string,
+  onRef: PropTypes.func,
+  onPress: PropTypes.func
+};
+
+export default Button;

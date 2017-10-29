@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
   Text,
   TouchableOpacity,
@@ -7,9 +10,7 @@ import {
   Animated
 } from 'react-native';
 
-import StyleManager from '../styles/StyleManager';
-
-export default class PaginationHeader extends Component {
+class PaginationHeader extends Component {
   constructor(props) {
     super(props);
 
@@ -17,32 +18,56 @@ export default class PaginationHeader extends Component {
       left: new Animated.Value(this.props.currentIndex)
     }
 
-    this._pageButtonWidth = Dimensions.get('window').width / this.props.total;
-    this._containerStyle = StyleManager.getStyle('PaginationHeaderContainer');
-    this._titleStyle = StyleManager.getStyle('PaginationHeaderTitle');
-    this._pageButtonStyle = StyleManager.getStyle('PaginationHeaderPageButton');
-    this._pageButtonStyle.width = this._pageButtonWidth;
+    this._styles = EStyleSheet.create({
+      $totalButtons: this.props.total,
+      container: {
+        flexDirection: 'column',
+        width: '$appWidth',
+        height: '$headerHeight * 0.7',
+        backgroundColor: '$headerBackgroundColor',
+        paddingLeft: 2,
+        paddingRight: 2,
+        position: 'absolute',
+        top: 0,
+      },
+      title: {
+        color: '$headerColor',
+        alignSelf: 'center',
+        justifyContent: 'flex-end',
+        flex: 1,
+        textAlign: 'center',
+        textAlignVertical: 'center'
+      },
+      pageButton: {
+        height: 5,
+        backgroundColor: '$buttonSelected',
+        width: '$appWidth / $totalButtons'
+      }
+    });
+
+    this._renderPaginationHeaders = this._renderPaginationHeaders.bind(this);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.total !== nextProps.total || this.props.currentIndex !== nextProps.currentIndex;
+    return this.props.total !== nextProps.total
+      || this.props.currentIndex !== nextProps.currentIndex;
   }
 
   render() {
     Animated.timing(
       this.state.left,
       {
-        toValue: this._pageButtonWidth * this.props.currentIndex,
+        toValue: this._styles._pageButton.width * this.props.currentIndex,
         duration: 300
       }
     ).start();
 
     return (
-      <View style={this._containerStyle}>
+      <View style={this._styles.container}>
         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', }}>
           {this._renderPaginationHeaders()}
         </View>
-        <Animated.View style={[{ left: this.state.left }, this._pageButtonStyle]} />
+        <Animated.View style={[this._styles.pageButton, { left: this.state.left }]} />
       </View>
     );
   }
@@ -52,7 +77,7 @@ export default class PaginationHeader extends Component {
     for (let i = 0; i < this.props.total; i++) {
       ret.push(
         <TouchableOpacity key={i} style={{ flex: 1, flexDirection: 'column' }} onPress={() => this.props.onPageChange(i)}>
-          <Text style={this._titleStyle}>
+          <Text style={this._styles.title}>
             {this.props.sectionTextGenerator(i)}
           </Text>
         </TouchableOpacity>
@@ -62,3 +87,12 @@ export default class PaginationHeader extends Component {
     return ret;
   }
 }
+
+PaginationHeader.propTypes = {
+  total: PropTypes.number.isRequired,
+  currentIndex: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func,
+  sectionTextGenerator: PropTypes.func,
+};
+
+export default PaginationHeader;

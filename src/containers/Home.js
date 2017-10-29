@@ -1,13 +1,28 @@
 import React, { Component } from 'react';
+import {
+  TouchableWithoutFeedback,
+  Animated,
+  ActivityIndicator,
+  StyleSheet,
+  StatusBar,
+  Image,
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  Platform,
+  TouchableOpacity,
+  ScrollView,
+  BackHandler
+} from 'react-native';
 import { connect } from 'react-redux';
+import Swiper from 'react-native-swiper';
+
 import * as homeActions from '../redux/actions/homeActions';
 import * as appActions from '../redux/actions/appActions';
 import * as playerActions from '../redux/actions/playerActions';
 import * as homeSelectors from '../redux/selectors/home';
 import * as favoritesActions from '../redux/actions/favoritesActions';
-
-import { TouchableWithoutFeedback, Animated, ActivityIndicator, StyleSheet, StatusBar, Image, View, Text, FlatList, Dimensions, Platform, TouchableOpacity, ScrollView } from 'react-native';
-import Swiper from 'react-native-swiper';
 
 import ControlPanel from './ControlPanel';
 import Body from '../components/Body';
@@ -62,7 +77,7 @@ class Home extends Component {
           <HomeHeader
             title={'Musically'}
             onMenuPress={() => this._drawer.open()}
-            onMorePress={() => this.props.setMenu({ target: 'MENU' })}
+            onMorePress={() => this.props.setMenu({ type: 'MENU' })}
             onSearchPress={() => this.props.navigation.navigate('Search', {})} />
           <Swiper
             style={styles.page}

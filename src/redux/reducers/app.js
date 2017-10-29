@@ -9,7 +9,7 @@ const initialState = {
   showMenu: false,
   targetMenu: null,
   menuPositionX: null,
-  menuPositionY: null,
+  menuPositionY: null
 };
 
 export default function app(state = initialState, action = {}) {

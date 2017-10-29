@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as playerActions from '../redux/actions/playerActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
@@ -7,23 +6,26 @@ import * as favoritesActions from '../redux/actions/favoritesActions';
 import { StyleSheet, Image, View, Text, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import Swiper from 'react-native-swiper';
 
+import Container from '../components/Container';
+import PlayerHeader from '../components/PlayerHeader';
 import Header from '../components/Header';
 import HeaderTitle from '../components/HeaderTitle';
 import ProgressBar from '../components/ProgressBar';
 import FloatMenu from '../components/FloatMenu';
+import PlayerControls from '../components/PlayerControls';
 
 class Player extends Component {
   constructor(props) {
     super(props);
 
     this._renderControls = this._renderControls.bind(this);
-    this._renderHeader = this._renderHeader.bind(this);
     this._renderFloatMenu = this._renderFloatMenu.bind(this);
     this._renderQueue = this._renderQueue.bind(this);
     this._onMomentumScrollEnd = this._onMomentumScrollEnd.bind(this);
     this._renderFooter = this._renderFooter.bind(this);
     this._getRepeatIcon = this._getRepeatIcon.bind(this);
-    this._progressBar = this._progressBar.bind(this);
+    // this._progressBar = this._progressBar.bind(this);
+    this._onProgressChange = this._onProgressChange.bind(this);
   }
 
   componentDidMount() {
@@ -40,14 +42,19 @@ class Player extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <Container>
         {this._renderQueue()}
+        <PlayerHeader
+          liked={this.props.isFavorite}
+          onBackPress={() => this.props.navigation.goBack()}
+          onLikePress={() => this.props.like(this.props.currentSong)}
+          onSharePress={() => { }}
+          onMenuPress={() => this.props.setMenu()} />
         {this._renderControls()}
         <TouchableOpacity style={styles.mixButton}></TouchableOpacity>
-        {this._renderHeader()}
         {this._renderFloatMenu()}
         {this._renderFooter()}
-      </View>
+      </Container>
     );
   }
 
@@ -61,7 +68,6 @@ class Player extends Component {
 
     return (
       <Swiper
-
         showsPagination={false}
         loop={false}
         onMomentumScrollEnd={this._onMomentumScrollEnd}>
@@ -74,32 +80,6 @@ class Player extends Component {
     this.props.songChanged(this.props.queue[state.index], null);
   }
 
-  _renderHeader() {
-    return (
-      <Header style={styles.header}>
-        <View style={styles.left}>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.goBack()}>
-            <Text style={styles.buttonText}>{'<'}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ alignSelf: 'center', flex: 1 }}>
-          <HeaderTitle>{''}</HeaderTitle>
-        </View>
-        <View style={[styles.right, styles.row]}>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.like(this.props.currentSong)}>
-            <Text style={[styles.buttonText, { color: (this.props.currentSong && this.props.currentSong.isFavorite) ? 'orange' : 'white' }]}>{'Li'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>{'Sh'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => this.props.setMenu()}>
-            <Text style={styles.buttonText}>{'+'}</Text>
-          </TouchableOpacity>
-        </View>
-      </Header>
-    );
-  }
-
   _renderControls() {
     let title = this.props.currentSong ? this.props.currentSong.title : null;
     let artist = this.props.currentSong ? this.props.currentSong.artist : null;
@@ -107,24 +87,38 @@ class Player extends Component {
     let currentIndex = this.props.currentIndex + 1;
     let totalSongs = this.props.queue.length;
     let duration = this.props.currentSong ? this._formatTime(this.props.currentSong.duration) : "00:00";
-    let elapsedTime = this._formatTime(this.props.elapsedTime);
+    // let elapsedTime = this._formatTime(this.props.elapsedTime);
+    let total = this.props.currentSong ? this.props.currentSong.duration : 0;
+
+    // return (
+    //   <View style={styles.controls}>
+    //     <Text style={{ lineHeight: 25, color: 'white', fontSize: 17 }}>{title}</Text>
+    //     <Text style={{ lineHeight: 25, color: 'gray' }}>{artist}</Text>
+    //     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+    //       <Text style={{ lineHeight: 25, color: 'gray' }}>{album}</Text>
+    //       <Text style={{ lineHeight: 25, color: 'gray' }}>{currentIndex + '/' + totalSongs}</Text>
+    //     </View>
+    //     <View style={{ marginTop: 30 }}>
+    //       {this._progressBar()}
+    //       <View style={{ paddingTop: 30, flexDirection: 'row', justifyContent: 'space-between' }}>
+    //         <Text style={{ lineHeight: 25, color: 'gray' }}>{elapsedTime}</Text>
+    //         <Text style={{ lineHeight: 25, color: 'gray' }}>{duration}</Text>
+    //       </View>
+    //     </View>
+    //   </View>
+    // );
 
     return (
-      <View style={styles.controls}>
-        <Text style={{ lineHeight: 25, color: 'white', fontSize: 17 }}>{title}</Text>
-        <Text style={{ lineHeight: 25, color: 'gray' }}>{artist}</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ lineHeight: 25, color: 'gray' }}>{album}</Text>
-          <Text style={{ lineHeight: 25, color: 'gray' }}>{currentIndex + '/' + totalSongs}</Text>
-        </View>
-        <View style={{ marginTop: 30 }}>
-          {this._progressBar()}
-          <View style={{ paddingTop: 30, flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ lineHeight: 25, color: 'gray' }}>{elapsedTime}</Text>
-            <Text style={{ lineHeight: 25, color: 'gray' }}>{duration}</Text>
-          </View>
-        </View>
-      </View>
+      <PlayerControls
+        title={title}
+        artist={artist}
+        album={album}
+        currentIndex={currentIndex}
+        totalSongs={totalSongs}
+        duration={duration}
+        elapsedTime={this.props.elapsedTime}
+        total={total}
+        onProgressChange={this._onProgressChange} />
     );
   }
 
@@ -140,29 +134,41 @@ class Player extends Component {
     return ret;
   }
 
-  _progressBar() {
+  _onProgressChange(percentage) {
     let total = this.props.currentSong ? this.props.currentSong.duration : 0;
 
-    return (
-      <ProgressBar
-        total={total}
-        elapsed={this.props.elapsedTime}
-        width={Dimensions.get('window').width}
-        color={'#ffa500'}
-        backgroundColor={'gray'}
-        showButton={true}
-        onProgressChange={percentage => {
-          if (this.props.playing)
-            this.props.playPause(this.props.currentSong);
+    if (this.props.playing)
+      this.props.playPause(this.props.currentSong);
 
-          if (percentage) {
-            let newElapsed = total * percentage;
-            this.props.progressChanged(newElapsed);
-          }
-        }}
-      />
-    );
+    if (percentage) {
+      let newElapsed = total * percentage;
+      this.props.progressChanged(newElapsed);
+    }
   }
+
+  // _progressBar() {
+  //   let total = this.props.currentSong ? this.props.currentSong.duration : 0;
+
+  //   return (
+  //     <ProgressBar
+  //       total={total}
+  //       elapsed={this.props.elapsedTime}
+  //       width={Dimensions.get('window').width}
+  //       color={'#ffa500'}
+  //       backgroundColor={'gray'}
+  //       showButton={true}
+  //       onProgressChange={percentage => {
+  //         if (this.props.playing)
+  //           this.props.playPause(this.props.currentSong);
+
+  //         if (percentage) {
+  //           let newElapsed = total * percentage;
+  //           this.props.progressChanged(newElapsed);
+  //         }
+  //       }}
+  //     />
+  //   );
+  // }
 
   _renderFloatMenu() {
     if (!this.props.showMenu)
@@ -223,29 +229,6 @@ class Player extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#2E2E2E'
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    width: Dimensions.get('window').width,
-    backgroundColor: 'transparent',
-  },
-  left: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-start',
-  },
-  right: {
-    flex: 1,
-    alignSelf: 'center',
-    alignItems: 'flex-end',
-  },
-  row: {
-    flexDirection: 'row',
-  },
   button: {
     height: Header.currentHeight * 0.7,
     width: Header.currentHeight * 0.7,
@@ -276,7 +259,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    height: Dimensions.get('window').height * 0.40,
+    height: Dimensions.get('window').height * 0.41,
+    backgroundColor: '#2E2E2E'
   },
   image: {
     width: Dimensions.get('window').width,
@@ -312,6 +296,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => {
   return {
     currentSong: state.player.currentSong,
+    isFavorite: state.player.isFavorite,
     currentIndex: state.player.currentIndex,
     elapsedTime: state.player.elapsedTime,
     queue: state.player.queue,

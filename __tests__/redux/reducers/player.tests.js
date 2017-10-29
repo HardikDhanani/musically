@@ -4,6 +4,7 @@ let currentState = null;
 
 beforeEach(() => {
   currentState = {
+    isFavorite: false,
     currentSong: null,
     currentIndex: -1,
     elapsedTime: 0,
@@ -20,6 +21,7 @@ it('Player reducer | State is undefined | Return initial state', () => {
   let state = player(undefined, { type: 'ACTION_TYPE' });
 
   expect(state.isLoading).toBe(false);
+  expect(state.isFavorite).toBe(false);
   expect(state.currentSong).toBeNull();
   expect(state.currentIndex).toEqual(-1);
   expect(state.elapsedTime).toEqual(0);
@@ -90,19 +92,20 @@ it('Player reducer | APP_STARTING_SUCCESS action type and currentSong | Return c
 });
 
 it('Player reducer | APP_STARTING_SUCCESS action type and currentSong | Return the currentIndex in the queue of the currentSong', () => {
-  let currentSong = { name: 'name' }
+  let currentSong = { name: 'name', isFavorite: true }
   let action = {
     type: 'APP_STARTING_SUCCESS',
     payload: {
       session: {
         queue: [{ name: 'previousSong' }, currentSong, { name: 'otherSong' }],
-        currentSong
+        currentSong,
       }
     }
   }
   let state = player(currentState, action);
 
   expect(state.currentIndex).toEqual(1);
+  expect(state.isFavorite).toEqual(currentSong.isFavorite);
 });
 
 it('Player reducer | APP_STARTING_SUCCESS action type and no currentSong | Return -1 as currentIndex', () => {
@@ -138,7 +141,7 @@ it('Player reducer | PLAYER_LOADING action type | Return isLoading as true', () 
 });
 
 it('Player reducer | PLAYER_LOADING_SUCCESS action type | Return queue and currentSong and currentIndex', () => {
-  let currentSong = { name: 'song' };
+  let currentSong = { name: 'song', isFavorite: true };
   let action = {
     type: 'PLAYER_LOADING_SUCCESS',
     payload: {
@@ -153,6 +156,7 @@ it('Player reducer | PLAYER_LOADING_SUCCESS action type | Return queue and curre
   expect(state.currentSong).toEqual(action.payload.currentSong);
   expect(state.currentIndex).toEqual(action.payload.currentIndex);
   expect(state.isLoading).toBe(false);
+  expect(state.isFavorite).toEqual(currentSong.isFavorite);
 });
 
 it('Player reducer | PLAYER_SET_MENU action type | Return oposite showMenu', () => {
@@ -166,7 +170,7 @@ it('Player reducer | PLAYER_SONG_CHANGED action type | Return currentSong and se
   let action = {
     type: 'PLAYER_SONG_CHANGED',
     payload: {
-      currentSong: { name: 'song' },
+      currentSong: { name: 'song', isFavorite: true },
       currentIndex: 2
     }
   }
@@ -175,6 +179,7 @@ it('Player reducer | PLAYER_SONG_CHANGED action type | Return currentSong and se
   expect(state.currentSong).toEqual(action.payload.currentSong);
   expect(state.currentIndex).toEqual(action.payload.currentIndex);
   expect(state.elapsedTime).toEqual(0);
+  expect(state.isFavorite).toEqual(action.payload.currentSong.isFavorite);
 });
 
 it('Player reducer | PLAYER_RAMDOM action type | Return currentSong and set elapsedTime to 0', () => {
@@ -284,7 +289,7 @@ it('Player reducer | FAVORITES_LIKE_SUCCESS action type and currentSong availabl
   };
   let state = player(currentState, action);
 
-  expect(state.currentSong.isFavorite).toEqual(action.payload.target.isFavorite);
+  expect(state.isFavorite).toEqual(action.payload.target.isFavorite);
 });
 
 it('Player reducer | FAVORITES_LIKE_SUCCESS action type and currentSong unavailable | Return current state', () => {

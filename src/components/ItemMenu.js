@@ -1,31 +1,53 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import EStyleSheet from 'react-native-extended-stylesheet';
+
 import {
   TouchableOpacity,
   Text,
   View
 } from 'react-native';
 
-import Styles from '../styles/Styles';
+const styles = EStyleSheet.create({
+  option: {
+    flexDirection: 'row',
+    height: '$floatMenuOptionHeight * 0.8',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10
+  },
+  optionText: {
+    fontSize: '$textFontSize',
+    color: '$floatMenuOptionTextColor'
+  }
+});
 
-export default class ItemMenu extends Component {
+class ItemMenu extends Component {
   render() {
-    let style = Styles.getFloatMenuStyle();
     return (
       <View>
-        <TouchableOpacity key={1} style={style.menuOption} onPress={this.props.onPlayPress}>
-          <Text style={style.menuOptionText}>{'Play'}</Text>
+        <TouchableOpacity key={1} style={styles.option} onPress={this.props.onPlayPress}>
+          <Text style={styles.optionText}>{'Play'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity key={2} style={style.menuOption} onPress={this.props.onAddToPlaylistPress}>
-          <Text style={style.menuOptionText}>{'Add to playlist'}</Text>
+        <TouchableOpacity key={2} style={styles.option} onPress={this.props.onAddToPlaylistPress}>
+          <Text style={styles.optionText}>{'Add to playlist'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity key={3} style={style.menuOption} onPress={this.props.onAddToQueuePress}>
-          <Text style={style.menuOptionText}>{'Add to queue'}</Text>
+        <TouchableOpacity key={3} style={styles.option} onPress={this.props.onAddToQueuePress}>
+          <Text style={styles.optionText}>{'Add to queue'}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   static get currentHeight() {
-    return Styles.floatMenuOptionHeight() * 3;
+    return styles._option.height * 3;
   }
 }
+
+ItemMenu.propTypes = {
+  onPlayPress: PropTypes.func,
+  onAddToPlaylistPress: PropTypes.func,
+  onAddToQueuePress: PropTypes.func
+};
+
+export default ItemMenu;
