@@ -12,8 +12,7 @@ import {
   Dimensions,
   Platform,
   TouchableOpacity,
-  ScrollView,
-  BackHandler
+  ScrollView
 } from 'react-native';
 import { connect } from 'react-redux';
 import Swiper from 'react-native-swiper';
@@ -26,19 +25,24 @@ import * as favoritesActions from '../redux/actions/favoritesActions';
 
 import ControlPanel from './ControlPanel';
 import Body from '../components/Body';
-import FloatMenuOption from '../components/FloatMenuOption';
 import HomeHeader from '../components/HomeHeader';
 import ArtistCard from '../components/ArtistCard';
 import AlbumCard from '../components/AlbumCard';
 import GenreCard from '../components/GenreCard';
 import SongCard from '../components/SongCard';
-import FloatMenu from '../components/FloatMenu';
+import PlaylistCard from '../components/PlaylistCard';
 import PlayerFooter from './PlayerFooter';
 import ThreeColumnContainer from '../components/ThreeColumnContainer';
 import PaginationHeader from '../components/PaginationHeader';
+import CardMenu from '../components/CardMenu';
 import SongMenu from '../components/SongMenu';
-import ItemMenu from '../components/ItemMenu';
+import HomeMenu from '../components/HomeMenu';
+import PlaylistMenu from '../components/PlaylistMenu';
 import Container from '../components/Container';
+import AddPlaylistButton from '../components/common/buttons/AddPlaylistButton';
+import NewPlaylist from '../components/NewPlaylist';
+import ConfirmationForm from '../components/ConfirmationForm';
+import PlaylistSelector from '../components/PlaylistSelector';
 
 class Home extends Component {
   constructor(props) {
@@ -52,6 +56,7 @@ class Home extends Component {
     this._renderAlbumCard = this._renderAlbumCard.bind(this);
     this._renderGenreCard = this._renderGenreCard.bind(this);
     this._renderItem = this._renderItem.bind(this);
+    this._renderPlaylist = this._renderPlaylist.bind(this);
     this._swiperHeight = this._swiperHeight.bind(this);
     this._onPageChange = this._onPageChange.bind(this);
     this._groupItems = this._groupItems.bind(this);
@@ -62,7 +67,14 @@ class Home extends Component {
     this._changeSection = this._changeSection.bind(this);
     this._playSongs = this._playSongs.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
-    this._getFloatMenuHeight = this._getFloatMenuHeight.bind(this);
+    this._showNewPlaylistForm = this._showNewPlaylistForm.bind(this);
+    this._getPlaylistMenu = this._getPlaylistMenu.bind(this);
+    this._getCardMenu = this._getCardMenu.bind(this);
+    this._getHomeMenu = this._getHomeMenu.bind(this);
+    this._showDeletePlaylistConfirmation = this._showDeletePlaylistConfirmation.bind(this);
+    this._showAddToPlaylistForm = this._showAddToPlaylistForm.bind(this);
+    this._renderPagination = this._renderPagination.bind(this);
+    this._onIndexChanged = this._onIndexChanged.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -83,8 +95,16 @@ class Home extends Component {
             style={styles.page}
             showsPagination={true}
             loop={false}
-            renderPagination={(index, total, context) => <PaginationHeader currentIndex={index} total={total} sectionTextGenerator={this._getSectionText} onPageChange={this._onPageChange} />}
-            ref={component => this._swiper = component}>
+            renderPagination={this._renderPagination}
+            ref={component => this._swiper = component}
+            onIndexChanged={this._onIndexChanged}>
+            <Body hasPaginationHeader={true}>
+              {
+                !this.props.isReady ?
+                  <ActivityIndicator animating={true} size='large' /> :
+                  <FlatList data={this.props.playlists} renderItem={this._renderPlaylist} keyExtractor={(item, index) => item.id} />
+              }
+            </Body>
             <Body hasPaginationHeader={true}>
               {
                 !this.props.isReady ?
@@ -114,11 +134,34 @@ class Home extends Component {
               }
             </Body>
           </Swiper>
-          {this._renderMenu()}
+          <AddPlaylistButton hide={this.props.selectedSection !== 'playlists'} bottom={140} style={styles.addButton} onPress={this.props.createNewPlaylistForm} />
           <PlayerFooter navigation={this.props.navigation} />
+          {this._showNewPlaylistForm()}
+          {this._showDeletePlaylistConfirmation()}
+          {this._renderMenu()}
+          {this._showAddToPlaylistForm()}
         </Container>
       </ControlPanel>
     );
+  }
+
+  _showAddToPlaylistForm() {
+    if (!this.props.showAddToPlaylistForm)
+      return null;
+
+    return (
+      <PlaylistSelector
+        onCancelPress={this.props.cancelAddSongToPlaylist}
+        onSelected={playlist => this.props.addSongToPlaylistConfirmed(this.props.songToAddToPlaylist, playlist)}
+        playlists={this.props.playlists} />
+    );
+  }
+
+  _showNewPlaylistForm() {
+    if (this.props.showNewPlaylistForm)
+      return (<NewPlaylist onCancelPress={this.props.closeNewPlaylistForm} onConfirmPress={this.props.newPlaylistConfirmed} />);
+
+    return null;
   }
 
   _onRef(component) {
@@ -139,12 +182,14 @@ class Home extends Component {
   _getSectionText(position) {
     switch (position) {
       case 0:
-        return 'Artists';
+        return 'Playlists';
       case 1:
-        return 'Albums';
+        return 'Artists';
       case 2:
-        return 'Genres';
+        return 'Albums';
       case 3:
+        return 'Genres';
+      case 4:
         return 'Songs';
       default:
         return '';
@@ -153,14 +198,16 @@ class Home extends Component {
 
   _getSectionIndex(text) {
     switch (text.toLowerCase()) {
-      case 'artists':
+      case 'playlists':
         return 0;
-      case 'albums':
+      case 'artists':
         return 1;
-      case 'genres':
+      case 'albums':
         return 2;
-      case 'songs':
+      case 'genres':
         return 3;
+      case 'songs':
+        return 4;
       default:
         return -1;
     }
@@ -208,6 +255,25 @@ class Home extends Component {
         like={song.item.isFavorite}
         onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
         onPress={() => this._playSongs(song.item, this.props.songs)}
+      />
+    );
+  }
+
+  _renderPlaylist(playlist) {
+    let targetMenu = {
+      type: 'PLAYLIST',
+      payload: playlist.item
+    };
+
+    return (
+      <PlaylistCard
+        styles={{ container: { backgroundColor: '#f1f1f1' }, text: { color: 'gray' } }}
+        key={playlist.index}
+        id={playlist.item.id}
+        name={playlist.item.name}
+        songs={playlist.item.songs}
+        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
+        onPress={() => this.props.navigation.navigate('Playlist', { playlistId: playlist.item.id })}
       />
     );
   }
@@ -296,53 +362,26 @@ class Home extends Component {
     if (!this.props.showMenu)
       return null;
 
-    let contentHeight = this._getFloatMenuHeight(this.props.targetMenu.type);
-    return (
-      <FloatMenu contentHeight={contentHeight} positionY={this.props.menuPositionY} positionX={this.props.menuPositionX} onPress={() => this.props.setMenu(null, 0, 0)}>
-        {this._getTargetMenu(this.props.targetMenu)}
-      </FloatMenu>
-    );
-  }
-
-  _getTargetMenu(target) {
-    if (target.type === 'MENU')
-      return this._getMenu();
-
-    return this._getItemMenu(target);
-  }
-
-  _getMenu() {
-    return [
-      (<FloatMenuOption key={1} text={'Sort Order'} haveContent={true} />),
-      (<FloatMenuOption key={2} text={'View Mode'} haveContent={true} />),
-      (<FloatMenuOption key={3} text={'Rescan Library'} />),
-      (<FloatMenuOption key={4} text={'Playlist Queue'} />)
-    ];
-  }
-
-  _getItemMenu(target) {
-    let initialSong = null;
-    let queue = [];
-
-    switch (target.type) {
-      case 'ARTIST':
-      case 'GENRE':
-        for (let i = 0; i < target.payload.albums.length; i++) {
-          queue = queue.concat(target.payload.albums[i].songs);
-        }
-        break;
-      case 'ALBUM':
-        queue = target.payload.songs;
-        break;
-      case 'SONG':
-        return this._getSongMenu(target.payload);
+    switch (this.props.targetMenu.type.toLowerCase()) {
+      case 'song':
+        return this._getSongMenu(this.props.targetMenu.payload);
+      case 'playlist':
+        return this._getPlaylistMenu(this.props.targetMenu.payload);
+      case 'artist':
+      case 'album':
+      case 'genre':
+        return this._getCardMenu(this.props.targetMenu.payload);
+      default:
+        return this._getHomeMenu();
     }
+  }
 
+  _getHomeMenu() {
     return (
-      <ItemMenu
-        onPlayPress={() => this._playSongs(initialSong, queue, true)}
-        onAddToQueuePress={() => this._addToQueue(queue)}
-        onLikePress={() => this.props.like(target.type, target.payload)} />
+      <HomeMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        onPress={() => this.props.setMenu(null, 0, 0)} />
     );
   }
 
@@ -352,18 +391,59 @@ class Home extends Component {
 
     return (
       <SongMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        isFavorite={song.isFavorite}
         onPlayPress={() => this._playSongs(initialSong, queue, true)}
-        onAddToQueuePress={() => this._addToQueue(queue)}
+        onAddToPlaylistPress={() => {
+          this.props.addSongToPlaylist(song);
+          this.props.setMenu(null, 0, 0);
+        }}
+        onAddToQueuePress={() => {
+          this._addToQueue(queue);
+          this.props.setMenu(null, 0, 0);
+        }}
         onLikePress={() => {
           this.props.like('song', song);
           this.props.setMenu(null, 0, 0);
         }}
-        isFavorite={song.isFavorite} />
+        onPress={() => this.props.setMenu(null, 0, 0)} />
+    );
+  }
+
+  _getPlaylistMenu(playlist) {
+    let initialSong = playlist.songs[0];
+    let queue = playlist.songs;
+
+    return (
+      <PlaylistMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        onDeletePress={() => {
+          this.props.setMenu(null, 0, 0);
+          this.props.deletePlaylist(playlist);
+        }}
+        onPlayPress={() => this._playSongs(initialSong, queue, true)}
+        onAddToQueuePress={() => this._addToQueue(queue)}
+        onPress={() => this.props.setMenu(null, 0, 0)} />
+    );
+  }
+
+  _getCardMenu(queue) {
+    let initialSong = queue[0];
+
+    return (
+      <CardMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        onPlayPress={() => this._playSongs(initialSong, queue, true)}
+        onAddToQueuePress={() => this._addToQueue(queue)}
+        onPress={() => this.props.setMenu(null, 0, 0)} />
     );
   }
 
   _playSongs(initialSong, queue, closeMenu = false) {
-    this.props.navigation.navigate('Player', { queue, initialSong });
+    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
 
     if (closeMenu)
       this.props.setMenu(null, 0, 0);
@@ -374,17 +454,29 @@ class Home extends Component {
     this.props.setMenu(null, 0, 0);
   }
 
-  _getFloatMenuHeight(type) {
-    switch (type.toLowerCase()) {
-      case 'song':
-        return SongMenu.currentHeight;
-      case 'artist':
-      case 'album':
-      case 'genre':
-        return ItemMenu.currentHeight;
-      default:
-        return 55 * 3;
-    }
+  _showDeletePlaylistConfirmation() {
+    if (!this.props.showDeletePlaylistConfirmation)
+      return null;
+
+    return (
+      <ConfirmationForm
+        title={this.props.confirmationTitle}
+        onCancelPress={this.props.deletePlaylistCancel}
+        onConfirmPress={() => this.props.deletePlaylistConfirm(this.props.playlistToDelete)}>
+        <Text style={styles.confirmationText}>{this.props.confirmationDetail}</Text>
+      </ConfirmationForm>
+    );
+  }
+
+  _renderPagination(index, total, context) {
+    return (
+      <PaginationHeader currentIndex={index} total={total} sectionTextGenerator={this._getSectionText} onPageChange={this._onPageChange} />
+    );
+  }
+
+  _onIndexChanged(index) {
+    var text = this._getSectionText(index).toLowerCase();
+    this.props.selectedSectionChanged(text);
   }
 }
 
@@ -408,12 +500,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 30,
     fontWeight: 'bold',
+  },
+  addButton: {
+    position: 'absolute',
+    right: 25
+  },
+  confirmationText: {
+    color: 'white',
+    fontSize: 16
   }
 });
 
 const mapStateToProps = state => {
   return {
     isReady: state.app.isReady,
+    playlists: state.app.playlists,
     songs: state.app.songs,
     albums: state.app.albums,
     artists: state.app.artists,
@@ -423,6 +524,13 @@ const mapStateToProps = state => {
     targetMenu: state.app.targetMenu,
     menuPositionX: state.app.menuPositionX,
     menuPositionY: state.app.menuPositionY,
+    showNewPlaylistForm: state.home.showNewPlaylistForm,
+    playlistToDelete: state.home.playlistToDelete,
+    showDeletePlaylistConfirmation: state.home.showDeletePlaylistConfirmation,
+    confirmationTitle: state.home.confirmationTitle,
+    confirmationDetail: state.home.confirmationDetail,
+    showAddToPlaylistForm: state.home.showAddToPlaylistForm,
+    songToAddToPlaylist: state.home.songToAddToPlaylist
   }
 }
 
@@ -432,6 +540,15 @@ const mapDispatchToProps = dispatch => {
     setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
     addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
     like: (type, target) => dispatch(favoritesActions.like(type, target)),
+    createNewPlaylistForm: () => dispatch(homeActions.createNewPlaylistForm()),
+    closeNewPlaylistForm: () => dispatch(homeActions.closeNewPlaylistForm()),
+    newPlaylistConfirmed: (playlistName) => homeActions.newPlaylistConfirmed(playlistName)(dispatch),
+    deletePlaylist: (playlist) => dispatch(homeActions.deletePlaylist(playlist)),
+    deletePlaylistCancel: () => dispatch(homeActions.deletePlaylistCancel()),
+    deletePlaylistConfirm: (playlist) => dispatch(homeActions.deletePlaylistConfirm(playlist)),
+    addSongToPlaylist: (song) => dispatch(homeActions.addSongToPlaylist(song)),
+    cancelAddSongToPlaylist: () => dispatch(homeActions.cancelAddSongToPlaylist()),
+    addSongToPlaylistConfirmed: (song, playlist) => homeActions.addSongToPlaylistConfirmed(song, playlist)(dispatch),
   }
 }
 

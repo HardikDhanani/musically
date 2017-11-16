@@ -29,7 +29,7 @@ class PlayerFooterControlsSection extends Component {
     return (
       <View style={styles.container}>
         <IconButton iconName='skip-previous' onPress={this.props.onPrevPress} style={styles._button} iconSize={styles._button.fontSize} />
-        <IconButton iconName={this.props.playing ? 'play' : 'pause'} onPress={this.props.onPlayPausePress} style={styles._button} iconSize={styles._button.fontSize} />
+        <IconButton iconName={this.props.playing ? 'pause' : 'play-arrow' } onPress={this.props.onPlayPausePress} style={styles._button} iconSize={styles._button.fontSize} />
         <IconButton iconName='skip-next' onPress={this.props.onNextPress} style={styles._button} iconSize={styles._button.fontSize} />
       </View>
     );

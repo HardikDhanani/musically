@@ -44,6 +44,7 @@ class ControlPanel extends Component {
       <ScrollView>
         <ControlPanelCover source={require('../images/music.png')} song={currentSongName} artist={currentSongArtist} />
         <ControlPanelSection>
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('playlists')} text={'Play Lists'} isActive={this.props.selectedSection === 'playlists'} icon='playlist-play' />
           <ControlPanelButton onPress={() => this._selectedSectionChanged('artists')} text={'Artists'} isActive={this.props.selectedSection === 'artists'} icon='person' />
           <ControlPanelButton onPress={() => this._selectedSectionChanged('albums')} text={'Albums'} isActive={this.props.selectedSection === 'albums'} icon='album' />
           <ControlPanelButton onPress={() => this._selectedSectionChanged('genres')} text={'Genres'} isActive={this.props.selectedSection === 'genres'} icon='music-note' />
@@ -51,7 +52,6 @@ class ControlPanel extends Component {
         </ControlPanelSection>
         <ControlPanelSection>
           <ControlPanelButton onPress={() => this._navigateTo('Queue')} text={'Queue'} isActive={false} icon='queue-music' />
-          <ControlPanelButton onPress={() => this._navigateTo('Playlists')} text={'Play Lists'} isActive={false} icon='playlist-play' />
           <ControlPanelButton onPress={() => this._navigateTo('Favorites')} text={'Favorites'} isActive={false} icon='favorite' />
         </ControlPanelSection>
         <ControlPanelSection>

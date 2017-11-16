@@ -9,7 +9,7 @@ import genre from './genre';
 import player from './player';
 import queue from './queue';
 import favorites from './favorites';
-import playlists from './playlists';
+import playlist from './playlist';
 
 const reducer = combineReducers({
   app,
@@ -21,7 +21,7 @@ const reducer = combineReducers({
   player,
   queue,
   favorites,
-  playlists
+  playlist
 });
 
 export default reducer;

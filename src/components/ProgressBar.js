@@ -131,7 +131,7 @@ class ProgressBar extends Component {
 
 ProgressBar.propTypes = {
   elapsed: PropTypes.number.isRequired,
-  total: PropTypes.string.isRequired,
+  total: PropTypes.number.isRequired,
   showButton: PropTypes.bool,
   onProgressChange: PropTypes.func
 };

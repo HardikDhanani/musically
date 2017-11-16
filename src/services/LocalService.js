@@ -13,13 +13,16 @@ class LocalService {
     this.saveArtists = this.saveArtists.bind(this);
     this.saveAlbums = this.saveAlbums.bind(this);
     this.saveGenres = this.saveGenres.bind(this);
+    this.savePlaylists = this.savePlaylists.bind(this);
     this.getSongs = this.getSongs.bind(this);
     this.getArtists = this.getArtists.bind(this);
     this.getAlbums = this.getAlbums.bind(this);
     this.getGenres = this.getGenres.bind(this);
+    this.getPlaylists = this.getPlaylists.bind(this);
     this.getSession = this.getSession.bind(this);
     this.isFirstTime = this.isFirstTime.bind(this);
     this.firstTimeDone = this.firstTimeDone.bind(this);
+    this.deletePlaylist = this.deletePlaylist.bind(this);
 
     this.__initLocalStorage();
     this._cache = new Cache();
@@ -109,6 +112,15 @@ class LocalService {
       .then(() => this._cache.save('GENRES', genres));
   }
 
+  savePlaylists(playlists) {
+    this._getStorage().save({
+      key: 'PLAYLISTS',
+      data: playlists,
+      expires: null
+    })
+      .then(() => this._cache.save('PLAYLISTS', playlists));
+  }
+
   saveSong(song) {
     return this.getSongs()
       .then(songs => {
@@ -142,6 +154,20 @@ class LocalService {
         let index = genres.findIndex(g => g.id === genre.id);
         genres[index] = genre;
         return this.saveGenres(genres);
+      });
+  }
+
+  savePlaylist(playlist) {
+    return this.getPlaylists()
+      .then(playlists => {
+        let index = playlists.findIndex(p => p.id === playlist.id);
+        if (index !== -1) {
+          playlists[index] = playlist;
+        } else {
+          playlist.id = playlists.length + 1;
+          playlists.push(playlist);
+        }
+        return this.savePlaylists(playlists);
       });
   }
 
@@ -263,6 +289,26 @@ class LocalService {
     });
   }
 
+  getPlaylists() {
+    if (this._cache.exists('PLAYLISTS'))
+      return Promise.resolve(this._cache.get('PLAYLISTS'));
+
+    return this._getStorage().load({
+      key: 'PLAYLISTS'
+    }).then(playlists => {
+      this._cache.save('PLAYLISTS', playlists);
+      return playlists;
+    }).catch(err => {
+      switch (err.name) {
+        case 'NotFoundError':
+          return [];
+
+        default:
+          throw new Exception(err);
+      }
+    });
+  }
+
   getFavorites() {
     let songsPromise = this.getSongs()
       .then(songs => songs.filter(s => s.isFavorite));
@@ -328,6 +374,38 @@ class LocalService {
             throw new Exception(err);
         }
       });
+  }
+
+  getPlaylist(playlist) {
+    return this.getPlaylists()
+      .then(playlists => {
+        return playlists.find(p => p.id === playlist.id);
+      });
+  }
+
+  getPlaylistById(playlistId) {
+    return this.getPlaylists()
+      .then(playlists => {
+        return playlists.find(p => p.id === playlistId);
+      });
+  }
+
+  getPlaylistByName(playlistName) {
+    return this.getPlaylists()
+      .then(playlists => {
+        return playlists.find(playlist => playlist.name === playlistName);
+      });
+  }
+
+  deletePlaylist(playlist){
+    return this.getPlaylists()
+    .then(playlists => {
+      var index = playlists.findIndex(p => p.id === playlist.id);
+      if (index > -1) {
+        playlists.splice(index, 1);
+      }
+      return this.savePlaylists(playlists);
+    });
   }
 }
 

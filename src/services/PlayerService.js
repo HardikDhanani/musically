@@ -27,7 +27,7 @@ class PlayerService {
         } else {
           // loaded successfully
           //console.log('duration in seconds: ' + _songPlaying.getDuration() + 'number of channels: ' + this._songPlaying.getNumberOfChannels());
-          resolve(_songPlaying);
+          resolve(_songPlaying.getDuration());
         }
       });
     });
@@ -71,13 +71,22 @@ class PlayerService {
 
   stop(): Promise<any> {
     return new Promise((resolve: Function, reject: Function) => {
-      if (_songPlaying) {
+      if (_songPlaying)
         _songPlaying.stop();
-        resolve();
-      } else {
-        console.log('No song playing');
-        reject('No song playing');
+        
+      resolve();
+    });
+  }
+
+  getCurrentTime(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      if (!_songPlaying) {
+        return reject(0);
       }
+
+      _songPlaying.getCurrentTime(seconds => {
+        return resolve(seconds * 1000);
+      });
     });
   }
 }

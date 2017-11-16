@@ -16,9 +16,8 @@ const getBodyHeight = () => {
   return Dimensions.get('window').height - (getHeaderHeight() + getFooterHeight() + StatusBar.currentHeight);
 }
 
-const getHomeBodyHeight = () => {
-  const paginationHeaderHeight = getHeaderHeight() * 0.7;
-  return Dimensions.get('window').height - (getHeaderHeight() + paginationHeaderHeight + getFooterHeight() + StatusBar.currentHeight);
+const getPaginationHeaderHeight = () => {
+  return getHeaderHeight() * 0.7;
 }
 
 const theme = {
@@ -26,11 +25,11 @@ const theme = {
   $appWidth: Dimensions.get('window').width,
   $appHeight: Dimensions.get('window').height,
   $bodyHeight: getBodyHeight(),
-  $homeBodyHeight: getHomeBodyHeight(),
-  
+
   $headerHeight: getHeaderHeight(),
   $headerColor: 'white',
   $headerBackgroundColor: PRIMARY_COLOR,
+  $paginationHeader: getPaginationHeaderHeight(),
 
   $footerHeight: getFooterHeight(),
   $footerColor: 'white',
@@ -41,7 +40,7 @@ const theme = {
 
   $floatMenuContentBackgroundColor: 'black',
   $floatMenuOptionTextColor: 'white',
-  $floatMenuOptionHeight: 55,
+  $floatMenuOptionHeight: getHeaderHeight() * 0.8,
 
   $buttonSelected: 'orange',
   $buttonUnselected: 'white',
@@ -56,6 +55,7 @@ const theme = {
     $titleFontSize: 17,
     $bigTextFontSize: 15,
     $textFontSize: 12,
+    $detailFontSize: 12,
     $headerIconSize: 20,
     $iconSize: 15,
   },
@@ -64,9 +64,10 @@ const theme = {
     $titleFontSize: 19,
     $bigTextFontSize: 17,
     $textFontSize: 14,
+    $detailFontSize: 14,
     $headerIconSize: 30,
     $iconSize: 20,
-  },  
+  },
 }
 
 export default theme;

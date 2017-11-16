@@ -9,7 +9,7 @@ import Genre from './Genre';
 import Player from './Player';
 import Queue from './Queue';
 import Favorites from './Favorites';
-import Playlists from './Playlists';
+import Playlist from './Playlist';
 
 const AppNavigator = StackNavigator(
     {
@@ -22,7 +22,7 @@ const AppNavigator = StackNavigator(
         Player: { screen: Player },
         Queue: { screen: Queue },
         Favorites: { screen: Favorites },
-        Playlists: { screen: Playlists },
+        Playlist: { screen: Playlist },
     },
     {
         initialRouteName: "Splash",

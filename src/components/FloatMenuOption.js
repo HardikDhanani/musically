@@ -10,7 +10,7 @@ import {
 const styles = EStyleSheet.create({
   container: {
     flexDirection: 'row',
-    height: '$headerHeight * 0.8',
+    height: '$floatMenuOptionHeight',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 10

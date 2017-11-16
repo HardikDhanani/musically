@@ -46,7 +46,7 @@ class PlayerHeader extends Component {
         <HeaderCenterSection />
         <HeaderRightSection>
           <IconButton iconName='favorite' onPress={this.props.onLikePress} style={this.props.liked ? styles._likedButton : styles._unlikedButton} iconSize={styles._button.fontSize} />
-          <IconButton iconName='share' onPress={this.props.onSharePress} style={this.props.liked ? styles._likedButton : styles._unlikedButton} iconSize={styles._button.fontSize} />
+          <IconButton iconName='share' onPress={this.props.onSharePress} style={styles._button} iconSize={styles._button.fontSize} />
           <IconButton iconName='more-vert' onPress={this.props.onMenuPress} style={styles._button} iconSize={styles._button.fontSize} />
         </HeaderRightSection>
       </Header>

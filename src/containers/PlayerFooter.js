@@ -58,7 +58,7 @@ class PlayerFooter extends Component {
 
     return (
       <ProgressBar
-        total={total}
+        total={parseInt(total)}
         elapsed={this.props.elapsedTime}
         width={Dimensions.get('window').width}
         color={'#ffa500'}

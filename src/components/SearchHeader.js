@@ -24,7 +24,7 @@ const styles = EStyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 19,
+    fontSize: '$titleFontSize',
     color: '$headerColor',
   },
   button: {

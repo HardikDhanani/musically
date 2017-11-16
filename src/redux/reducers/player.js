@@ -65,13 +65,13 @@ export default function artist(state = initialState, action = {}) {
       let repeatMode = 'NONE';
       switch (state.repeatMode) {
         case 'NONE':
-          repeatMode = 'ONE';
-          break;
-        case 'ONE':
           repeatMode = 'ALL';
           break;
-        default:
+        case 'ONE':
           repeatMode = 'NONE';
+          break;
+        default:
+          repeatMode = 'ONE';
       }
       return {
         ...state,
@@ -91,7 +91,7 @@ export default function artist(state = initialState, action = {}) {
     case 'PLAYER_TIME_ELAPSED':
       return {
         ...state,
-        elapsedTime: state.elapsedTime + action.payload.elapsedTime
+        elapsedTime: action.payload.elapsedTime
       }
     case 'PLAYER_PROGRESS_CHANGED':
       return {

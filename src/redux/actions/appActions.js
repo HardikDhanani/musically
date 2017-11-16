@@ -1,5 +1,6 @@
 import LocalService from '../../services/LocalService';
 import songsSelector from '../selectors/songs';
+import * as playerActions from './playerActions';
 
 let _isLoaded = false;
 
@@ -9,8 +10,9 @@ async function _load(dispatch) {
   let albums = await LocalService.getAlbums();
   let artists = await LocalService.getArtists();
   let genres = await LocalService.getGenres();
+  let playlists = await LocalService.getPlaylists();
 
-  dispatch(startingSuccess(songs, artists, albums, genres, session));
+  dispatch(startingSuccess(songs, artists, albums, genres, playlists, session));
 }
 
 function _groupAndSaveArtists(songs) {
@@ -39,6 +41,21 @@ function _groupAndSaveMusic(songs) {
     .then(() => _groupAndSaveGenres(songs));
 }
 
+function _createDefaultPlaylists() {
+  let mostPlayed = {
+    name: 'Most played',
+    songs: []
+  }
+
+  let favorites = {
+    name: 'Favorites',
+    songs: []
+  }
+
+  return LocalService.savePlaylist(mostPlayed)
+    .then(() => LocalService.savePlaylist(favorites))
+}
+
 const starting = () => {
   return {
     type: 'APP_STARTING'
@@ -51,7 +68,7 @@ const goHome = () => {
   }
 }
 
-const startingSuccess = (songs, artists, albums, genres, session) => {
+const startingSuccess = (songs, artists, albums, genres, playlists, session) => {
   return {
     type: 'APP_STARTING_SUCCESS',
     payload: {
@@ -59,6 +76,7 @@ const startingSuccess = (songs, artists, albums, genres, session) => {
       artists,
       albums,
       genres,
+      playlists,
       session,
     }
   }
@@ -67,6 +85,36 @@ const startingSuccess = (songs, artists, albums, genres, session) => {
 const startingError = () => {
   return {
     type: 'APP_STARTING_ERROR'
+  }
+}
+
+const savingNewPlaylist = () => {
+  return {
+    type: 'APP_SAVING_NEW_PLAYLIST'
+  }
+}
+
+const playlistAlreadyExists = () => {
+  return {
+    type: 'APP_PLAYLIST_ALREADY_EXISTS'
+  }
+}
+
+const playlistSaved = (playlists) => {
+  return {
+    type: 'APP_SAVING_NEW_PLAYLIST_SUCCEED',
+    payload: {
+      playlists
+    }
+  }
+}
+
+const errorSavingPlaylist = (message) => {
+  return {
+    type: 'APP_SAVING_NEW_PLAYLIST_ERROR',
+    payload: {
+      message
+    }
   }
 }
 
@@ -81,16 +129,33 @@ export const setMenu = (target, positionX, positionY) => {
   }
 }
 
+export const deletingPlaylist = () => {
+  return {
+    type: 'APP_DELETING_PLAYLIST'
+  }
+}
+
+export const playlistDeleted = (playlists) => {
+  return {
+    type: 'APP_PLAYLIST_DELETED',
+    payload: {
+      playlists
+    }
+  }
+}
+
 export function start() {
   return (dispatch) => {
     try {
       if (_isLoaded) {
+        playerActions.initPlayer()(dispatch);
         dispatch(goHome());
       } else {
         dispatch(starting());
 
         setTimeout(() => {
           _isLoaded = true;
+          playerActions.initPlayer()(dispatch);
           dispatch(goHome());
         }, 3000);
 
@@ -99,6 +164,7 @@ export function start() {
             if (resp) {
               LocalService.scanForSongs()
                 .then(_groupAndSaveMusic)
+                .then(_createDefaultPlaylists)
                 .then(LocalService.firstTimeDone)
                 .then(() => _load(dispatch));
             } else {
@@ -109,5 +175,81 @@ export function start() {
     } catch (error) {
       console.log(error);
     }
+  }
+}
+
+export function createNewPlaylist(playlistName) {
+  return dispatch => {
+    dispatch(savingNewPlaylist());
+
+    LocalService.getPlaylistByName(playlistName)
+      .then(playlist => {
+        if (playlist) {
+          dispatch(playlistAlreadyExists());
+        } else {
+          playlist = {
+            name: playlistName,
+            songs: []
+          }
+
+          LocalService.savePlaylist(playlist)
+            .then(LocalService.getPlaylists)
+            .then(playlists => {
+              dispatch(playlistSaved(playlists));
+            })
+            .catch(error => {
+              dispatch(errorSavingPlaylist(error.message));
+            });
+        }
+      });
+  }
+}
+
+export function deletePlaylist(playlist) {
+  return dispatch => {
+    dispatch(deletingPlaylist());
+
+    LocalService.deletePlaylist(playlist)
+      .then(LocalService.getPlaylists)
+      .then(playlists => {
+        dispatch(playlistDeleted(playlists));
+      });
+  }
+}
+
+export function addSongToPlaylist(song, playlist) {
+  return dispatch => {
+    let index = playlist.songs.findIndex(s => s.id === song.id);
+    if (index === -1) {
+      dispatch(addingSongToPlaylist());
+
+      playlist.songs.push(song);
+      LocalService.savePlaylist(playlist)
+        .then(LocalService.getPlaylists)
+        .then(playlists => dispatch(songAddedToPlaylist(playlists)));
+    } else {
+      dispatch(songAlreadyInPlaylist());
+    }
+  }
+}
+
+export const addingSongToPlaylist = () => {
+  return {
+    type: 'APP_ADDING_SONG_TO_PLAYLIST'
+  }
+}
+
+export const songAddedToPlaylist = (playlists) => {
+  return {
+    type: 'APP_ADDING_SONG_TO_PLAYLIST_SUCCEED',
+    payload: {
+      playlists
+    }
+  }
+}
+
+export const songAlreadyInPlaylist = () => {
+  return {
+    type: 'APP_SONG_ALREADY_IN_PLAYLIST'
   }
 }

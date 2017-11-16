@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import EStyleSheet from 'react-native-extended-stylesheet';
 import * as playerActions from '../redux/actions/playerActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
 
@@ -13,6 +14,20 @@ import HeaderTitle from '../components/HeaderTitle';
 import ProgressBar from '../components/ProgressBar';
 import FloatMenu from '../components/FloatMenu';
 import PlayerControls from '../components/PlayerControls';
+import IconButton from '../components/common/buttons/IconButton';
+
+const styles_2 = EStyleSheet.create({
+  buttonSelected: {
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize',
+    color: '$buttonSelected'
+  },
+  buttonUnselected: {
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize',
+    color: '$buttonUnselected'
+  }
+});
 
 class Player extends Component {
   constructor(props) {
@@ -31,13 +46,15 @@ class Player extends Component {
   componentDidMount() {
     let queue = null;
     let initialSong = null;
+    let reset = false;
 
     if (this.props.navigation.state.params) {
       queue = this.props.navigation.state.params.queue;
       initialSong = this.props.navigation.state.params.initialSong;
+      reset = this.props.navigation.state.params.reset;
     }
 
-    this.props.load(queue, initialSong);
+    this.props.load(queue, initialSong, reset);
   }
 
   render() {
@@ -197,21 +214,11 @@ class Player extends Component {
   _renderFooter() {
     return (
       <View style={[styles.footer, this.props.style]}>
-        <TouchableOpacity style={styles.playerButton} onPress={() => this.props.random()}>
-          <Text style={{ fontSize: 40, color: this.props.randomActive ? '#ffa500' : 'white' }}>{'x'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.playerButton} onPress={this.props.prev}>
-          <Text style={{ fontSize: 40, color: 'white' }}>{'<<'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.playerButton} onPress={() => this.props.playPause(this.props.currentSong)}>
-          <Text style={{ fontSize: 40, color: 'white' }}>{this.props.playing ? '||' : '>'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.playerButton} onPress={this.props.next}>
-          <Text style={{ fontSize: 40, color: 'white' }}>{'>>'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.playerButton} onPress={() => this.props.repeat()}>
-          <Text style={{ fontSize: 40, color: 'white' }}>{this._getRepeatIcon()}</Text>
-        </TouchableOpacity>
+        <IconButton iconName='shuffle' onPress={this.props.random} style={this.props.randomActive ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName='skip-previous' onPress={this.props.prev} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName={this.props.playing ? 'pause' : 'play-arrow'} onPress={() => this.props.playPause(this.props.currentSong)} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName='skip-next' onPress={this.props.next} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName={this._getRepeatIcon()} onPress={() => this.props.repeat()} style={this.props.repeatMode !== 'NONE' ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
       </View>
     );
   }
@@ -219,11 +226,9 @@ class Player extends Component {
   _getRepeatIcon() {
     switch (this.props.repeatMode) {
       case 'ONE':
-        return 'R1';
-      case 'ALL':
-        return 'RA';
+        return 'repeat-one';
       default:
-        return 'R0';
+        return 'repeat';
     }
   }
 }
@@ -282,7 +287,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     position: 'absolute',
     bottom: 0,
-    marginBottom: 20,
     paddingHorizontal: 20,
   },
   playerButton: {
@@ -309,7 +313,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    load: (queue, initialSong) => playerActions.load(queue, initialSong)(dispatch),
+    load: (queue, initialSong, reset) => playerActions.load(queue, initialSong, reset)(dispatch),
     setMenu: () => dispatch(playerActions.setMenu()),
     songChanged: (song) => playerActions.songChanged(song, null)(dispatch),
     random: () => dispatch(playerActions.random()),

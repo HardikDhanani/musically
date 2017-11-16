@@ -10,17 +10,24 @@ const styles = EStyleSheet.create({
   body: {
     alignItems: 'center',
     alignSelf: 'center',
+    height: '$bodyHeight',
   },
-  flex: {
-    flex: 1
+  paginationHeader: {
+    marginTop: '$paginationHeader',
+    height: '$paginationHeader'
   }
 });
 
 class Body extends PureComponent {
   render() {
-    let heightStyle = this.props.height ? { height: this.props.height } : styles.flex;
+    let height = this.props.hasPaginationHeader
+      ? styles._body.height - styles._paginationHeader.height
+      : styles._body.height;
+
+    let marginTop = this.props.hasPaginationHeader ? styles._paginationHeader.marginTop : 0;
+
     return (
-      <View style={[styles.body, heightStyle]}>
+      <View style={[styles.body, { height, marginTop }]}>
         {this.props.children}
       </View>
     );

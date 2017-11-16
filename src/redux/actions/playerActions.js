@@ -4,9 +4,12 @@ import MusicControl from 'react-native-music-control';
 
 MusicControl.enableControl('play', true);
 MusicControl.enableControl('pause', true);
-MusicControl.enableControl('stop', false);
 MusicControl.enableControl('nextTrack', true);
 MusicControl.enableControl('previousTrack', true);
+MusicControl.enableBackgroundMode(true);
+
+let isPlaying = false;
+let timer = null;
 
 const loading = () => {
   return {
@@ -64,6 +67,54 @@ const timeElapsed = (elapsedTime) => {
   }
 }
 
+const songChangedAction = (currentSong, currentIndex) => {
+  return {
+    type: 'PLAYER_SONG_CHANGED',
+    payload: {
+      currentSong,
+      currentIndex
+    }
+  }
+}
+
+const addToQueueAction = (queue) => {
+  return {
+    type: 'PLAYER_ADD_TO_QUEUE',
+    payload: {
+      queue
+    }
+  }
+}
+
+const playAndNotifyProgress = (dispatch) => {
+  isPlaying = true;
+  dispatch(play());
+  timer = setInterval(() => {
+    PlayerService.getCurrentTime()
+      .then(currentTime => {
+        dispatch(timeElapsed(currentTime));
+
+        MusicControl.updatePlayback({
+          state: MusicControl.STATE_PLAYING, // (STATE_ERROR, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_BUFFERING)
+          elapsedTime: currentTime * 1000, // (Seconds)
+        });
+      })
+      .catch(error => {
+        console.log('error: ' + JSON.stringify(error));
+      });
+  }, 500);
+}
+
+const stopAndStopNotifyProgress = (dispatch) => {
+  isPlaying = false;
+  clearInterval(timer);
+  dispatch(pause());
+
+  MusicControl.updatePlayback({
+    state: MusicControl.STATE_PAUSED, // (STATE_ERROR, STATE_STOPPED, STATE_PLAYING, STATE_PAUSED, STATE_BUFFERING)
+  });
+}
+
 export const progressChanged = (newElapsed) => {
   return {
     type: 'PLAYER_PROGRESS_CHANGED',
@@ -79,16 +130,6 @@ export const setMenu = () => {
   }
 }
 
-const songChangedAction = (currentSong, currentIndex) => {
-  return {
-    type: 'PLAYER_SONG_CHANGED',
-    payload: {
-      currentSong,
-      currentIndex
-    }
-  }
-}
-
 export const random = () => {
   return {
     type: 'PLAYER_RAMDOM'
@@ -101,16 +142,7 @@ export const repeat = () => {
   }
 }
 
-const addToQueueAction = (queue) => {
-  return {
-    type: 'PLAYER_ADD_TO_QUEUE',
-    payload: {
-      queue
-    }
-  }
-}
-
-export function load(queue, initialSong) {
+export function load(queue, initialSong, reset = false) {
   return dispatch => {
     dispatch(loading())
 
@@ -136,6 +168,8 @@ export function load(queue, initialSong) {
 
         return LocalService.saveSession(session);
       })
+      .then(() => reset ? PlayerService.stop() : Promise.resolve())
+      .then(() => reset ? PlayerService.loadSong(initSong.path) : Promise.resolve())
       .then(() => {
         dispatch(loadingSuccess(initQueue, initSong, initIndex));
       })
@@ -179,7 +213,11 @@ export function next() {
       })
       .then(() => !endReached ? PlayerService.loadSong(currentSong.path) : Promise.resolve())
       .then(() => (isPlaying && !endReached) ? PlayerService.play(() => next()(dispatch)) : Promise.resolve())
-      .then(() => dispatch(!endReached ? songChangedAction(currentSong, currentIndex) : playAndNotifyProgress(dispatch)))
+      .then(() => {
+        setNowPlaying(currentSong);
+
+        dispatch(!endReached ? songChangedAction(currentSong, currentIndex) : playAndNotifyProgress(dispatch));
+      })
       .catch(error => console.log(error));
   }
 }
@@ -206,7 +244,10 @@ export function prev() {
       })
       .then(() => PlayerService.loadSong(currentSong.path))
       .then(() => isPlaying ? PlayerService.play() : Promise.resolve())
-      .then(() => dispatch(songChangedAction(currentSong, currentIndex)))
+      .then(() => {
+        setNowPlaying(currentSong);
+        dispatch(songChangedAction(currentSong, currentIndex));
+      })
       .catch(error => console.log(error));
   }
 }
@@ -231,7 +272,21 @@ export const songChanged = (currentSong, currentIndex) => {
   }
 }
 
-let isPlaying = false;
+const setNowPlaying = (song) => {
+  MusicControl.setNowPlaying({
+    title: song.title,
+    artwork: song.cover, // URL or RN's image require()
+    artist: song.artist,
+    album: song.album,
+    genre: song.genre,
+    duration: parseFloat(song.duration) / 1000, // (Seconds)
+    // description: '', // Android Only
+    color: 0x2E2E2E, // Notification Color - Android Only
+    // date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
+    // rating: 84, // Android Only (Boolean or Number depending on the type)
+    // notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
+  });
+}
 
 export const playPause = (currentSong) => {
   return dispatch => {
@@ -244,42 +299,15 @@ export const playPause = (currentSong) => {
     } else {
       if (!PlayerService.isSongLoaded()) {
         PlayerService.loadSong(currentSong.path)
-          .then(() => PlayerService.play(() => next()(dispatch)))
+          .then(duration => PlayerService.play(() => next(duration)(dispatch)))
           .then(() => {
-
-            MusicControl.setNowPlaying({
-              title: currentSong.title,
-              artwork: currentSong.cover, // URL or RN's image require()
-              artist: currentSong.artist,
-              album: currentSong.album,
-              genre: currentSong.genre,
-              duration: parseFloat(currentSong.duration) / 1000, // (Seconds)
-              // description: '', // Android Only
-              color: 0x2E2E2E, // Notification Color - Android Only
-              // date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
-              // rating: 84, // Android Only (Boolean or Number depending on the type)
-              // notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
-            });
-
+            setNowPlaying(currentSong);
             playAndNotifyProgress(dispatch);
           });
       } else {
         PlayerService.play(() => next()(dispatch))
           .then(() => {
-            MusicControl.setNowPlaying({
-              title: currentSong.title,
-              artwork: currentSong.cover, // URL or RN's image require()
-              artist: currentSong.artist,
-              album: currentSong.album,
-              genre: currentSong.genre,
-              duration: parseFloat(currentSong.duration) / 1000, // (Seconds)
-              // description: '', // Android Only
-              color: 0x2E2E2E, // Notification Color - Android Only
-              // date: '1983-01-02T00:00:00Z', // Release Date (RFC 3339) - Android Only
-              // rating: 84, // Android Only (Boolean or Number depending on the type)
-              // notificationIcon: 'my_custom_icon' // Android Only (String), Android Drawable resource name for a custom notification icon
-            });
-
+            setNowPlaying(currentSong);
             playAndNotifyProgress(dispatch);
           });
       }
@@ -287,15 +315,33 @@ export const playPause = (currentSong) => {
   }
 }
 
-let timer = null;
-const playAndNotifyProgress = (dispatch) => {
-  isPlaying = true;
-  dispatch(play());
-  timer = setInterval(() => dispatch(timeElapsed(500)), 500);
+const playMusicControl = (dispatch) => {
+  PlayerService.play(() => next()(dispatch))
+    .then(() => {
+      playAndNotifyProgress(dispatch);
+    });
 }
 
-const stopAndStopNotifyProgress = (dispatch) => {
-  isPlaying = false;
-  clearInterval(timer);
-  dispatch(pause());
+const pauseMusicControl = (dispatch) => {
+  PlayerService.pause()
+    .then(() => {
+      stopAndStopNotifyProgress(dispatch);
+    });
+}
+
+export const initPlayer = () => {
+  return dispatch => {
+    MusicControl.on('play', () => {
+      playMusicControl(dispatch);
+    });
+    MusicControl.on('pause', () => {
+      pauseMusicControl(dispatch);
+    });
+    MusicControl.on('nextTrack', () => {
+      next()(dispatch);
+    });
+    MusicControl.on('previousTrack', () => {
+      prev()(dispatch);
+    });
+  }
 }

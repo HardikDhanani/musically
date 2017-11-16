@@ -11,7 +11,7 @@ import Body from './Body';
 import ContainerViewHeader from './ContainerViewHeader';
 import ContainerViewCover from './ContainerViewCover';
 import ContainerViewSection from './ContainerViewSection';
-import MixButton from './MixButton';
+import MixButton from './common/buttons/MixButton';
 
 class ContainerView extends Component {
   constructor(props) {
