@@ -216,7 +216,7 @@ class Favorites extends Component {
   }
 
   _renderMenu() {
-    if (!this.props.showMenu)
+    if (!this.props.showMenu || this.props.targetMenu.caller !== 'FAVORITES')
       return null;
 
     switch (this.props.targetMenu.type.toLowerCase()) {
@@ -224,7 +224,12 @@ class Favorites extends Component {
       case 'artist':
       case 'album':
       case 'genre':
-        return <SongMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} isFavorite={true} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
+        return (
+          <SongMenu
+            isFavorite={true} positionX={this.props.menuPositionX}
+            positionY={this.props.menuPositionY}
+            onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })}/>
+        );
 
       default:
         return <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
@@ -280,7 +285,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     load: () => favoritesActions.load()(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'FAVORITES' }, positionX, positionY)),
   }
 }
 

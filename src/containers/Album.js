@@ -6,6 +6,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import * as albumActions from '../redux/actions/albumActions';
 import * as appActions from '../redux/actions/appActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
+import * as playerActions from '../redux/actions/playerActions';
 
 import {
   View,
@@ -44,6 +45,9 @@ class Album extends Component {
     this._renderTargetMenu = this._renderTargetMenu.bind(this);
     this._getSections = this._getSections.bind(this);
     this._playSongs = this._playSongs.bind(this);
+    this._getAlbumMenu = this._getAlbumMenu.bind(this);
+    this._getSongMenu = this._getSongMenu.bind(this);
+    this._addToQueue = this._addToQueue.bind(this);
   }
 
   componentDidMount() {
@@ -52,19 +56,22 @@ class Album extends Component {
   }
 
   render() {
+    let songs = this.props.album ? this.props.album.songs : [];
+    let initialSong = songs.length > 0 ? songs[0] : null;
+
     return (
       <ContainerView
         title={''}
         onBackPress={() => this.props.navigation.goBack()}
         onSearchPress={() => this.props.navigation.navigate('Search', {})}
         onLikePress={() => this.props.like(this.props.album)}
+        onPlayPress={() => this._playSongs(initialSong, songs, false)}
         onMenuPress={() => this.props.setMenu({ type: 'MENU' })}
-        onPlayPress={() => this._playSongs()}
         coverContent={this._renderCoverContent()}
         sections={this._getSections()}
         source={require('../images/music.png')}
         imageUri={this.props.album ? this.props.album.cover : null}
-        showMenu={this.props.showMenu}
+        showMenu={this.props.showMenu && (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) === 'ALBUM'}
         menuContent={this._renderTargetMenu()}
         menuPositionX={this.props.menuPositionX}
         menuPositionY={this.props.menuPositionY}
@@ -109,15 +116,14 @@ class Album extends Component {
   }
 
   _renderTargetMenu() {
-    if (!this.props.showMenu)
+    if (!this.props.showMenu || (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) !== 'ALBUM')
       return null;
 
-    switch (this.props.targetMenu.type) {
-      case 'SONG':
-        return <SongMenu onPress={() => this.props.setMenu({ type: 'MENU' })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
-
+    switch (this.props.targetMenu.type.toLowerCase()) {
+      case 'song':
+        return this._getSongMenu(this.props.targetMenu.payload);
       default:
-        return <HeaderMenu onPress={() => this.props.setMenu({ type: 'MENU' })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
+        return this._getAlbumMenu();
     }
   }
 
@@ -129,10 +135,47 @@ class Album extends Component {
     }];
   }
 
-  _playSongs(initialSong) {
-    let queue = this.props.album ? this.props.album.songs : [];
+  _playSongs(initialSong, queue, closeMenu = false) {
+    if (closeMenu)
+      this.props.setMenu(null, 0, 0);
 
-    this.props.navigation.navigate('Player', { queue, initialSong });
+    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
+  }
+
+  _addToQueue(queue) {
+    this.props.setMenu(null, 0, 0);
+    this.props.addToQueue(queue);
+  }
+
+  _getSongMenu(song) {
+    let initialSong = song;
+    let queue = [initialSong];
+
+    return (
+      <SongMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        isFavorite={song.isFavorite}
+        onPlayPress={() => this._playSongs(initialSong, queue, true)}
+        onAddToPlaylistPress={() => {
+          this.props.setMenu(null, 0, 0);
+          this.props.addSongToPlaylist(song);
+        }}
+        onAddToQueuePress={() => {
+          this._addToQueue(queue);
+        }}
+        onLikePress={() => {
+          this.props.setMenu(null, 0, 0);
+          this.props.like('song', song);
+        }}
+        onPress={() => this.props.setMenu(null, 0, 0)} />
+    );
+  }
+
+  _getAlbumMenu() {
+    return (
+      <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />
+    );
   }
 }
 
@@ -150,8 +193,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     load: (album, artist) => albumActions.load(album, artist)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'ALBUM' }, positionX, positionY)),
     like: (album) => dispatch(favoritesActions.like('album', album)),
+    addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
   }
 }
 

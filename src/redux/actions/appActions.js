@@ -118,6 +118,51 @@ const errorSavingPlaylist = (message) => {
   }
 }
 
+const addingSongToPlaylist = () => {
+  return {
+    type: 'APP_ADDING_SONG_TO_PLAYLIST'
+  }
+}
+
+const songAddedToPlaylist = (playlists) => {
+  return {
+    type: 'APP_ADDING_SONG_TO_PLAYLIST_SUCCEED',
+    payload: {
+      playlists
+    }
+  }
+}
+
+const songAlreadyInPlaylist = () => {
+  return {
+    type: 'APP_SONG_ALREADY_IN_PLAYLIST'
+  }
+}
+
+const removingSongFromPlaylist = () => {
+  return {
+    type: 'APP_REMOVING_SONG_FROM_PLAYLIST'
+  }
+}
+
+const songRemovedFromPlaylist = (playlists) => {
+  return {
+    type: 'APP_REMOVING_SONG_FROM_PLAYLIST_SUCCEED',
+    payload: {
+      playlists
+    }
+  }
+}
+
+const playlistsUpdated = (playlists) => {
+  return {
+    type: 'APP_PLAYLISTS_UPDATED',
+    payload: {
+      playlists
+    }
+  }
+}
+
 export const setMenu = (target, positionX, positionY) => {
   return {
     type: 'APP_SET_MENU',
@@ -233,23 +278,24 @@ export function addSongToPlaylist(song, playlist) {
   }
 }
 
-export const addingSongToPlaylist = () => {
-  return {
-    type: 'APP_ADDING_SONG_TO_PLAYLIST'
-  }
-}
+export function removeSongFromPlaylist(song, playlist) {
+  return dispatch => {
+    dispatch(removingSongFromPlaylist());
 
-export const songAddedToPlaylist = (playlists) => {
-  return {
-    type: 'APP_ADDING_SONG_TO_PLAYLIST_SUCCEED',
-    payload: {
-      playlists
+    let index = playlist.songs.findIndex(s => s.id === song.id);
+    if (index !== -1) {
+      playlist.songs.splice(index, 1);
     }
+
+    LocalService.savePlaylist(playlist)
+      .then(LocalService.getPlaylists)
+      .then(playlists => dispatch(songRemovedFromPlaylist(playlists)));
   }
 }
 
-export const songAlreadyInPlaylist = () => {
-  return {
-    type: 'APP_SONG_ALREADY_IN_PLAYLIST'
+export function updatePlaylists() {
+  return dispatch => {
+    LocalService.getPlaylists()
+      .then(playlists => dispatch(playlistsUpdated(playlists)));
   }
 }

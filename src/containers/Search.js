@@ -245,7 +245,7 @@ class Search extends Component {
   }
 
   _renderMenu() {
-    if (!this.props.showMenu)
+    if (!this.props.showMenu || this.props.targetMenu.caller !== 'SEARCH')
       return null;
 
     return (
@@ -306,7 +306,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     search: text => searchActions.search(text)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'SEARCH' }, positionX, positionY)),
   }
 }
 

@@ -10,6 +10,8 @@ MusicControl.enableBackgroundMode(true);
 
 let isPlaying = false;
 let timer = null;
+let isRandom = false;
+let repeatMode = 'NONE';
 
 const loading = () => {
   return {
@@ -115,30 +117,104 @@ const stopAndStopNotifyProgress = (dispatch) => {
   });
 }
 
+const randomAction = (randomValue) => {
+  return {
+    type: 'PLAYER_RAMDOM',
+    payload: {
+      random: randomValue
+    }
+  }
+}
+
+const repeatAction = (mode) => {
+  return {
+    type: 'PLAYER_REPEAT',
+    payload: {
+      mode
+    }
+  }
+}
+
+const _getNextNoneRepeatMode = (queue, currentIndex) => {
+  if (isRandom)
+    return Math.floor(Math.random() * (queue.length - 1));
+
+  if (queue.length - 1 === currentIndex)
+    return -1;
+
+  return currentIndex + 1;
+}
+
+const _getNextAllRepeatMode = (queue, currentIndex) => {
+  if (isRandom)
+    return Math.floor(Math.random() * (queue.length - 1));
+
+  if (queue.length - 1 === currentIndex)
+    return 0;
+
+  return currentIndex + 1;
+}
+
+const _getPrevNoneRepeatMode = (queue, currentIndex) => {
+  if (isRandom)
+    return Math.floor(Math.random() * (queue.length - 1));
+
+  if (0 === currentIndex)
+    return -1;
+
+  return currentIndex - 1;
+}
+
+const _getPrevAllRepeatMode = (queue, currentIndex) => {
+  if (isRandom)
+    return Math.floor(Math.random() * (queue.length - 1));
+
+  if (0 === currentIndex)
+    return queue.length - 1;
+
+  return currentIndex - 1;
+}
+
+const _getNextFromQueue = (queue, currentIndex) => {
+  let nextIndex = currentIndex
+  switch (repeatMode) {
+    case 'NONE':
+      nextIndex = _getNextNoneRepeatMode(queue, currentIndex);
+      break;
+    case 'ALL':
+      nextIndex = _getNextAllRepeatMode(queue, currentIndex);
+      break;
+  }
+
+  return {
+    song: queue[nextIndex],
+    index: nextIndex
+  };
+}
+
+const _getPrevFromQueue = (queue, currentIndex) => {
+  let prevIndex = currentIndex
+  switch (repeatMode) {
+    case 'NONE':
+      prevIndex = _getPrevNoneRepeatMode(queue, currentIndex);
+      break;
+    case 'ALL':
+      prevIndex = _getPrevAllRepeatMode(queue, currentIndex);
+      break;
+  }
+
+  return {
+    song: queue[prevIndex],
+    index: prevIndex
+  };
+}
+
 export const progressChanged = (newElapsed) => {
   return {
     type: 'PLAYER_PROGRESS_CHANGED',
     payload: {
       newElapsed
     }
-  }
-}
-
-export const setMenu = () => {
-  return {
-    type: 'PLAYER_SET_MENU'
-  }
-}
-
-export const random = () => {
-  return {
-    type: 'PLAYER_RAMDOM'
-  }
-}
-
-export const repeat = () => {
-  return {
-    type: 'PLAYER_REPEAT'
   }
 }
 
@@ -179,12 +255,22 @@ export function load(queue, initialSong, reset = false) {
 
 export function addToQueue(queue) {
   return dispatch => {
+    let newQueue = [];
     LocalService.getSession()
       .then(session => {
         session.queue = session.queue.concat(queue);
+
+        if(!session.currentSong){
+          session.currentSong = session.queue[0];
+          session.currentIndex = 0;
+          dispatch(songChangedAction(session.currentSong, session.currentIndex))
+        }
+
+        newQueue = session.queue;
+
         return LocalService.saveSession(session);
       })
-      .then(() => dispatch(addToQueueAction(queue)))
+      .then(() => dispatch(addToQueueAction(newQueue)))
       .catch(error => console.log(error));
   }
 }
@@ -199,9 +285,12 @@ export function next() {
       .then(session => {
         currentSong = session.currentSong;
         currentIndex = session.currentIndex;
-        if (currentIndex < session.queue.length - 1) {
-          currentSong = session.queue[currentIndex + 1];
-          currentIndex = currentIndex + 1;
+
+        let song = _getNextFromQueue(session.queue, session.currentIndex);
+
+        if (song.index !== -1) {
+          currentSong = song.song;
+          currentIndex = song.index;
         } else {
           endReached = true;
           isPlaying = false;
@@ -214,11 +303,18 @@ export function next() {
       .then(() => !endReached ? PlayerService.loadSong(currentSong.path) : Promise.resolve())
       .then(() => (isPlaying && !endReached) ? PlayerService.play(() => next()(dispatch)) : Promise.resolve())
       .then(() => {
-        setNowPlaying(currentSong);
+        if (!endReached) {
+          setNowPlaying(currentSong);
+          dispatch(songChangedAction(currentSong, currentIndex));
+        }
 
-        dispatch(!endReached ? songChangedAction(currentSong, currentIndex) : playAndNotifyProgress(dispatch));
+        if (isPlaying) {
+          playAndNotifyProgress(dispatch);
+        }
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error)
+      });
   }
 }
 
@@ -231,11 +327,15 @@ export function prev() {
       .then(session => {
         currentSong = session.currentSong;
         currentIndex = session.currentIndex;
-        if (currentIndex > 0) {
-          currentSong = session.queue[currentIndex - 1];
-          currentIndex = currentIndex - 1;
+
+        let song = _getPrevFromQueue(session.queue, session.currentIndex);
+
+        if (song.index !== -1) {
+          currentSong = song.song;
+          currentIndex = song.index;
         } else {
           endReached = true;
+          isPlaying = false;
         }
 
         session.currentSong = currentSong;
@@ -247,6 +347,11 @@ export function prev() {
       .then(() => {
         setNowPlaying(currentSong);
         dispatch(songChangedAction(currentSong, currentIndex));
+
+        if (isPlaying) {
+          playAndNotifyProgress(dispatch);
+        }
+
       })
       .catch(error => console.log(error));
   }
@@ -322,6 +427,13 @@ const playMusicControl = (dispatch) => {
     });
 }
 
+const stopMusicControl = (dispatch) => {
+  PlayerService.stop()
+    .then(() => {
+      dispatch(stop());
+    });
+}
+
 const pauseMusicControl = (dispatch) => {
   PlayerService.pause()
     .then(() => {
@@ -334,6 +446,9 @@ export const initPlayer = () => {
     MusicControl.on('play', () => {
       playMusicControl(dispatch);
     });
+    MusicControl.on('stop', () => {
+      stopMusicControl(dispatch);
+    });
     MusicControl.on('pause', () => {
       pauseMusicControl(dispatch);
     });
@@ -343,5 +458,29 @@ export const initPlayer = () => {
     MusicControl.on('previousTrack', () => {
       prev()(dispatch);
     });
+  }
+}
+
+export const random = () => {
+  return dispatch => {
+    isRandom = !isRandom;
+    dispatch(randomAction(isRandom));
+  }
+}
+
+export const repeat = () => {
+  return dispatch => {
+    switch (repeatMode) {
+      case 'NONE':
+        repeatMode = 'ALL'
+        break;
+      case 'ALL':
+        repeatMode = 'ONE'
+        break;
+      default:
+        repeatMode = 'NONE'
+        break;
+    }
+    dispatch(repeatAction(repeatMode));
   }
 }

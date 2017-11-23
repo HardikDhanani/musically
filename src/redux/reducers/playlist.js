@@ -35,7 +35,7 @@ export default function playlist(state = initialState, action = {}) {
       return {
         ...state,
         isRemovingSong: false,
-        songs: action.payload.playlist.songs
+        songs: JSON.parse(JSON.stringify(action.payload.playlist.songs))
       }
     default:
       return state;

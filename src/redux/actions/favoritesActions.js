@@ -1,4 +1,5 @@
 import LocalService from '../../services/LocalService';
+import * as appActions from './appActions';
 
 const likeSuccess = (type, target) => {
   return {
@@ -60,12 +61,29 @@ export function load() {
   }
 }
 
-export function like(type, target) {
+const _saveSongAndAddOrRemoveToFavoritesPlaylist = (song, removeFromFavorites, dispatch) => {
+  return LocalService.saveSong(song)
+    .then(() => LocalService.getPlaylistByName('favorites'))
+    .then(playlist => {
+
+      if (removeFromFavorites) {
+        if (song.isFavorite) {
+          appActions.addSongToPlaylist(song, playlist)(dispatch);
+        } else {
+          appActions.removeSongFromPlaylist(song, playlist)(dispatch);
+        }
+      }
+
+      return Promise.resolve();
+    });
+}
+
+export function like(type, target, removeFromFavorites = true) {
   return dispatch => {
     target.isFavorite = !target.isFavorite;
     switch (type.toLowerCase()) {
       case 'song':
-        LocalService.saveSong(target)
+        _saveSongAndAddOrRemoveToFavoritesPlaylist(target, removeFromFavorites, dispatch)
           .then(() => dispatch(likeSuccess(type, target)));
         break;
 

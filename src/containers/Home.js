@@ -359,7 +359,7 @@ class Home extends Component {
   }
 
   _renderMenu() {
-    if (!this.props.showMenu)
+    if (!this.props.showMenu || (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) !== 'HOME')
       return null;
 
     switch (this.props.targetMenu.type.toLowerCase()) {
@@ -370,7 +370,7 @@ class Home extends Component {
       case 'artist':
       case 'album':
       case 'genre':
-        return this._getCardMenu(this.props.targetMenu.payload);
+        return this._getCardMenu(this.props.targetMenu.type.toLowerCase(), this.props.targetMenu.payload);
       default:
         return this._getHomeMenu();
     }
@@ -396,16 +396,15 @@ class Home extends Component {
         isFavorite={song.isFavorite}
         onPlayPress={() => this._playSongs(initialSong, queue, true)}
         onAddToPlaylistPress={() => {
-          this.props.addSongToPlaylist(song);
           this.props.setMenu(null, 0, 0);
+          this.props.addSongToPlaylist(song);
         }}
         onAddToQueuePress={() => {
           this._addToQueue(queue);
-          this.props.setMenu(null, 0, 0);
         }}
         onLikePress={() => {
-          this.props.like('song', song);
           this.props.setMenu(null, 0, 0);
+          this.props.like('song', song);
         }}
         onPress={() => this.props.setMenu(null, 0, 0)} />
     );
@@ -414,11 +413,13 @@ class Home extends Component {
   _getPlaylistMenu(playlist) {
     let initialSong = playlist.songs[0];
     let queue = playlist.songs;
+    let showDelete = !(playlist.name.toLowerCase() === 'favorites' || playlist.name.toLowerCase() === 'most played')
 
     return (
       <PlaylistMenu
         positionX={this.props.menuPositionX}
         positionY={this.props.menuPositionY}
+        showDelete={showDelete}
         onDeletePress={() => {
           this.props.setMenu(null, 0, 0);
           this.props.deletePlaylist(playlist);
@@ -429,29 +430,35 @@ class Home extends Component {
     );
   }
 
-  _getCardMenu(queue) {
-    let initialSong = queue[0];
+  _getCardMenu(targetType, target) {
+    let queue = [];
+
+    if (targetType === 'artist' || targetType === 'genre') {
+      queue = [].concat.apply([], target.albums.map(a => a.songs));
+    } else {
+      queue = target.songs;
+    }
 
     return (
       <CardMenu
         positionX={this.props.menuPositionX}
         positionY={this.props.menuPositionY}
-        onPlayPress={() => this._playSongs(initialSong, queue, true)}
+        onPlayPress={() => this._playSongs(null, queue, true)}
         onAddToQueuePress={() => this._addToQueue(queue)}
         onPress={() => this.props.setMenu(null, 0, 0)} />
     );
   }
 
   _playSongs(initialSong, queue, closeMenu = false) {
-    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
-
     if (closeMenu)
       this.props.setMenu(null, 0, 0);
+
+    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
   }
 
   _addToQueue(queue) {
-    this.props.addToQueue(queue);
     this.props.setMenu(null, 0, 0);
+    this.props.addToQueue(queue);
   }
 
   _showDeletePlaylistConfirmation() {
@@ -537,7 +544,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     selectedSectionChanged: (section) => homeActions.selectedSectionChanged(section)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'HOME' }, positionX, positionY)),
     addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
     like: (type, target) => dispatch(favoritesActions.like(type, target)),
     createNewPlaylistForm: () => dispatch(homeActions.createNewPlaylistForm()),

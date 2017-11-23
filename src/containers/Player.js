@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
+
 import * as playerActions from '../redux/actions/playerActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
+import * as appActions from '../redux/actions/appActions';
 
 import { StyleSheet, Image, View, Text, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import Swiper from 'react-native-swiper';
@@ -307,14 +309,14 @@ const mapStateToProps = state => {
     randomActive: state.player.randomActive,
     playing: state.player.playing,
     repeatMode: state.player.repeatMode,
-    showMenu: state.player.showMenu,
+    showMenu: state.player.showMenu
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     load: (queue, initialSong, reset) => playerActions.load(queue, initialSong, reset)(dispatch),
-    setMenu: () => dispatch(playerActions.setMenu()),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'PLAYER' }, positionX, positionY)),
     songChanged: (song) => playerActions.songChanged(song, null)(dispatch),
     random: () => dispatch(playerActions.random()),
     repeat: () => dispatch(playerActions.repeat()),

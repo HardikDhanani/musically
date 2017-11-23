@@ -36,13 +36,13 @@
   - [ ] Play an album
   - [ ] Play an artist
   - [ ] Play a genre
-  - [ ] Play next song
-  - [ ] Play previous song
-  - [ ] Pause current song
-  - [ ] Resume current song
-  - [ ] Play songs ramdomly
-  - [ ] Repeat a song
-  - [ ] Repeat all songs in the current queue
+  - [x] Play next song
+  - [x] Play previous song
+  - [x] Pause current song
+  - [x] Resume current song
+  - [x] Play songs ramdomly
+  - [x] Repeat a song
+  - [x] Repeat all songs in the current queue
   - [x] Play song in background
   - [x] After a song finishes play next song
   - [x] Show "Now Playing"

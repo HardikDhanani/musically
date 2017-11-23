@@ -84,18 +84,16 @@ class LocalService {
   }
 
   saveArtists(artists) {
-    this._getStorage().save({
+    return this._getStorage().save({
       key: 'ARTISTS',
       data: artists,
       expires: null
     })
-      .then(() => {
-        this._cache.save('ARTISTS', artists)
-      });
+      .then(() => this._cache.save('ARTISTS', artists));
   }
 
   saveAlbums(albums) {
-    this._getStorage().save({
+    return this._getStorage().save({
       key: 'ALBUMS',
       data: albums,
       expires: null
@@ -104,7 +102,7 @@ class LocalService {
   }
 
   saveGenres(genres) {
-    this._getStorage().save({
+    return this._getStorage().save({
       key: 'GENRES',
       data: genres,
       expires: null
@@ -113,7 +111,7 @@ class LocalService {
   }
 
   savePlaylists(playlists) {
-    this._getStorage().save({
+    return this._getStorage().save({
       key: 'PLAYLISTS',
       data: playlists,
       expires: null
@@ -393,19 +391,19 @@ class LocalService {
   getPlaylistByName(playlistName) {
     return this.getPlaylists()
       .then(playlists => {
-        return playlists.find(playlist => playlist.name === playlistName);
+        return playlists.find(playlist => playlist.name.toLowerCase() === playlistName.toLowerCase());
       });
   }
 
-  deletePlaylist(playlist){
+  deletePlaylist(playlist) {
     return this.getPlaylists()
-    .then(playlists => {
-      var index = playlists.findIndex(p => p.id === playlist.id);
-      if (index > -1) {
-        playlists.splice(index, 1);
-      }
-      return this.savePlaylists(playlists);
-    });
+      .then(playlists => {
+        var index = playlists.findIndex(p => p.id === playlist.id);
+        if (index > -1) {
+          playlists.splice(index, 1);
+        }
+        return this.savePlaylists(playlists);
+      });
   }
 }
 

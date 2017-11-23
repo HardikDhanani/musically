@@ -94,14 +94,14 @@ class Playlist extends Component {
   }
 
   _playSongs(initialSong, queue, closeMenu = false) {
-    this.props.navigation.navigate('Player', { queue, initialSong });
-
     if (closeMenu)
       this.props.setMenu(null, 0, 0);
+
+    this.props.navigation.navigate('Player', { queue, initialSong });
   }
 
   _renderMenu() {
-    if (!this.props.showMenu)
+    if (!this.props.showMenu || this.props.targetMenu.caller !== 'PLAYLIST')
       return null;
 
     return (
@@ -110,12 +110,12 @@ class Playlist extends Component {
         positionY={this.props.menuPositionY}
         onPlayPress={() => this._playSongs(initialSong, queue, true)}
         onRemoveFromPlaylistPress={() => {
-          this.props.removeSong(this.props.id, this.props.targetMenu.payload.id);
           this.props.setMenu(null, 0, 0);
+          this.props.removeSong(this.props.id, this.props.targetMenu.payload.id);
         }}
         onAddToQueuePress={() => {
-          this._addToQueue(queue);
           this.props.setMenu(null, 0, 0);
+          this._addToQueue(queue);
         }}
         onPress={() => this.props.setMenu(null, 0, 0)} />
     );
@@ -138,7 +138,7 @@ const mapDispatchToProps = dispatch => {
   return {
     load: (playlistId) => playlistActions.load(playlistId)(dispatch),
     removeSong: (playlistId, songId) => playlistActions.removeSong(playlistId, songId)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'PLAYLIST' }, positionX, positionY)),
   }
 }
 

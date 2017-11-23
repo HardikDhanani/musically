@@ -6,6 +6,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import * as artistActions from '../redux/actions/artistActions';
 import * as appActions from '../redux/actions/appActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
+import * as playerActions from '../redux/actions/playerActions';
 
 import {
   View,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 import HeaderMenu from '../components/HeaderMenu';
 import SongMenu from '../components/SongMenu';
+import CardMenu from '../components/CardMenu';
 import ContainerView from '../components/ContainerView';
 import Header from '../components/Header';
 import SongCard from '../components/SongCard';
@@ -48,6 +50,10 @@ class Artist extends Component {
     this._getSections = this._getSections.bind(this);
     this._playSongs = this._playSongs.bind(this);
     this._groupItems = this._groupItems.bind(this);
+    this._getArtistMenu = this._getArtistMenu.bind(this);
+    this._getCardMenu = this._getCardMenu.bind(this);
+    this._getSongMenu = this._getSongMenu.bind(this);
+    this._addToQueue = this._addToQueue.bind(this);
   }
 
   componentDidMount() {
@@ -56,18 +62,23 @@ class Artist extends Component {
   }
 
   render() {
+    let albums = this.props.artist ? this.props.artist.albums : [];
+    let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
+    let initialSong = songs.length > 0 ? songs[0] : null;
+
     return (
       <ContainerView
         title={''}
         onBackPress={() => this.props.navigation.goBack()}
         onSearchPress={() => this.props.navigation.navigate('Search', {})}
         onLikePress={() => this.props.like(this.props.artist)}
-        onPlayPress={this._playSongs}
+        onPlayPress={() => this._playSongs(initialSong, songs, false)}
+        onMenuPress={() => this.props.setMenu({ type: 'MENU' })}
         coverContent={this._renderCoverContent()}
         sections={this._getSections()}
         source={require('../images/music.png')}
         imageUri={this.props.artist ? this.props.artist.cover : null}
-        showMenu={this.props.showMenu}
+        showMenu={this.props.showMenu && (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) === 'ARTIST'}
         menuContent={this._renderTargetMenu()}
         like={this.props.isFavorite}
         footer={(<PlayerFooter navigation={this.props.navigation} />)}>
@@ -130,17 +141,61 @@ class Artist extends Component {
   }
 
   _renderTargetMenu() {
-    if (!this.props.showMenu)
+    if (!this.props.showMenu || (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) !== 'ARTIST')
       return null;
 
     switch (this.props.targetMenu.type.toLowerCase()) {
       case 'song':
+        return this._getSongMenu(this.props.targetMenu.payload);
       case 'album':
-        return <SongMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
-
+        return this._getCardMenu(this.props.targetMenu.type.toLowerCase(), this.props.targetMenu.payload);
       default:
-        return <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
+        return this._getArtistMenu();
     }
+  }
+
+  _getSongMenu(song) {
+    let initialSong = song;
+    let queue = [initialSong];
+
+    return (
+      <SongMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        isFavorite={song.isFavorite}
+        onPlayPress={() => this._playSongs(initialSong, queue, true)}
+        onAddToPlaylistPress={() => {
+          this.props.setMenu(null, 0, 0);
+          this.props.addSongToPlaylist(song);
+        }}
+        onAddToQueuePress={() => {
+          this._addToQueue(queue);
+        }}
+        onLikePress={() => {
+          this.props.setMenu(null, 0, 0);
+          this.props.like('song', song);
+        }}
+        onPress={() => this.props.setMenu(null, 0, 0)} />
+    );
+  }
+
+  _getCardMenu(targetType, target) {
+    let queue = [].concat.apply([], target.albums.map(a => a.songs));
+
+    return (
+      <CardMenu
+        positionX={this.props.menuPositionX}
+        positionY={this.props.menuPositionY}
+        onPlayPress={() => this._playSongs(null, queue, true)}
+        onAddToQueuePress={() => this._addToQueue(queue)}
+        onPress={() => this.props.setMenu(null, 0, 0)} />
+    );
+  }
+
+  _getArtistMenu() {
+    return (
+      <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />
+    );
   }
 
   _getSections() {
@@ -172,11 +227,16 @@ class Artist extends Component {
     return grupedItems;
   }
 
-  _playSongs(initialSong) {
-    let albums = this.props.artist ? this.props.artist.albums.map(a => a.songs) : [];
-    let queue = albums ? [].concat.apply([], albums) : [];
+  _playSongs(initialSong, queue, closeMenu = false) {
+    if (closeMenu)
+      this.props.setMenu(null, 0, 0);
 
-    this.props.navigation.navigate('Player', { queue, initialSong });
+    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
+  }
+
+  _addToQueue(queue) {
+    this.props.setMenu(null, 0, 0);
+    this.props.addToQueue(queue);
   }
 }
 
@@ -194,8 +254,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     load: (artist) => artistActions.load(artist)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu(target, positionX, positionY)),
+    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'ARTIST' }, positionX, positionY)),
     like: (artist) => dispatch(favoritesActions.like('artist', artist)),
+    addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
   }
 }
 
