@@ -34,7 +34,12 @@ function _groupAndSaveGenres(songs) {
 }
 
 function _groupAndSaveMusic(songs) {
-  let ordererSongs = songsSelector.orderBy(songs, s => s.title);
+  let ordererSongs = songsSelector.orderBy(songs, s => s.title).map(song => {
+    return {
+      ...song,
+      reproductions: 0
+    };
+  });
   return LocalService.saveSongs(ordererSongs)
     .then(() => _groupAndSaveArtists(songs))
     .then(() => _groupAndSaveAlbums(songs))
@@ -52,8 +57,14 @@ function _createDefaultPlaylists() {
     songs: []
   }
 
+  let recentPlayed = {
+    name: 'Recent played',
+    songs: []
+  }
+
   return LocalService.savePlaylist(mostPlayed)
     .then(() => LocalService.savePlaylist(favorites))
+    .then(() => LocalService.savePlaylist(recentPlayed));
 }
 
 const starting = () => {
@@ -157,6 +168,27 @@ const songRemovedFromPlaylist = (playlists) => {
 const playlistsUpdated = (playlists) => {
   return {
     type: 'APP_PLAYLISTS_UPDATED',
+    payload: {
+      playlists
+    }
+  }
+}
+
+const songDoesNotExistInPlaylist = () => {
+  return {
+    type: 'APP_SONG_DOES_NOT_EXIST_IN_PLAYLIST'
+  }
+}
+
+const updatingSongInPlaylist = () => {
+  return {
+    type: 'APP_UPDATING_SONG_IN_PLAYLIST'
+  }
+}
+
+const songUpdatedInPlaylist = (playlists) => {
+  return {
+    type: 'APP_UPDATING_SONG_IN_PLAYLIST_SUCCEED',
     payload: {
       playlists
     }
@@ -274,6 +306,22 @@ export function addSongToPlaylist(song, playlist) {
         .then(playlists => dispatch(songAddedToPlaylist(playlists)));
     } else {
       dispatch(songAlreadyInPlaylist());
+    }
+  }
+}
+
+export function updateSongInPlaylist(song, playlist) {
+  return dispatch => {
+    let index = playlist.songs.findIndex(s => s.id === song.id);
+    if (index !== -1) {
+      dispatch(updatingSongInPlaylist());
+
+      playlist.songs[index] = song;
+      LocalService.savePlaylist(playlist)
+        .then(LocalService.getPlaylists)
+        .then(playlists => dispatch(songUpdatedInPlaylist(playlists)));
+    } else {
+      dispatch(songDoesNotExistInPlaylist());
     }
   }
 }

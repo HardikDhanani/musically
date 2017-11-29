@@ -53,7 +53,7 @@ class LocalService {
 
   scanForSongs() {
     return new Promise((resolve, reject) => {
-      NativeModules.MusicFileManager.getAll(err => {
+      NativeModules.MusicFileManager.getAll(false, err => {
         console.log('Error scaning songs: ' + err);
         reject(err);
       }, (response) => {

@@ -2,6 +2,8 @@ import LocalService from '../../services/LocalService';
 import PlayerService from '../../services/PlayerService';
 import MusicControl from 'react-native-music-control';
 
+import * as appActions from './appActions';
+
 MusicControl.enableControl('play', true);
 MusicControl.enableControl('pause', true);
 MusicControl.enableControl('nextTrack', true);
@@ -209,6 +211,43 @@ const _getPrevFromQueue = (queue, currentIndex) => {
   };
 }
 
+const _updateMostPlayedPlaylist = (song, dispatch) => {
+  return LocalService.getPlaylistByName('Most played')
+    .then(playlist => {
+      let index = playlist.songs.findIndex(s => s.id === song.id);
+      if (index !== -1) {
+        appActions.updateSongInPlaylist(song, playlist)(dispatch);
+      } else {
+        appActions.addSongToPlaylist(song, playlist)(dispatch);
+      }
+    });
+}
+
+const _updateRecentPlayedPlaylist = (song, dispatch) => {
+  return LocalService.getPlaylistByName('Recent played')
+    .then(playlist => {
+      let index = playlist.songs.findIndex(s => s.id === song.id);
+      if (index !== -1) {
+        playlist.songs.splice(index, 1);
+      }
+      
+      playlist.songs = [song].concat(playlist.songs).slice(0, 20);
+
+      return LocalService.savePlaylist(playlist)
+    })
+    .then(() => appActions.updatePlaylists()(dispatch));
+}
+
+const _loadSong = (song, dispatch) => {
+  return PlayerService.loadSong(song.path)
+    .then(() => {
+      song.reproductions += 1;
+      return LocalService.saveSong(song);
+    })
+    .then(() => _updateMostPlayedPlaylist(song, dispatch))
+    .then(() => _updateRecentPlayedPlaylist(song, dispatch));
+}
+
 export const progressChanged = (newElapsed) => {
   return {
     type: 'PLAYER_PROGRESS_CHANGED',
@@ -245,7 +284,7 @@ export function load(queue, initialSong, reset = false) {
         return LocalService.saveSession(session);
       })
       .then(() => reset ? PlayerService.stop() : Promise.resolve())
-      .then(() => reset ? PlayerService.loadSong(initSong.path) : Promise.resolve())
+      .then(() => reset ? _loadSong(initSong, dispatch) : Promise.resolve())
       .then(() => {
         dispatch(loadingSuccess(initQueue, initSong, initIndex));
       })
@@ -260,7 +299,7 @@ export function addToQueue(queue) {
       .then(session => {
         session.queue = session.queue.concat(queue);
 
-        if(!session.currentSong){
+        if (!session.currentSong) {
           session.currentSong = session.queue[0];
           session.currentIndex = 0;
           dispatch(songChangedAction(session.currentSong, session.currentIndex))
@@ -300,7 +339,8 @@ export function next() {
         session.currentIndex = currentIndex;
         return LocalService.saveSession(session);
       })
-      .then(() => !endReached ? PlayerService.loadSong(currentSong.path) : Promise.resolve())
+      // .then(() => !endReached ? PlayerService.loadSong(currentSong.path) : Promise.resolve())
+      .then(() => !endReached ? _loadSong(currentSong, dispatch) : Promise.resolve())
       .then(() => (isPlaying && !endReached) ? PlayerService.play(() => next()(dispatch)) : Promise.resolve())
       .then(() => {
         if (!endReached) {
@@ -342,7 +382,8 @@ export function prev() {
         session.currentIndex = currentIndex;
         return LocalService.saveSession(session);
       })
-      .then(() => PlayerService.loadSong(currentSong.path))
+      // .then(() => PlayerService.loadSong(currentSong.path))
+      .then(() => _loadSong(currentSong, dispatch))
       .then(() => isPlaying ? PlayerService.play() : Promise.resolve())
       .then(() => {
         setNowPlaying(currentSong);
@@ -395,6 +436,8 @@ const setNowPlaying = (song) => {
 
 export const playPause = (currentSong) => {
   return dispatch => {
+    if (!currentSong)
+      return;
 
     if (isPlaying) {
       PlayerService.pause()
@@ -403,7 +446,8 @@ export const playPause = (currentSong) => {
         });
     } else {
       if (!PlayerService.isSongLoaded()) {
-        PlayerService.loadSong(currentSong.path)
+        //PlayerService.loadSong(currentSong.path)
+        _loadSong(currentSong, dispatch)
           .then(duration => PlayerService.play(() => next(duration)(dispatch)))
           .then(() => {
             setNowPlaying(currentSong);

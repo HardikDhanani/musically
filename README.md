@@ -33,9 +33,9 @@
   - [ ] Remove multiple songs from playlist
   - [x] Delete a playlist
   - [x] Play a song
-  - [ ] Play an album
-  - [ ] Play an artist
-  - [ ] Play a genre
+  - [x] Play an album
+  - [x] Play an artist
+  - [x] Play a genre
   - [x] Play next song
   - [x] Play previous song
   - [x] Pause current song
@@ -52,11 +52,31 @@
   - [x] Resume song from "Now Playing"
   - [ ] Create a daily playlist
   - [ ] Open a song with Musically
-  - [ ] Most played Playlist
+  - [x] Most played Playlist
+  - [ ] Can reset Most Played playlist
+  - [ ] Can reset a song in Most Played playlist
   - [ ] Recent played Playlist
   - [x] Splash Screen
   - [ ] Share this App
-  - [ ] Go to Player if playing and put in background
+  - [x] Go to Player if playing and put in background
+  - [ ] Add to queue just after the current song
+  - [ ] Set laguage
+  - [ ] Set theme
+  - [ ] Send feedback
+  - [ ] Cant delete Favorites Playlist
+  - [ ] Cant delete Most Played Playlist
+  - [ ] Total number of songs
+  - [ ] Total number of artist
+  - [ ] Total number of albums
+  - [ ] Total number of genres
+  - [ ] Total number of playlists
+  - [ ] Alphabetical lists
+  - [ ] A song must start automatically after playing it
+  
+## Settings
+
+ - [ ] How many reproductions before being Most Played
+ - [ ] How long recent played
 
 ## Bugs
 
@@ -67,3 +87,13 @@
 
  - [ ] 1. Start playing a song
        Bug: Progress bar and elapsed time don't show correctly
+
+ - Los tracks parecen terminar antes de lo que deberian terminar
+ - Desde un album, menu song, Add to Playlist rompe la app
+ - Desde un album, menu song, Add to Favorites no funciona
+ - Desde un artist, menu album, Add to Playlist rompe la app
+ - Desde un artist, menu album, Add to Favorites no funciona
+ - Escuchando con blueooth, al apagar el auticular, el sonido swiche a altavoz. Deberia pausar la reproduccion
+ - No funciona el swiper del player
+ - Adding a song from Home/Songs to the queue adds everything
+

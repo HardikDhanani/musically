@@ -42,6 +42,7 @@ export default function app(state = initialState, action = {}) {
     case 'APP_SAVING_NEW_PLAYLIST_SUCCEED':
     case 'APP_ADDING_SONG_TO_PLAYLIST_SUCCEED':
     case 'APP_REMOVING_SONG_FROM_PLAYLIST_SUCCEED':
+    case 'APP_UPDATING_SONG_IN_PLAYLIST_SUCCEED':
     case 'APP_PLAYLIST_DELETED':
     case 'APP_PLAYLISTS_UPDATED':
       return {
