@@ -19,6 +19,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Base64;
 import android.util.Log;
+import android.os.AsyncTask;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -44,8 +45,15 @@ import java.util.HashMap;
 
 public class MusicFileManager extends ReactContextBaseJavaModule {
     private static MusicFileManager instance = null;
-
-   	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
+    
+    private WritableArray _jsonReturnArray;
+    private Callback _errorCallback;
+    private Callback _successCallback;
+    private String _error;
+    private Boolean _createBlur;
+    private Boolean _success;
+    private ContentResolver _musicResolver;
+    private Context _context; 
 
     public static MusicFileManager getInstance(ReactApplicationContext reactContext) {
         if (instance == null) {
@@ -57,6 +65,8 @@ public class MusicFileManager extends ReactContextBaseJavaModule {
 
     private MusicFileManager(ReactApplicationContext reactContext) {
         super(reactContext);
+
+        this._context = reactContext;
     }
 
     @Override
@@ -64,190 +74,226 @@ public class MusicFileManager extends ReactContextBaseJavaModule {
         return "MusicFileManager";
     }
 
+    private void consumeSuccessCallback() {
+        if(this._successCallback != null && this._success) {
+
+            this._successCallback.invoke(this._jsonReturnArray);
+            this._successCallback = null;
+        }
+    }
+
+    private void consumeErrorCallback() {
+        if(this._errorCallback != null) {
+
+            this._errorCallback.invoke(this._error);
+            this._errorCallback = null;
+        }
+    }
+
     @ReactMethod
     public void getAll(Boolean createBlur, Callback errorCallback, Callback successCallback){
 
-        ContentResolver musicResolver = this.getCurrentActivity().getContentResolver();
-        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-        Cursor musicCursor = musicResolver.query(musicUri, null, selection, null, sortOrder);
+        this._errorCallback = errorCallback;
+        this._successCallback = successCallback;
+        this._createBlur = createBlur;
+        this._musicResolver = this.getCurrentActivity().getContentResolver();
+        this._jsonReturnArray = new WritableNativeArray();
 
-        if (musicCursor != null && musicCursor.moveToFirst()) {
+        new AsyncTask<Void, Void, Void>() {
             
-            if(musicCursor.getCount() > 0){
-
-                MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-
-                try {
-
-                    WritableArray jsonArray = new WritableNativeArray();
-                    WritableMap items;
-                    byte[] art;
-
-                    long thisId;
-                    String thisPath;
-                    String fileName;
-                    String thisTitle;
-                    String thisArtist;
-                    String duration;
-                    String album;
-                    String artist;
-                    String title;
-                    String genre;
-                    String encoded;
-                    String blurred;
-
-                    while(musicCursor.moveToNext())
-                    {
-                        try{
-                            items = new WritableNativeMap();
-
-                            thisId = musicCursor.getLong(musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID));
-                            thisPath = musicCursor.getString(musicCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                            thisTitle = musicCursor.getString(musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE));
-                            thisArtist = musicCursor.getString(musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST));
-                            duration = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
-
-                            if(thisPath != null && thisPath != "" && thisPath.endsWith(".mp3")) {
-                                
-                                mmr.setDataSource(thisPath);
-
-                                fileName = thisPath.substring(thisPath.lastIndexOf("/") + 1);
-
-                                album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                                artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                                title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                                genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-                                encoded = "";
-                                blurred = "";
-
-                                art = mmr.getEmbeddedPicture();
-
-                                if (album == null) {
-                                    album = thisArtist;
-                                }
-
-                                if (artist == null) {
-                                    artist = thisArtist;
-                                }
-
-                                if (title == null) {
-                                    title = thisTitle;
-                                }
-
-                                if (art != null) {
-                                    Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
-
-                                    try {
-                                        String pathToImg = Environment.getExternalStorageDirectory() + "/" + thisId + ".jpg";
-                                        encoded = this.saveImageToStorageAndGetPath(pathToImg, songImage);
-                                    } catch (Exception e) {
-                                        // Just let images empty
-                                    }
-
-                                    if (createBlur) {
-                                        try {
-                                            String pathToImg = Environment.getExternalStorageDirectory() + "/" + thisId + "-blur.jpg";
-                                            blurred = this.saveBlurImageToStorageAndGetPath(pathToImg, songImage);
-                                        } catch (Exception e) {
-
+            @Override
+            protected Void doInBackground(Void... params) {
+                Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+                String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+                Cursor musicCursor = _musicResolver.query(musicUri, null, selection, null, sortOrder);
+        
+                if (musicCursor != null && musicCursor.moveToFirst()) {
+                    
+                    if(musicCursor.getCount() > 0){
+        
+                        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        
+                        try {
+                            WritableMap items;
+                            byte[] art;
+        
+                            long thisId;
+                            String thisPath;
+                            String fileName;
+                            String thisTitle;
+                            String thisArtist;
+                            String duration;
+                            String album;
+                            String artist;
+                            String title;
+                            String genre;
+                            String encoded;
+                            String blurred;
+        
+                            while(musicCursor.moveToNext())
+                            {
+                                try{
+                                    items = new WritableNativeMap();
+        
+                                    thisId = musicCursor.getLong(musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID));
+                                    thisPath = musicCursor.getString(musicCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                                    thisTitle = musicCursor.getString(musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.TITLE));
+                                    thisArtist = musicCursor.getString(musicCursor.getColumnIndex(android.provider.MediaStore.Audio.Media.ARTIST));
+                                    duration = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
+        
+                                    if(thisPath != null && thisPath != "" && thisPath.endsWith(".mp3")) {
+                                        
+                                        mmr.setDataSource(thisPath);
+        
+                                        fileName = thisPath.substring(thisPath.lastIndexOf("/") + 1);
+        
+                                        album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                                        artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                                        title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                                        genre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+                                        encoded = "";
+                                        blurred = "";
+        
+                                        art = mmr.getEmbeddedPicture();
+        
+                                        if (album == null) {
+                                            album = thisArtist;
                                         }
+        
+                                        if (artist == null) {
+                                            artist = thisArtist;
+                                        }
+        
+                                        if (title == null) {
+                                            title = thisTitle;
+                                        }
+        
+                                        if (art != null) {
+                                            Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
+        
+                                            try {
+                                                String pathToImg = Environment.getExternalStorageDirectory() + "/" + thisId + ".jpg";
+                                                encoded = this.saveImageToStorageAndGetPath(pathToImg, songImage);
+                                            } catch (Exception e) {
+
+                                            }
+        
+                                            if (_createBlur) {
+                                                try {
+                                                    String pathToImg = Environment.getExternalStorageDirectory() + "/" + thisId + "-blur.jpg";
+                                                    blurred = this.saveBlurImageToStorageAndGetPath(pathToImg, songImage);
+                                                } catch (Exception e) {
+        
+                                                }
+                                            }
+                                        }
+        
+                                        String str = String.valueOf(thisId);
+        
+                                        items.putString("id", str);
+                                        items.putString("album", album);
+                                        items.putString("artist", artist);
+                                        items.putString("title", title);
+                                        items.putString("genre", genre);
+        
+                                        if (encoded == "") {
+                                            items.putString("cover", "");
+                                        } else {
+                                            items.putString("cover", "file://" + encoded);
+                                        }
+        
+                                        if (blurred == "") {
+                                            items.putString("blur", "");
+                                        } else {
+                                            items.putString("blur", "file://" + blurred);
+                                        }
+        
+                                        items.putString("duration", duration);
+                                        items.putString("path", thisPath);
+                                        items.putString("fileName", fileName);
+
+                                        _jsonReturnArray.pushMap(items);
                                     }
+                                } catch (Exception e) {
+        
                                 }
-
-                                String str = String.valueOf(thisId);
-
-                                items.putString("id", str);
-                                items.putString("album", album);
-                                items.putString("artist", artist);
-                                items.putString("title", title);
-                                items.putString("genre", genre);
-
-                                if (encoded == "") {
-                                    items.putString("cover", "");
-                                } else {
-                                    items.putString("cover", "file://" + encoded);
-                                }
-
-                                if (blurred == "") {
-                                    items.putString("blur", "");
-                                } else {
-                                    items.putString("blur", "file://" + blurred);
-                                }
-
-                                items.putString("duration", duration);
-                                items.putString("path", thisPath);
-                                items.putString("fileName", fileName);
-                                jsonArray.pushMap(items);
                             }
-                        } catch (Exception e) {
 
+                            _success = true;
+                        } catch (Exception e) {
+                            _error = "Error: " + e.toString();
+                        } finally {
+                            mmr.release();
                         }
                     }
+                }
+    
+                return null;
+            }
+            
+            protected void onPostExecute(Void dummy) {
+                if(_success) {
+                    consumeSuccessCallback();
+                }
+                else {
+                    consumeErrorCallback();
+                }
+            }
 
-                    successCallback.invoke(jsonArray);
-                } catch (Exception e) {
-                    errorCallback.invoke("Error: " + e.toString());
+            private String saveImageToStorageAndGetPath(String pathToImg, Bitmap songImage) throws IOException {
+                if (songImage != null) {
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    songImage.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream.toByteArray();
+        
+                    if (byteArray != null && byteArray.length > 0) {
+                        this.saveToStorage(pathToImg, byteArray);
+            
+                        return pathToImg;
+                    }
+                }
+        
+                return null;
+            }
+        
+            private String saveBlurImageToStorageAndGetPath(String pathToImg, Bitmap songImage) throws IOException {
+                if (songImage != null) {
+                    Blur blur = new Blur();
+                    Bitmap blurimg = blur.fastblur(_context, songImage, 20);
+        
+                    if (blurimg != null) {
+                        ByteArrayOutputStream byteArrayOutputStreams = new ByteArrayOutputStream();
+        
+                        blurimg.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStreams);
+                        byte[] byteArray = byteArrayOutputStreams.toByteArray();
+        
+                        if (byteArray != null && byteArray.length > 0) {
+                            this.saveToStorage(pathToImg, byteArray);
+            
+                            return pathToImg;
+                        }
+        
+                    }
+                }
+        
+                return null;
+            }
+        
+            private void saveToStorage(String pathToImg, byte[] imageBytes) throws IOException {
+                FileOutputStream fos = null;
+                try {
+                    File filePath = new File(pathToImg);
+                    fos = new FileOutputStream(filePath, true);
+                    fos.write(imageBytes);
                 } finally {
-                    mmr.release();
+                    if (fos != null) {
+                        fos.flush();
+                        fos.close();
+                    }
                 }
             }
-        }
-    }
-
-    private String saveImageToStorageAndGetPath(String pathToImg, Bitmap songImage) throws IOException {
-        if (songImage != null) {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            songImage.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream.toByteArray();
-
-            if (byteArray != null && byteArray.length > 0) {
-                this.saveToStorage(pathToImg, byteArray);
-    
-                return pathToImg;
-            }
-        }
-
-        return null;
-    }
-
-    private String saveBlurImageToStorageAndGetPath(String pathToImg, Bitmap songImage) throws IOException {
-        if (songImage != null) {
-            Blur blur = new Blur();
-            Context context = this.getReactApplicationContext();
-            Bitmap blurimg = blur.fastblur(context, songImage, 20);
-
-            if (blurimg != null) {
-                ByteArrayOutputStream byteArrayOutputStreams = new ByteArrayOutputStream();
-
-                blurimg.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStreams);
-                byte[] byteArray = byteArrayOutputStreams.toByteArray();
-
-                if (byteArray != null && byteArray.length > 0) {
-                    this.saveToStorage(pathToImg, byteArray);
-    
-                    return pathToImg;
-                }
-
-            }
-        }
-
-        return null;
-    }
-
-    private void saveToStorage(String pathToImg, byte[] imageBytes) throws IOException {
-        FileOutputStream fos = null;
-        try {
-            File filePath = new File(pathToImg);
-            fos = new FileOutputStream(filePath, true);
-            fos.write(imageBytes);
-        } finally {
-            if (fos != null) {
-                fos.flush();
-                fos.close();
-            }
-        }
+        }.execute();
     }
 }
 
