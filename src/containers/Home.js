@@ -254,7 +254,7 @@ class Home extends Component {
         duration={song.item.duration}
         like={song.item.isFavorite}
         onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-        onPress={() => this._playSongs(song.item, this.props.songs)}
+        onPress={() => this._playSongs([song.item])}
       />
     );
   }
@@ -424,7 +424,7 @@ class Home extends Component {
           this.props.setMenu(null, 0, 0);
           this.props.deletePlaylist(playlist);
         }}
-        onPlayPress={() => this._playSongs(initialSong, queue, true)}
+        onPlayPress={() => this._playSongs(queue, true)}
         onAddToQueuePress={() => this._addToQueue(queue)}
         onPress={() => this.props.setMenu(null, 0, 0)} />
     );
@@ -443,17 +443,17 @@ class Home extends Component {
       <CardMenu
         positionX={this.props.menuPositionX}
         positionY={this.props.menuPositionY}
-        onPlayPress={() => this._playSongs(null, queue, true)}
+        onPlayPress={() => this._playSongs(queue, true)}
         onAddToQueuePress={() => this._addToQueue(queue)}
         onPress={() => this.props.setMenu(null, 0, 0)} />
     );
   }
 
-  _playSongs(initialSong, queue, closeMenu = false) {
+  _playSongs(queue, closeMenu = false) {
     if (closeMenu)
       this.props.setMenu(null, 0, 0);
 
-    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
+    this.props.navigation.navigate('Player', { queue, reset: true });
   }
 
   _addToQueue(queue) {
