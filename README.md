@@ -55,7 +55,7 @@
   - [x] Most played Playlist
   - [ ] Can reset Most Played playlist
   - [ ] Can reset a song in Most Played playlist
-  - [ ] Recent played Playlist
+  - [x] Recent played Playlist
   - [x] Splash Screen
   - [ ] Share this App
   - [x] Go to Player if playing and put in background
@@ -63,8 +63,8 @@
   - [ ] Set laguage
   - [ ] Set theme
   - [ ] Send feedback
-  - [ ] Cant delete Favorites Playlist
-  - [ ] Cant delete Most Played Playlist
+  - [ ] Can't delete Favorites Playlist
+  - [ ] Can't delete Most Played Playlist
   - [ ] Total number of songs
   - [ ] Total number of artist
   - [ ] Total number of albums

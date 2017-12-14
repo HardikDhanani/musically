@@ -47,16 +47,14 @@ class Player extends Component {
 
   componentDidMount() {
     let queue = null;
-    let initialSong = null;
-    let reset = false;
+    let startPlaying = false;
 
     if (this.props.navigation.state.params) {
       queue = this.props.navigation.state.params.queue;
-      initialSong = this.props.navigation.state.params.initialSong;
-      reset = this.props.navigation.state.params.reset;
+      startPlaying = this.props.navigation.state.params.startPlaying;
     }
 
-    this.props.load(queue, initialSong, reset);
+    this.props.load(queue, startPlaying);
   }
 
   render() {
@@ -96,7 +94,11 @@ class Player extends Component {
   }
 
   _onMomentumScrollEnd(e, state, context) {
-    this.props.songChanged(this.props.queue[state.index], null);
+    if(this.props.currentIndex > state.index){
+      this.props.prev();
+    } else if(this.props.currentIndex < state.index) {
+      this.props.next();
+    }
   }
 
   _renderControls() {
@@ -106,26 +108,7 @@ class Player extends Component {
     let currentIndex = this.props.currentIndex + 1;
     let totalSongs = this.props.queue.length;
     let duration = this.props.currentSong ? this._formatTime(this.props.currentSong.duration) : "00:00";
-    // let elapsedTime = this._formatTime(this.props.elapsedTime);
     let total = this.props.currentSong ? this.props.currentSong.duration : 0;
-
-    // return (
-    //   <View style={styles.controls}>
-    //     <Text style={{ lineHeight: 25, color: 'white', fontSize: 17 }}>{title}</Text>
-    //     <Text style={{ lineHeight: 25, color: 'gray' }}>{artist}</Text>
-    //     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-    //       <Text style={{ lineHeight: 25, color: 'gray' }}>{album}</Text>
-    //       <Text style={{ lineHeight: 25, color: 'gray' }}>{currentIndex + '/' + totalSongs}</Text>
-    //     </View>
-    //     <View style={{ marginTop: 30 }}>
-    //       {this._progressBar()}
-    //       <View style={{ paddingTop: 30, flexDirection: 'row', justifyContent: 'space-between' }}>
-    //         <Text style={{ lineHeight: 25, color: 'gray' }}>{elapsedTime}</Text>
-    //         <Text style={{ lineHeight: 25, color: 'gray' }}>{duration}</Text>
-    //       </View>
-    //     </View>
-    //   </View>
-    // );
 
     return (
       <PlayerControls
@@ -164,30 +147,6 @@ class Player extends Component {
       this.props.progressChanged(newElapsed);
     }
   }
-
-  // _progressBar() {
-  //   let total = this.props.currentSong ? this.props.currentSong.duration : 0;
-
-  //   return (
-  //     <ProgressBar
-  //       total={total}
-  //       elapsed={this.props.elapsedTime}
-  //       width={Dimensions.get('window').width}
-  //       color={'#ffa500'}
-  //       backgroundColor={'gray'}
-  //       showButton={true}
-  //       onProgressChange={percentage => {
-  //         if (this.props.playing)
-  //           this.props.playPause(this.props.currentSong);
-
-  //         if (percentage) {
-  //           let newElapsed = total * percentage;
-  //           this.props.progressChanged(newElapsed);
-  //         }
-  //       }}
-  //     />
-  //   );
-  // }
 
   _renderFloatMenu() {
     if (!this.props.showMenu)
@@ -315,9 +274,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    load: (queue, initialSong, reset) => playerActions.load(queue, initialSong, reset)(dispatch),
+    load: (queue, startPlaying) => playerActions.load(queue, startPlaying)(dispatch),
     setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'PLAYER' }, positionX, positionY)),
-    songChanged: (song) => playerActions.songChanged(song, null)(dispatch),
     random: () => dispatch(playerActions.random()),
     repeat: () => dispatch(playerActions.repeat()),
     playPause: (currentSong) => playerActions.playPause(currentSong)(dispatch),
