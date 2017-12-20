@@ -50,7 +50,8 @@ class PaginationHeader extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return this.props.total !== nextProps.total
-      || this.props.currentIndex !== nextProps.currentIndex;
+      || this.props.currentIndex !== nextProps.currentIndex
+      || this.props.language !== nextProps.language;
   }
 
   render() {

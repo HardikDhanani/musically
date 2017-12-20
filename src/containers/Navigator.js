@@ -10,6 +10,7 @@ import Player from './Player';
 import Queue from './Queue';
 import Favorites from './Favorites';
 import Playlist from './Playlist';
+import Settings from './Settings';
 
 const AppNavigator = StackNavigator(
     {
@@ -23,6 +24,7 @@ const AppNavigator = StackNavigator(
         Queue: { screen: Queue },
         Favorites: { screen: Favorites },
         Playlist: { screen: Playlist },
+        Settings: { screen: Settings },
     },
     {
         initialRouteName: "Splash",

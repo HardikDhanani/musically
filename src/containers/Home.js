@@ -23,6 +23,8 @@ import * as playerActions from '../redux/actions/playerActions';
 import * as homeSelectors from '../redux/selectors/home';
 import * as favoritesActions from '../redux/actions/favoritesActions';
 
+import HomePlaylists from './HomePlaylists';
+
 import ControlPanel from './ControlPanel';
 import Body from '../components/Body';
 import HomeHeader from '../components/HomeHeader';
@@ -39,9 +41,6 @@ import SongMenu from '../components/SongMenu';
 import HomeMenu from '../components/HomeMenu';
 import PlaylistMenu from '../components/PlaylistMenu';
 import Container from '../components/Container';
-import AddPlaylistButton from '../components/common/buttons/AddPlaylistButton';
-import NewPlaylist from '../components/NewPlaylist';
-import ConfirmationForm from '../components/ConfirmationForm';
 import PlaylistSelector from '../components/PlaylistSelector';
 
 class Home extends Component {
@@ -56,22 +55,19 @@ class Home extends Component {
     this._renderAlbumCard = this._renderAlbumCard.bind(this);
     this._renderGenreCard = this._renderGenreCard.bind(this);
     this._renderItem = this._renderItem.bind(this);
-    this._renderPlaylist = this._renderPlaylist.bind(this);
     this._swiperHeight = this._swiperHeight.bind(this);
     this._onPageChange = this._onPageChange.bind(this);
     this._groupItems = this._groupItems.bind(this);
     this._keyExtractor = this._keyExtractor.bind(this);
     this._onRef = this._onRef.bind(this);
     this._getSectionText = this._getSectionText.bind(this);
+    this._getSectionTextId = this._getSectionTextId.bind(this);
     this._getSectionIndex = this._getSectionIndex.bind(this);
     this._changeSection = this._changeSection.bind(this);
     this._playSongs = this._playSongs.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
-    this._showNewPlaylistForm = this._showNewPlaylistForm.bind(this);
-    this._getPlaylistMenu = this._getPlaylistMenu.bind(this);
     this._getCardMenu = this._getCardMenu.bind(this);
     this._getHomeMenu = this._getHomeMenu.bind(this);
-    this._showDeletePlaylistConfirmation = this._showDeletePlaylistConfirmation.bind(this);
     this._showAddToPlaylistForm = this._showAddToPlaylistForm.bind(this);
     this._renderPagination = this._renderPagination.bind(this);
     this._onIndexChanged = this._onIndexChanged.bind(this);
@@ -98,13 +94,7 @@ class Home extends Component {
             renderPagination={this._renderPagination}
             ref={component => this._swiper = component}
             onIndexChanged={this._onIndexChanged}>
-            <Body hasPaginationHeader={true}>
-              {
-                !this.props.isReady ?
-                  <ActivityIndicator animating={true} size='large' /> :
-                  <FlatList data={this.props.playlists} renderItem={this._renderPlaylist} keyExtractor={(item, index) => item.id} />
-              }
-            </Body>
+            <HomePlaylists navigation={this.props.navigation} />
             <Body hasPaginationHeader={true}>
               {
                 !this.props.isReady ?
@@ -134,10 +124,7 @@ class Home extends Component {
               }
             </Body>
           </Swiper>
-          <AddPlaylistButton hide={this.props.selectedSection !== 'playlists'} bottom={140} style={styles.addButton} onPress={this.props.createNewPlaylistForm} />
           <PlayerFooter navigation={this.props.navigation} />
-          {this._showNewPlaylistForm()}
-          {this._showDeletePlaylistConfirmation()}
           {this._renderMenu()}
           {this._showAddToPlaylistForm()}
         </Container>
@@ -157,19 +144,12 @@ class Home extends Component {
     );
   }
 
-  _showNewPlaylistForm() {
-    if (this.props.showNewPlaylistForm)
-      return (<NewPlaylist onCancelPress={this.props.closeNewPlaylistForm} onConfirmPress={this.props.newPlaylistConfirmed} />);
-
-    return null;
-  }
-
   _onRef(component) {
     this._drawer = component;
   }
 
   _onPageChange(targetIndex) {
-    this.props.selectedSectionChanged(this._getSectionText(targetIndex).toLowerCase());
+    this.props.selectedSectionChanged(this._getSectionTextId(targetIndex).toLowerCase());
     this._changeSection(targetIndex);
   }
 
@@ -182,15 +162,32 @@ class Home extends Component {
   _getSectionText(position) {
     switch (position) {
       case 0:
-        return 'Playlists';
+        return this.props.dictionary.getWord('playlists_short');
       case 1:
-        return 'Artists';
+        return this.props.dictionary.getWord('artists');
       case 2:
-        return 'Albums';
+        return this.props.dictionary.getWord('albums');
       case 3:
-        return 'Genres';
+        return this.props.dictionary.getWord('genres');
       case 4:
-        return 'Songs';
+        return this.props.dictionary.getWord('songs');
+      default:
+        return '';
+    }
+  }
+
+  _getSectionTextId(position) {
+    switch (position) {
+      case 0:
+        return 'playlists';
+      case 1:
+        return 'artists';
+      case 2:
+        return 'albums';
+      case 3:
+        return 'genres';
+      case 4:
+        return 'songs';
       default:
         return '';
     }
@@ -255,25 +252,6 @@ class Home extends Component {
         like={song.item.isFavorite}
         onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
         onPress={() => this._playSongs([song.item])}
-      />
-    );
-  }
-
-  _renderPlaylist(playlist) {
-    let targetMenu = {
-      type: 'PLAYLIST',
-      payload: playlist.item
-    };
-
-    return (
-      <PlaylistCard
-        styles={{ container: { backgroundColor: '#f1f1f1' }, text: { color: 'gray' } }}
-        key={playlist.index}
-        id={playlist.item.id}
-        name={playlist.item.name}
-        songs={playlist.item.songs}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-        onPress={() => this.props.navigation.navigate('Playlist', { playlistId: playlist.item.id })}
       />
     );
   }
@@ -365,8 +343,6 @@ class Home extends Component {
     switch (this.props.targetMenu.type.toLowerCase()) {
       case 'song':
         return this._getSongMenu(this.props.targetMenu.payload);
-      case 'playlist':
-        return this._getPlaylistMenu(this.props.targetMenu.payload);
       case 'artist':
       case 'album':
       case 'genre':
@@ -410,26 +386,6 @@ class Home extends Component {
     );
   }
 
-  _getPlaylistMenu(playlist) {
-    let initialSong = playlist.songs[0];
-    let queue = playlist.songs;
-    let showDelete = !(playlist.name.toLowerCase() === 'favorites' || playlist.name.toLowerCase() === 'most played')
-
-    return (
-      <PlaylistMenu
-        positionX={this.props.menuPositionX}
-        positionY={this.props.menuPositionY}
-        showDelete={showDelete}
-        onDeletePress={() => {
-          this.props.setMenu(null, 0, 0);
-          this.props.deletePlaylist(playlist);
-        }}
-        onPlayPress={() => this._playSongs(queue, true)}
-        onAddToQueuePress={() => this._addToQueue(queue)}
-        onPress={() => this.props.setMenu(null, 0, 0)} />
-    );
-  }
-
   _getCardMenu(targetType, target) {
     let queue = [];
 
@@ -461,28 +417,14 @@ class Home extends Component {
     this.props.addToQueue(queue);
   }
 
-  _showDeletePlaylistConfirmation() {
-    if (!this.props.showDeletePlaylistConfirmation)
-      return null;
-
-    return (
-      <ConfirmationForm
-        title={this.props.confirmationTitle}
-        onCancelPress={this.props.deletePlaylistCancel}
-        onConfirmPress={() => this.props.deletePlaylistConfirm(this.props.playlistToDelete)}>
-        <Text style={styles.confirmationText}>{this.props.confirmationDetail}</Text>
-      </ConfirmationForm>
-    );
-  }
-
   _renderPagination(index, total, context) {
     return (
-      <PaginationHeader currentIndex={index} total={total} sectionTextGenerator={this._getSectionText} onPageChange={this._onPageChange} />
+      <PaginationHeader language={this.props.dictionary.language} currentIndex={index} total={total} sectionTextGenerator={this._getSectionText} onPageChange={this._onPageChange} />
     );
   }
 
   _onIndexChanged(index) {
-    var text = this._getSectionText(index).toLowerCase();
+    var text = this._getSectionTextId(index).toLowerCase();
     this.props.selectedSectionChanged(text);
   }
 }
@@ -521,21 +463,16 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => {
   return {
     isReady: state.app.isReady,
-    playlists: state.app.playlists,
     songs: state.app.songs,
     albums: state.app.albums,
     artists: state.app.artists,
     genres: state.app.genres,
+    dictionary: state.app.dictionary,
     selectedSection: state.home.selectedSection,
     showMenu: state.app.showMenu,
     targetMenu: state.app.targetMenu,
     menuPositionX: state.app.menuPositionX,
     menuPositionY: state.app.menuPositionY,
-    showNewPlaylistForm: state.home.showNewPlaylistForm,
-    playlistToDelete: state.home.playlistToDelete,
-    showDeletePlaylistConfirmation: state.home.showDeletePlaylistConfirmation,
-    confirmationTitle: state.home.confirmationTitle,
-    confirmationDetail: state.home.confirmationDetail,
     showAddToPlaylistForm: state.home.showAddToPlaylistForm,
     songToAddToPlaylist: state.home.songToAddToPlaylist
   }
@@ -547,12 +484,6 @@ const mapDispatchToProps = dispatch => {
     setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'HOME' }, positionX, positionY)),
     addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
     like: (type, target) => dispatch(favoritesActions.like(type, target)),
-    createNewPlaylistForm: () => dispatch(homeActions.createNewPlaylistForm()),
-    closeNewPlaylistForm: () => dispatch(homeActions.closeNewPlaylistForm()),
-    newPlaylistConfirmed: (playlistName) => homeActions.newPlaylistConfirmed(playlistName)(dispatch),
-    deletePlaylist: (playlist) => dispatch(homeActions.deletePlaylist(playlist)),
-    deletePlaylistCancel: () => dispatch(homeActions.deletePlaylistCancel()),
-    deletePlaylistConfirm: (playlist) => dispatch(homeActions.deletePlaylistConfirm(playlist)),
     addSongToPlaylist: (song) => dispatch(homeActions.addSongToPlaylist(song)),
     cancelAddSongToPlaylist: () => dispatch(homeActions.cancelAddSongToPlaylist()),
     addSongToPlaylistConfirmed: (song, playlist) => homeActions.addSongToPlaylistConfirmed(song, playlist)(dispatch),

@@ -7,13 +7,11 @@ import {
 
 const styles = EStyleSheet.create({
   container: {
-    backgroundColor: '$headerBackgroundColor',
-    borderBottomColor: '$elementInactive',
-    borderBottomWidth: 1
+    width: '$appWidth * 0.7'
   }
 });
 
-export default class ControlPanelSection extends PureComponent {
+export default class LeftColumn extends PureComponent {
   render() {
     return (
       <View style={styles.container}>

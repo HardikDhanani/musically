@@ -2,18 +2,18 @@ import React, { PureComponent } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
+  TouchableNativeFeedback,
   View
 } from 'react-native';
 
 const styles = EStyleSheet.create({
   container: {
-    backgroundColor: '$headerBackgroundColor',
-    borderBottomColor: '$elementInactive',
-    borderBottomWidth: 1
+    alignSelf: 'flex-start',
+    alignItems: 'flex-end'
   }
 });
 
-export default class ControlPanelSection extends PureComponent {
+export default class RightColumn extends PureComponent {
   render() {
     return (
       <View style={styles.container}>

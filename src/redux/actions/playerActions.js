@@ -128,7 +128,7 @@ const _updateMostPlayedPlaylist = (song, dispatch) => {
 }
 
 const _updateRecentPlayedPlaylist = (song, dispatch) => {
-  return LocalService.getPlaylistByName('Recent played')
+  return LocalService.getPlaylistByName('Recently played')
     .then(playlist => {
       let index = playlist.songs.findIndex(s => s.id === song.id);
       if (index !== -1) {
@@ -158,10 +158,6 @@ const _trackChanged = (track, dispatch) => {
     })
     .then(() => {
       dispatch(songChangedAction(currentSong, currentIndex));
-
-      // if (isPlaying) {
-      //   playAndNotifyProgress(dispatch);
-      // }
     });
 }
 
@@ -234,9 +230,13 @@ export const addToQueue = (queue) => {
     LocalService.getSession()
       .then(session => {
         newSession = session;
-
         let tracks = queue.map(_mapTrack);
-        return _musicPlayerService.appendToQueue(tracks, session.currentIndex !== -1 ? (session.currentIndex + 1) : null)
+
+        if (_musicPlayerService.queue.length > 0) {
+          return _musicPlayerService.appendToQueue(tracks, session.currentIndex !== -1 ? (session.currentIndex + 1) : null);
+        } else {
+          return _musicPlayerService.setQueue(tracks);
+        }
       })
       .then(returnedQueue => {
         newSession.queue = returnedQueue.map(t => t.additionalInfo);
@@ -265,7 +265,9 @@ export const prev = () => {
 
 export const playPause = () => {
   return dispatch => {
-    _musicPlayerService.togglePlayPause();
+    if (_musicPlayerService.queue.length > 0) {
+      _musicPlayerService.togglePlayPause();
+    }
   }
 }
 
@@ -273,6 +275,9 @@ export const initPlayer = () => {
   return dispatch => {
     _musicPlayerService.addEventListener(Events.Play, currentTrack => {
       _startNotifyingProgress(dispatch);
+
+      currentTrack.additionalInfo.reproductions += 1;
+
       _updateMostPlayedPlaylist(currentTrack.additionalInfo, dispatch);
       _updateRecentPlayedPlaylist(currentTrack.additionalInfo, dispatch);
       dispatch(play());
@@ -293,8 +298,12 @@ export const initPlayer = () => {
 
     LocalService.getSession()
       .then(session => {
-        let tracks = session.queue.map(_mapTrack);
-        return _musicPlayerService.setQueue(tracks);
+        if (session.queue && session.queue.length) {
+          let tracks = session.queue.map(_mapTrack);
+          return _musicPlayerService.setQueue(tracks);
+        } else {
+          return Promise.resolve([]);
+        }
       });
   }
 }

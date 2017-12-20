@@ -10,6 +10,7 @@ import player from './player';
 import queue from './queue';
 import favorites from './favorites';
 import playlist from './playlist';
+import settings from './settings';
 
 const reducer = combineReducers({
   app,
@@ -21,7 +22,8 @@ const reducer = combineReducers({
   player,
   queue,
   favorites,
-  playlist
+  playlist,
+  settings
 });
 
 export default reducer;

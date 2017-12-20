@@ -99,9 +99,12 @@ export default function artist(state = initialState, action = {}) {
         elapsedTime: action.payload.newElapsed
       }
     case 'PLAYER_ADD_TO_QUEUE':
+      let newQueue = state.queue.concat(action.payload.queue || []);
       return {
         ...state,
-        queue: state.queue.concat(action.payload.queue || [])
+        queue: newQueue,
+        currentIndex: state.queue.length === 0 ? 0 : state.currentIndex,
+        currentSong: state.queue.length === 0 ? newQueue[0] : state.currentSong,
       }
     case 'FAVORITES_LIKE_SUCCESS':
       if (!state.currentSong || action.payload.type !== 'song')

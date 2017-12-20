@@ -3,6 +3,7 @@ package com.musically;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.horcrux.svg.SvgPackage;
 import com.tanguyantoine.react.MusicControl;
 import com.zmxv.RNSound.RNSoundPackage;
@@ -28,9 +29,10 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new SvgPackage(),
-            new RNSoundPackage(),
-            new MusicControl(),
+          new RNDeviceInfo(),
+          new SvgPackage(),
+          new RNSoundPackage(),
+          new MusicControl(),
           new MusicFileManagerPackage()
       );
     }

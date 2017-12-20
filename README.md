@@ -60,7 +60,7 @@
   - [ ] Share this App
   - [x] Go to Player if playing and put in background
   - [ ] Add to queue just after the current song
-  - [ ] Set laguage
+  - [x] Set laguage
   - [ ] Set theme
   - [ ] Send feedback
   - [ ] Can't delete Favorites Playlist
@@ -72,11 +72,13 @@
   - [ ] Total number of playlists
   - [ ] Alphabetical lists
   - [ ] A song must start automatically after playing it
+  - [x] Can set as default language the current mobile language
+  - [ ] Translate everything
   
 ## Settings
 
- - [ ] How many reproductions before being Most Played
- - [ ] How long recent played
+ - [x] How many reproductions before being Most Played
+ - [x] How long recent played
 
 ## Bugs
 

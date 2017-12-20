@@ -44,19 +44,19 @@ class ControlPanel extends Component {
       <ScrollView>
         <ControlPanelCover source={require('../images/music.png')} song={currentSongName} artist={currentSongArtist} />
         <ControlPanelSection>
-          <ControlPanelButton onPress={() => this._selectedSectionChanged('playlists')} text={'Play Lists'} isActive={this.props.selectedSection === 'playlists'} icon='playlist-play' />
-          <ControlPanelButton onPress={() => this._selectedSectionChanged('artists')} text={'Artists'} isActive={this.props.selectedSection === 'artists'} icon='person' />
-          <ControlPanelButton onPress={() => this._selectedSectionChanged('albums')} text={'Albums'} isActive={this.props.selectedSection === 'albums'} icon='album' />
-          <ControlPanelButton onPress={() => this._selectedSectionChanged('genres')} text={'Genres'} isActive={this.props.selectedSection === 'genres'} icon='music-note' />
-          <ControlPanelButton onPress={() => this._selectedSectionChanged('songs')} text={'Songs'} isActive={this.props.selectedSection === 'songs'} icon='music-note' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('playlists')} text={this.props.dictionary.getWord('playlists')} isActive={this.props.selectedSection === 'playlists'} icon='playlist-play' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('artists')} text={this.props.dictionary.getWord('artists')} isActive={this.props.selectedSection === 'artists'} icon='person' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('albums')} text={this.props.dictionary.getWord('albums')} isActive={this.props.selectedSection === 'albums'} icon='album' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('genres')} text={this.props.dictionary.getWord('genres')} isActive={this.props.selectedSection === 'genres'} icon='music-note' />
+          <ControlPanelButton onPress={() => this._selectedSectionChanged('songs')} text={this.props.dictionary.getWord('songs')} isActive={this.props.selectedSection === 'songs'} icon='music-note' />
         </ControlPanelSection>
         <ControlPanelSection>
-          <ControlPanelButton onPress={() => this._navigateTo('Queue')} text={'Queue'} isActive={false} icon='queue-music' />
-          <ControlPanelButton onPress={() => this._navigateTo('Favorites')} text={'Favorites'} isActive={false} icon='favorite' />
+          <ControlPanelButton onPress={() => this._navigateTo('Queue')} text={this.props.dictionary.getWord('queue')} isActive={false} icon='queue-music' />
+          <ControlPanelButton onPress={() => this._navigateTo('Favorites')} text={this.props.dictionary.getWord('favorites')} isActive={false} icon='favorite' />
         </ControlPanelSection>
         <ControlPanelSection>
-          <ControlPanelButton onPress={() => { }} text={'Equalizer'} isActive={false} icon='equalizer' />
-          <ControlPanelButton onPress={() => { }} text={'Settings'} isActive={false} icon='settings' />
+          <ControlPanelButton onPress={() => { }} text={this.props.dictionary.getWord('equalizer')} isActive={false} icon='equalizer' />
+          <ControlPanelButton onPress={() => this._navigateTo('Settings')} text={this.props.dictionary.getWord('settings')} isActive={false} icon='settings' />
         </ControlPanelSection>
       </ScrollView>
     );
@@ -82,6 +82,7 @@ const mapStateToProps = state => {
   return {
     selectedSection: state.home.selectedSection,
     currentSong: state.player.currentSong,
+    dictionary: state.app.dictionary
   }
 }
 

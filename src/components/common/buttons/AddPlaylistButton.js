@@ -32,9 +32,31 @@ class AddPlaylistButton extends Component {
     this.state = {
       bottom: new Animated.Value(0)
     }
+
+    this._animate = this._animate.bind(this);
+  }
+
+  componentDidMount() {
+    this._animate(400);
   }
 
   componentDidUpdate() {
+    this._animate();
+  }
+
+  render() {
+    let { bottom } = this.state;
+
+    return (
+      <Animated.View style={{ bottom }}>
+        <TouchableOpacity style={[styles.buttonContainer, this.props.style]} onPress={this.props.onPress}>
+          <Icon name="playlist-add" color={styles._button.color} backgroundColor={styles._button.backgroundColor} size={styles._button.fontSize} />
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+
+  _animate(duration) {
     if (this.state.bottom._value === 0 && this.props.hide)
       return;
 
@@ -49,21 +71,9 @@ class AddPlaylistButton extends Component {
       this.state.bottom,
       {
         toValue: toValue,
-        duration: 200,
+        duration: duration || 200,
       }
     ).start();
-  }
-
-  render() {
-    let { bottom } = this.state;
-
-    return (
-      <Animated.View style={{ bottom }}>
-        <TouchableOpacity style={[styles.buttonContainer, this.props.style]} onPress={this.props.onPress}>
-          <Icon name="playlist-add" color={styles._button.color} backgroundColor={styles._button.backgroundColor} size={styles._button.fontSize} />
-        </TouchableOpacity>
-      </Animated.View>
-    );
   }
 }
 

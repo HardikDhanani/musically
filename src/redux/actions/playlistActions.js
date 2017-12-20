@@ -2,6 +2,15 @@ import LocalService from '../../services/LocalService';
 import * as favoritesActions from './favoritesActions';
 import * as appActions from './appActions';
 
+const _unlikeIfFavorite = (playlist, song, dispatch) => {
+  if (song) {
+    if (playlist.name.toLowerCase() === 'favorites') {
+      song.isFavorite = true;
+      favoritesActions.like('song', song, false)(dispatch);
+    }
+  }
+}
+
 const loading = () => {
   return {
     type: 'PLAYLIST_LOADING'
@@ -49,15 +58,6 @@ export function load(playlistId) {
   }
 }
 
-const _unlikeIfFavorite = (playlist, song, dispatch) => {
-  if(song){
-    if(playlist.name.toLowerCase() === 'favorites'){
-      song.isFavorite = true;
-      favoritesActions.like('song', song, false)(dispatch);
-    }
-  }
-}
-
 export function removeSong(playlistId, songId) {
   return dispatch => {
     dispatch(removingSong());
@@ -68,7 +68,7 @@ export function removeSong(playlistId, songId) {
     LocalService.getPlaylistById(playlistId)
       .then(pl => {
         playlist = pl;
-        
+
         let index = playlist.songs.findIndex(s => s.id === songId);
         if (index !== -1) {
           song = playlist.songs[index];

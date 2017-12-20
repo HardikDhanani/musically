@@ -3,15 +3,18 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  TouchableOpacity,
-  Text
+  TouchableNativeFeedback,
+  Text,
+  View
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const styles = EStyleSheet.create({
   button: {
     flexDirection: 'row',
-    padding: 8,
+    alignItems: 'center',
+    padding: 12,
+    paddingLeft: 20
   },
   icon: {
     marginRight: 30,
@@ -19,10 +22,7 @@ const styles = EStyleSheet.create({
     width: 30
   },
   text: {
-    fontSize: '$titleFontSize',
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    fontWeight: 'bold'
+    fontSize: '$titleFontSize'
   },
   active: {
     color: '$elementActive'
@@ -35,10 +35,12 @@ const styles = EStyleSheet.create({
 class ControlPanelButton extends PureComponent {
   render() {
     return (
-      <TouchableOpacity style={styles.button} onPress={this.props.onPress}>
-        <Icon size={25} style={[styles.icon, this.props.isActive ? styles.active : styles.inactive]} name={this.props.icon} />
-        <Text style={[styles.text, this.props.isActive ? styles.active : styles.inactive]}>{this.props.text}</Text>
-      </TouchableOpacity>
+      <TouchableNativeFeedback onPress={this.props.onPress}>
+        <View style={styles.button} >
+          <Icon size={25} style={[styles.icon, this.props.isActive ? styles.active : styles.inactive]} name={this.props.icon} />
+          <Text style={[styles.text, this.props.isActive ? styles.active : styles.inactive]}>{this.props.text}</Text>
+        </View>
+      </TouchableNativeFeedback>
     );
   }
 }

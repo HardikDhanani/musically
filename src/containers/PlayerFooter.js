@@ -1,22 +1,41 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import EStyleSheet from 'react-native-extended-stylesheet';
+import PropTypes from 'prop-types';
+
 import * as playerActions from '../redux/actions/playerActions';
 
-import { Text, TouchableWithoutFeedback, View, Dimensions, Image } from 'react-native';
-import StyleManager from '../styles/StyleManager';
-
+import { 
+  Text, 
+  TouchableWithoutFeedback, 
+  View, 
+  Dimensions, 
+  Image 
+} from 'react-native';
 import Button from '../components/Button';
 import ProgressBar from '../components/ProgressBar';
 import PlayerFooterSongSection from '../components/PlayerFooterSongSection';
 import PlayerFooterControlsSection from '../components/PlayerFooterControlsSection';
+
+const styles = EStyleSheet.create({
+  container: {
+    height: '$footerHeight',
+    width: '$appWidth',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '$headerBackgroundColor'
+  },
+  image: {
+    width: '$footerHeight',
+    height: '$footerHeight',
+  }
+});
 
 class PlayerFooter extends Component {
   constructor(props) {
     super(props);
 
     this._progressBar = this._progressBar.bind(this);
-    this._containerStyle = StyleManager.getStyle('PlayerFooterContainer');
-    this._imageStyle = StyleManager.getStyle('PlayerFooterImage');
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -35,8 +54,8 @@ class PlayerFooter extends Component {
 
     return (
       <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Player', { initialSong: this.props.currentSong })}>
-        <View style={this._containerStyle}>
-          <Image source={source} style={this._imageStyle} />
+        <View style={styles.container}>
+          <Image source={source} style={styles.image} />
           <View style={{ flex: 1, flexDirection: 'column' }}>
             {this._progressBar()}
             <View style={{ flex: 1, flexDirection: 'row' }}>

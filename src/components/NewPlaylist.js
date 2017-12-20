@@ -26,7 +26,7 @@ class NewPlaylist extends Component {
   }
 
   render() {
-    
+
     return (
       <ConfirmationForm
         title={'New Playlist'}

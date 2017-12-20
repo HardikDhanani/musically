@@ -1,18 +1,58 @@
 import LocalService from '../../services/LocalService';
+import LanguageManager from '../../services/LanguageManager';
 import songsSelector from '../selectors/songs';
+import playlistsSelector from '../selectors/playlists';
 import * as playerActions from './playerActions';
+import * as playlistActions from './playlistActions';
+import dictionaries from '../../dictionaries/index';
+import { languageChanged } from './settingsActions';
+import playlist from '../reducers/playlist';
+
 
 let _isLoaded = false;
+let _languageManager = new LanguageManager(dictionaries);
+
+function _getCurrentLanguage() {
+  let DeviceInfo = require('react-native-device-info');
+  let locale = DeviceInfo.getDeviceLocale() || 'en-US';
+
+  switch (locale.substring(0, 2)) {
+    case 'es':
+      return 'spanish';
+    case 'pt':
+      return 'portuguese';
+    case 'en':
+    default:
+      return 'english';
+  }
+}
+
+async function _initialize(dispatch) {
+  let session = await LocalService.getSession();
+  _languageManager.setLanguage(session.language || _getCurrentLanguage());
+  dispatch(appInitialized(_languageManager.currentDictionary));
+}
+
+function _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session) {
+  playlistsSelector.setMostPlayedLengthOnPlaylists(playlists, session.mostPlayedLength);
+  playlistsSelector.setRecentlyPlayedLengthOnPlaylists(playlists, session.recentlyPlayedLength);
+}
 
 async function _load(dispatch) {
   let session = await LocalService.getSession();
+
+  LocalService.getPlaylists()
+    .then(playlists => {
+      _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session);
+      dispatch(homePlaylistsLoaded(playlists))
+    });
+
   let songs = await LocalService.getSongs();
   let albums = await LocalService.getAlbums();
   let artists = await LocalService.getArtists();
   let genres = await LocalService.getGenres();
-  let playlists = await LocalService.getPlaylists();
 
-  dispatch(startingSuccess(songs, artists, albums, genres, playlists, session));
+  dispatch(startingSuccess(songs, artists, albums, genres, null, session));
 }
 
 function _groupAndSaveArtists(songs) {
@@ -37,13 +77,14 @@ function _groupAndSaveMusic(songs) {
   let ordererSongs = songsSelector.orderBy(songs, s => s.title).map(song => {
     return {
       ...song,
-      reproductions: 0
+      reproductions: 0,
+      isFavorite: false
     };
   });
   return LocalService.saveSongs(ordererSongs)
-    .then(() => _groupAndSaveArtists(songs))
-    .then(() => _groupAndSaveAlbums(songs))
-    .then(() => _groupAndSaveGenres(songs));
+    .then(() => _groupAndSaveArtists(ordererSongs))
+    .then(() => _groupAndSaveAlbums(ordererSongs))
+    .then(() => _groupAndSaveGenres(ordererSongs));
 }
 
 function _createDefaultPlaylists() {
@@ -58,13 +99,22 @@ function _createDefaultPlaylists() {
   }
 
   let recentPlayed = {
-    name: 'Recent played',
+    name: 'Recently played',
     songs: []
   }
 
   return LocalService.savePlaylist(mostPlayed)
     .then(() => LocalService.savePlaylist(favorites))
     .then(() => LocalService.savePlaylist(recentPlayed));
+}
+
+const appInitialized = (dictionary) => {
+  return {
+    type: 'APP_INITIALIZED',
+    payload: {
+      dictionary
+    }
+  }
 }
 
 const starting = () => {
@@ -76,6 +126,15 @@ const starting = () => {
 const goHome = () => {
   return {
     type: 'APP_GO_HOME'
+  }
+}
+
+const homePlaylistsLoaded = (playlists) => {
+  return {
+    type: 'APP_HOME_PLAYLISTS_LOADED_SUCCESS',
+    payload: {
+      playlists
+    }
   }
 }
 
@@ -195,6 +254,15 @@ const songUpdatedInPlaylist = (playlists) => {
   }
 }
 
+const languageChangedAction = (dictionary) => {
+  return {
+    type: 'APP_LANGUAGE_CHANGED',
+    payload: {
+      dictionary
+    }
+  }
+}
+
 export const setMenu = (target, positionX, positionY) => {
   return {
     type: 'APP_SET_MENU',
@@ -229,6 +297,7 @@ export function start() {
         dispatch(goHome());
       } else {
         dispatch(starting());
+        _initialize(dispatch);
 
         setTimeout(() => {
           _isLoaded = true;
@@ -300,10 +369,19 @@ export function addSongToPlaylist(song, playlist) {
     if (index === -1) {
       dispatch(addingSongToPlaylist());
 
+      let session = null;
       playlist.songs.push(song);
       LocalService.savePlaylist(playlist)
+        .then(LocalService.getSession)
+        .then(ses => {
+          session = ses;
+          return Promise.resolve();
+        })
         .then(LocalService.getPlaylists)
-        .then(playlists => dispatch(songAddedToPlaylist(playlists)));
+        .then(playlists => {
+          _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session);
+          dispatch(songAddedToPlaylist(playlists))
+        });
     } else {
       dispatch(songAlreadyInPlaylist());
     }
@@ -316,10 +394,19 @@ export function updateSongInPlaylist(song, playlist) {
     if (index !== -1) {
       dispatch(updatingSongInPlaylist());
 
+      let session = null;
       playlist.songs[index] = song;
       LocalService.savePlaylist(playlist)
+        .then(LocalService.getSession)
+        .then(ses => {
+          session = ses;
+          return Promise.resolve();
+        })
         .then(LocalService.getPlaylists)
-        .then(playlists => dispatch(songUpdatedInPlaylist(playlists)));
+        .then(playlists => {
+          _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session);
+          dispatch(songUpdatedInPlaylist(playlists))
+        });
     } else {
       dispatch(songDoesNotExistInPlaylist());
     }
@@ -345,5 +432,19 @@ export function updatePlaylists() {
   return dispatch => {
     LocalService.getPlaylists()
       .then(playlists => dispatch(playlistsUpdated(playlists)));
+  }
+}
+
+export function setLanguage(language) {
+  return dispatch => {
+    LocalService.getSession()
+      .then(session => {
+        session.language = language;
+        return LocalService.saveSession(session)
+      })
+      .then(session => {
+        _languageManager.setLanguage(language);
+        dispatch(languageChangedAction(_languageManager.currentDictionary));
+      });
   }
 }
