@@ -107,7 +107,7 @@ class HomePlaylists extends Component {
   _getPlaylistMenu(playlist) {
     let initialSong = playlist.songs[0];
     let queue = playlist.songs;
-    let showDelete = !(playlist.name.toLowerCase() === 'favorites' || playlist.name.toLowerCase() === 'most played')
+    let showDelete = !(playlist.name.toLowerCase() === 'favorites' || playlist.name.toLowerCase() === 'most played' || playlist.name.toLowerCase() === 'recently played')
 
     return (
       <PlaylistMenu

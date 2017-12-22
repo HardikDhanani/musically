@@ -15,8 +15,8 @@ let playlists = {};
 
 playlists.setMostPlayedLengthOnPlaylists = (playlists, mostPlayedLength) => {
   let sortSongs = (a, b) => {
-    if (a.reproductions < b.reproductions) return -1;
-    if (a.reproductions > b.reproductions) return 1;
+    if (a.reproductions < b.reproductions) return 1;
+    if (a.reproductions > b.reproductions) return -1;
     return 0;
   }
 

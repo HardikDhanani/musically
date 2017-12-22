@@ -15,6 +15,7 @@
   - [x] Add an genre to queue
   - [x] Remove items from the queue
   - [ ] Remove multiple items from the queue
+  - [ ] Reorder items in the queue
   - [x] Like a song
   - [x] Unlike a song
   - [x] Like an album
@@ -63,8 +64,9 @@
   - [x] Set laguage
   - [ ] Set theme
   - [ ] Send feedback
-  - [ ] Can't delete Favorites Playlist
-  - [ ] Can't delete Most Played Playlist
+  - [x] Can't delete Favorites Playlist
+  - [x] Can't delete Most Played Playlist
+  - [x] Can't delete Recently Played Playlist
   - [ ] Total number of songs
   - [ ] Total number of artist
   - [ ] Total number of albums
