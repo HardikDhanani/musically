@@ -15,7 +15,7 @@
   - [x] Add an genre to queue
   - [x] Remove items from the queue
   - [ ] Remove multiple items from the queue
-  - [ ] Reorder items in the queue
+  - [x] Reorder items in the queue
   - [x] Like a song
   - [x] Unlike a song
   - [x] Like an album
@@ -32,6 +32,7 @@
   - [x] Add song to playlist
   - [x] Remove song from playlist
   - [ ] Remove multiple songs from playlist
+  - [ ] Reorder items in a playlist
   - [x] Delete a playlist
   - [x] Play a song
   - [x] Play an album
@@ -54,9 +55,10 @@
   - [ ] Create a daily playlist
   - [ ] Open a song with Musically
   - [x] Most played Playlist
-  - [ ] Can reset Most Played playlist
-  - [ ] Can reset a song in Most Played playlist
-  - [x] Recent played Playlist
+  - [x] Can reset Most Played playlist
+  - [x] Can reset Recently Played playlist
+  - [x] Can delete a song from Most Played playlist
+  - [x] Recently played Playlist
   - [x] Splash Screen
   - [ ] Share this App
   - [x] Go to Player if playing and put in background

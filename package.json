@@ -17,6 +17,7 @@
     "react-native-music-control": "^0.4.12",
     "react-native-music-player-service": "^0.1.1",
     "react-native-shadow": "^1.2.1",
+    "react-native-sortable-listview": "^0.2.7",
     "react-native-sound": "^0.10.4",
     "react-native-storage": "^0.2.2",
     "react-native-svg": "^5.4.1",

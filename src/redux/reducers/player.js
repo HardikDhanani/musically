@@ -114,6 +114,21 @@ export default function artist(state = initialState, action = {}) {
         ...state,
         isFavorite: action.payload.target.isFavorite
       }
+    case 'QUEUE_MOVE_SONG_SUCCESS':
+      let index = state.currentIndex;
+      if (state.currentSong.id === action.payload.songId) {
+        index = action.payload.movedTo;
+      }
+      return {
+        ...state,
+        queue: JSON.parse(JSON.stringify(action.payload.queue)),
+        currentIndex: index
+      }
+    case 'QUEUE_REMOVING_SONG_SUCCESS':
+      return {
+        ...state,
+        queue: JSON.parse(JSON.stringify(action.payload.queue))
+      }
     default:
       return state;
   }

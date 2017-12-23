@@ -38,6 +38,11 @@ export default function search(state = initialState, action = {}) {
         ...state,
         isRemovingSong: false
       }
+    case 'QUEUE_MOVE_SONG_SUCCESS':
+      return {
+        ...state,
+        queue: JSON.parse(JSON.stringify(action.payload.queue))
+      }
     default:
       return state;
   }

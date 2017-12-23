@@ -49,6 +49,26 @@ const removingSongError = (error) => {
   }
 }
 
+const moveSongSuccess = (queue, songId, movedTo) => {
+  return {
+    type: 'QUEUE_MOVE_SONG_SUCCESS',
+    payload: {
+      queue,
+      songId,
+      movedTo
+    }
+  }
+}
+
+const moveSongError = (error) => {
+  return {
+    type: 'QUEUE_MOVE_SONG_ERROR',
+    payload: {
+      error
+    }
+  }
+}
+
 export function load() {
   return dispatch => {
     dispatch(loading())
@@ -87,6 +107,23 @@ export function removeFromQueue(song) {
       })
       .catch(error => {
         dispatch(removingSongError(error));
+      });
+  }
+}
+
+export function moveSong(songId, from, to) {
+  return dispatch => {
+    LocalService.getSession()
+      .then(session => {
+        session.queue.splice(to, 0, session.queue.splice(from, 1)[0]);
+
+        return LocalService.saveSession(session);
+      })
+      .then(session => {
+        dispatch(moveSongSuccess(session.queue, songId, to))
+      })
+      .catch(error => {
+        dispatch(moveSongError(error));
       });
   }
 }

@@ -4,10 +4,10 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
   View,
-  TouchableWithoutFeedback,
   Text
 } from 'react-native';
 import IconButton from './common/buttons/IconButton';
+import Touchable from './common/buttons/Touchable';
 
 const styles = EStyleSheet.create({
   container: {
@@ -55,7 +55,7 @@ class PlaylistCard extends Component {
 
   render() {
     return (
-      <TouchableWithoutFeedback onPress={this.props.onPress}>
+      <Touchable onPress={this.props.onPress}>
         <View style={[styles.container, this.props.styles.container]}>
           <IconButton iconName='play-arrow' onPress={this.props.onPlayPress} style={styles._button} iconSize={styles._button.fontSize} />
           <View style={styles.infoContainer}>
@@ -66,7 +66,7 @@ class PlaylistCard extends Component {
           </View>
           <IconButton iconName='more-vert' onPress={this._onOptionPressed} onRef={ref => this._options = ref} style={styles._button} iconSize={styles._button.fontSize} />
         </View>
-      </TouchableWithoutFeedback>
+      </Touchable>
     );
   }
 

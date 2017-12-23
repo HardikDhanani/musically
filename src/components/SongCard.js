@@ -4,9 +4,9 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
   View,
-  TouchableWithoutFeedback,
   Text
 } from 'react-native';
+import Touchable from './common/buttons/Touchable';
 import IconButton from './common/buttons/IconButton';
 
 const styles = EStyleSheet.create({
@@ -67,7 +67,11 @@ class SongCard extends Component {
     let duration = this._getDuration(this.props.duration);
 
     return (
-      <TouchableWithoutFeedback onPress={this.props.onPress}>
+      <Touchable
+        onLongPress={this.props.onLongPress}
+        onLongIn={this.props.onLongIn}
+        onLongOut={this.props.onLongOut}
+        onPress={this.props.onPress}>
         <View style={[styles.container, this.props.styles.container]}>
           <IconButton iconName='play-arrow' onPress={this.props.onPlayPress} style={styles._button} iconSize={styles._button.fontSize} />
           <View style={styles.infoContainer}>
@@ -81,7 +85,7 @@ class SongCard extends Component {
           </View>
           <IconButton iconName='more-vert' onPress={this._onOptionPressed} onRef={ref => this._options = ref} style={styles._button} iconSize={styles._button.fontSize} />
         </View>
-      </TouchableWithoutFeedback>
+      </Touchable>
     );
   }
 
@@ -108,6 +112,10 @@ class SongCard extends Component {
           width
         });
     });
+  }
+
+  _delayTouch(callback) {
+    setTimeout(callback, 100);
   }
 }
 

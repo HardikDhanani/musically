@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import SortableListView from 'react-native-sortable-listview';
 
 import * as queueActions from '../redux/actions/queueActions';
 import * as appActions from '../redux/actions/appActions';
@@ -10,13 +11,14 @@ import * as playerActions from '../redux/actions/playerActions';
 import {
   View,
   ActivityIndicator,
-  FlatList
+  TouchableHighlight
 } from 'react-native';
 import QueueHeader from '../components/QueueHeader';
 import Body from '../components/Body';
 import SongCard from '../components/SongCard';
 import QueueSongMenu from '../components/QueueSongMenu';
 import FloatMenu from '../components/FloatMenu';
+import HeaderMenu from '../components/HeaderMenu';
 import PlayerFooter from './PlayerFooter';
 
 const styles = EStyleSheet.create({
@@ -25,6 +27,22 @@ const styles = EStyleSheet.create({
     backgroundColor: '$bodySecondaryBackgroundColor'
   }
 });
+
+class SorteableItem extends Component {
+  render() {
+    return (
+      <SongCard
+        {...this.props.sortHandlers}
+        styles={{ container: styles.item, text: styles.itemText }}
+        id={this.props.song.id}
+        name={this.props.song.title}
+        artist={this.props.song.artist}
+        duration={this.props.song.duration}
+        onOptionPressed={this.props.onOptionPressed}
+        onPress={this.props.onPress} />
+    )
+  }
+}
 
 class Queue extends Component {
   constructor(props) {
@@ -50,7 +68,15 @@ class Queue extends Component {
           {
             this.props.isLoading ?
               <ActivityIndicator animating={true} size='large' /> :
-              <FlatList initialNumToRender={10} getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })} data={this.props.queue} renderItem={this._renderSong} keyExtractor={(item, index) => index} />
+              <SortableListView
+                style={{ flex: 1 }}
+                data={this.props.queue}
+                onRowMoved={e => {
+                  this.props.moveSong(e.row.data.id, e.from, e.to);
+                }}
+                renderRow={this._renderSong}
+                activeOpacity={0.5}
+                disableAnimatedScrolling={true} />
           }
         </Body>
         {this._renderMenu()}
@@ -62,20 +88,15 @@ class Queue extends Component {
   _renderSong(song) {
     let targetMenu = {
       type: 'SONG',
-      payload: song.item
+      payload: song
     };
 
     return (
-      <View key={song.index}>
-        <SongCard
-          styles={{ container: styles.item, text: styles.itemText }}
-          id={song.item.id}
-          name={song.item.title}
-          artist={song.item.artist}
-          duration={song.item.duration}
-          onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-          onPress={() => this.props.songChanged(song.item)} />
-      </View>
+      <SorteableItem
+        song={song}
+        targetMenu={targetMenu}
+        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
+        onPress={() => this.props.songChanged(song)} />
     );
   }
 
@@ -127,9 +148,10 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     load: () => dispatch(queueActions.load()),
-    songChanged: (song) => playerActions.songChanged(song, null)(dispatch),
+    songChanged: (song) => { },
     removeFromQueue: song => queueActions.removeFromQueue(song)(dispatch),
     setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'QUEUE' }, positionX, positionY)),
+    moveSong: (songId, from, to) => queueActions.moveSong(songId, from, to)(dispatch)
   }
 }
 
