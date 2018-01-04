@@ -27,7 +27,7 @@ const AppNavigator = StackNavigator(
         Settings: { screen: Settings },
     },
     {
-        initialRouteName: "Splash",
+        initialRouteName: 'Splash',
         headerMode: 'none',
     }
 );

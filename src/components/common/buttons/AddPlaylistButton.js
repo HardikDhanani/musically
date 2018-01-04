@@ -14,9 +14,10 @@ const styles = EStyleSheet.create({
     height: '$headerHeight',
     width: '$headerHeight',
     borderRadius: 100,
-    backgroundColor: '$elementActive',
+    backgroundColor: '$appMainColor',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    elevation: 10
   },
   button: {
     color: '$headerColor',

@@ -69,6 +69,45 @@ const moveSongError = (error) => {
   }
 }
 
+export const setDeleteModeOn = () => {
+  return {
+    type: 'QUEUE_SET_DELETE_MODE_ON'
+  }
+}
+
+export const setDeleteModeOff = () => {
+  return {
+    type: 'QUEUE_SET_DELETE_MODE_OFF'
+  }
+}
+
+export const selectSong = (id) => {
+  return {
+    type: 'QUEUE_SELECT_SONG',
+    payload: {
+      id
+    }
+  }
+}
+
+export const onSelectAllPress = () => {
+  return {
+    type: 'QUEUE_SELECT_ALL_PRESSED'
+  }
+}
+
+export const showDeleteSongsConfirmation = () => {
+  return {
+    type: 'QUEUE_DELETE_SONGS_CONFIRMATION'
+  }
+}
+
+export const deleteSelectedSongsCancel = () => {
+  return {
+    type: 'QUEUE_DELETE_SONGS_CANCEL'
+  }
+}
+
 export function load() {
   return dispatch => {
     dispatch(loading())
@@ -124,6 +163,31 @@ export function moveSong(songId, from, to) {
       })
       .catch(error => {
         dispatch(moveSongError(error));
+      });
+  }
+}
+
+export function deleteSelectedSongs(queue) {
+  return dispatch => {
+    LocalService.getSession()
+      .then(session => {
+        let newQueue = queue.filter(s => !s.selected).map(s => {
+          return {
+            ...s,
+            selected: undefined
+          }
+        });
+
+        session.queue = newQueue;
+        return LocalService.saveSession(session);
+      })
+      .then(session => {
+        let songsToRemove = queue.filter(s => s.selected);
+        dispatch(removingSongSuccess(session.queue));
+        playerActions.removeFromQueue(songsToRemove)(dispatch);
+      })
+      .catch(error => {
+        dispatch(removingSongError(error));
       });
   }
 }

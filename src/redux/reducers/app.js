@@ -1,7 +1,12 @@
 const initialState = {
-  dictionary: {},
+  dictionary: {
+    getWord: () => '[undefined]'
+  },
   isReady: false,
   homePlaylistsReady: false,
+  homeArtistsReady: false,
+  homeSlbumsReady: false,
+  homeSongsReady: false,
   goHome: false,
   session: null,
   songs: [],
@@ -37,6 +42,9 @@ export default function app(state = initialState, action = {}) {
       return {
         ...state,
         isReady: true,
+        homeArtistsReady: true,
+        homeAlbumsReady: true,
+        homeSongsReady: true,
         session: action.payload.session,
         songs: action.payload.songs,
         albums: action.payload.albums,

@@ -10,7 +10,6 @@ import * as appActions from '../redux/actions/appActions';
 
 import StyleManager from '../styles/StyleManager';
 
-import Header from '../components/Header';
 import Body from '../components/Body';
 import SearchHeader from '../components/SearchHeader';
 import GroupSection from '../components/GroupSection';

@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import Header from './Header';
+import Header from './common/headers/Header';
 import HeaderTitle from './HeaderTitle';
 import HeaderLeftSection from './HeaderLeftSection';
 import HeaderRightSection from './HeaderRightSection';
@@ -25,9 +25,10 @@ class QueueHeader extends PureComponent {
           <IconButton iconName='arrow-back' onPress={this.props.onBackPress} style={styles._button} iconSize={styles._button.fontSize} />
         </HeaderLeftSection>
         <HeaderCenterSection>
-          <HeaderTitle>{'Queue'}</HeaderTitle>
+          <HeaderTitle>{this.props.title}</HeaderTitle>
         </HeaderCenterSection>
         <HeaderRightSection>
+          <IconButton iconName='delete' onPress={this.props.onDeletePress} style={styles._button} iconSize={styles._button.fontSize - 2} />
           <IconButton iconName='more-vert' onPress={this.props.onMorePress} style={styles._button} iconSize={styles._button.fontSize} />
         </HeaderRightSection>
       </Header>
@@ -37,6 +38,7 @@ class QueueHeader extends PureComponent {
 
 QueueHeader.propTypes = {
   onBackPress: PropTypes.func,
+  onDeletePress: PropTypes.func,
   onMorePress: PropTypes.func
 };
 

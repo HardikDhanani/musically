@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import Header from '../Header';
+import Header from '../common/headers/Header';
 import HeaderTitle from '../HeaderTitle';
 import HeaderLeftSection from '../HeaderLeftSection';
 import HeaderCenterSection from '../HeaderCenterSection';

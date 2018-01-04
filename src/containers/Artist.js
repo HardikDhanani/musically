@@ -16,7 +16,6 @@ import HeaderMenu from '../components/HeaderMenu';
 import SongMenu from '../components/SongMenu';
 import CardMenu from '../components/CardMenu';
 import ContainerView from '../components/ContainerView';
-import Header from '../components/Header';
 import SongCard from '../components/SongCard';
 import AlbumCard from '../components/AlbumCard';
 import FloatMenuOption from '../components/FloatMenuOption';

@@ -10,7 +10,10 @@ const initialState = {
   confirmationTitle: null,
   confirmationDetail: null,
   showAddToPlaylistForm: false,
-  songToAddToPlaylist: null
+  songToAddToPlaylist: null,
+  playlistModified: null,
+  showAddNewPlaylistForm: false,
+  showAddToPlaylistConfirmationForm: false
 };
 
 export default function home(state = initialState, action = {}) {
@@ -109,6 +112,31 @@ export default function home(state = initialState, action = {}) {
         ...state,
         showAddToPlaylistForm: false,
         songToAddToPlaylist: null
+      }
+    case 'HOME_SHOW_ADD_PLAYLIST_SUCCESS':
+      return {
+        ...state,
+        showAddToPlaylistForm: false,
+        showAddToPlaylistConfirmationForm: true,
+        songToAddToPlaylist: action.payload.song,
+        playlistModified: action.payload.playlist
+      }
+    case 'HOME_HIDE_ADD_PLAYLIST_SUCCESS':
+      return {
+        ...state,
+        showAddToPlaylistConfirmationForm: false,
+        songToAddToPlaylist: null,
+        playlistModified: null
+      }
+    case 'HOME_ADD_NEW_PLAYLIST':
+      return {
+        ...state,
+        showAddNewPlaylistForm: true
+      }
+    case 'HOME_CANCEL_ADD_NEW_PLAYLIST':
+      return {
+        ...state,
+        showAddNewPlaylistForm: false
       }
     default:
       return state;

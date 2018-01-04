@@ -9,28 +9,23 @@ class Touchable extends PureComponent {
   render() {
     return (
       <TouchableNativeFeedback
-        onLongPress={this.props.onLongPress}
-        onLongIn={this.props.onLongIn}
-        onLongOut={this.props.onLongOut}
-        delayPressIn={1500}
+        {...this.props}
+        delayPressIn={2000}
         onPress={() => this._delayOnPress(this.props.onPress)}>
         {this.props.children}
       </TouchableNativeFeedback>
     );
   }
 
-  _delayOnPress(callback) {
-    if (callback) {
-      setTimeout(callback, 250);
+  _delayOnPress(onPress) {
+    if (onPress) {
+      setTimeout(onPress, 250);
     }
   }
 }
 
 Touchable.propTypes = {
-  onPress: PropTypes.func,
-  onLongPress: PropTypes.func,
-  onLongIn: PropTypes.func,
-  onLongOut: PropTypes.func
+  onPress: PropTypes.func
 };
 
 export default Touchable;

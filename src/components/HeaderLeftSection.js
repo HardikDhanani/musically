@@ -9,7 +9,8 @@ const styles = EStyleSheet.create({
   container: {
     flexDirection: 'row',
     alignSelf: 'center',
-    alignItems: 'flex-start'
+    alignItems: 'center',
+    justifyContent: 'flex-start'
   }
 });
 

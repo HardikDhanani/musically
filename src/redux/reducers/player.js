@@ -11,7 +11,7 @@ const initialState = {
   repeatMode: 'NONE'
 };
 
-export default function artist(state = initialState, action = {}) {
+export default function player(state = initialState, action = {}) {
   let queue = null;
   switch (action.type) {
     case 'APP_STARTING_SUCCESS':
@@ -105,6 +105,13 @@ export default function artist(state = initialState, action = {}) {
         queue: newQueue,
         currentIndex: state.queue.length === 0 ? 0 : state.currentIndex,
         currentSong: state.queue.length === 0 ? newQueue[0] : state.currentSong,
+      }
+    case 'PLAYER_QUEUE_UPDATED':
+      return {
+        ...state,
+        queue: action.payload.queue,
+        currentIndex: action.payload.currentIndex,
+        currentSong: action.payload.currentSong,
       }
     case 'FAVORITES_LIKE_SUCCESS':
       if (!state.currentSong || action.payload.type !== 'song')

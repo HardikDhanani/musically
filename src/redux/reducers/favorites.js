@@ -9,7 +9,7 @@ const initialState = {
   update: false,
 };
 
-export default function search(state = initialState, action = {}) {
+export default function favorites(state = initialState, action = {}) {
   switch (action.type) {
     case 'FAVORITES_LOADING':
       return {

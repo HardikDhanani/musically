@@ -6,7 +6,6 @@ import * as appActions from './appActions';
 let _musicPlayerService = new MusicPlayerService(true, { color: 0x2E2E2E });
 let timer = null;
 
-
 /* Internal actions */
 const loading = () => {
   return {
@@ -97,6 +96,17 @@ const repeatAction = (mode) => {
     type: 'PLAYER_REPEAT',
     payload: {
       mode
+    }
+  }
+}
+
+const queueUpdated = (queue, currentSong, currentIndex) => {
+  return {
+    type: 'PLAYER_QUEUE_UPDATED',
+    payload: {
+      queue,
+      currentSong,
+      currentIndex
     }
   }
 }
@@ -247,6 +257,25 @@ export const addToQueue = (queue) => {
       })
       .catch(error => {
         console.log(error);
+      });
+  }
+}
+
+export const removeFromQueue = (songsToRemove) => {
+  return dispatch => {
+    let toRemove = songsToRemove.map(s => s.id);
+    _musicPlayerService.removeFromQueue(toRemove)
+      .then(returnedQueue => {
+        return LocalService.getSession();
+      })
+      .then(session => {
+        session.currentSong = _musicPlayerService.queue[_musicPlayerService.currentIndex].additionalInfo;
+        session.currentIndex = _musicPlayerService.currentIndex;
+
+        return LocalService.saveSession(session);
+      })
+      .then(session => {
+        dispatch(queueUpdated(session.queue, session.queue[session.currentIndex], session.currentIndex));
       });
   }
 }

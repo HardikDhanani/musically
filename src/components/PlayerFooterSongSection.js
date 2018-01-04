@@ -14,13 +14,15 @@ const styles = EStyleSheet.create({
     paddingHorizontal: 15
   },
   title: {
-    fontSize: '$titleFontSize',
-    color: '$footerColor',
+    fontFamily: 'nunito',
+    fontSize: 14,
+    color: '$footerTextColor',
     fontWeight: 'bold'
   },
   text: {
-    fontSize: '$textFontSize',
-    color: '$footerColor'
+    fontFamily: 'nunito',
+    fontSize: 13,
+    color: '$footerTextColor'
   }
 });
 

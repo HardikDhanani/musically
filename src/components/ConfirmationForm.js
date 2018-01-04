@@ -4,13 +4,13 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
-  TouchableOpacity,
   View,
-  Text,
-  BackHandler,
   ScrollView,
-  Modal
+  Modal,
+  TouchableOpacity
 } from 'react-native';
+import Touchable from './common/buttons/Touchable';
+import Text from './common/Text';
 
 const styles = EStyleSheet.create({
   mainContainer: {
@@ -20,20 +20,20 @@ const styles = EStyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
     width: '$appWidth',
     height: '$appHeight',
     justifyContent: 'center',
     alignItems: 'center'
   },
   formContainer: {
-    width: '$appWidth * 0.95',
-    // height: '$appHeight * 0.25',
-    backgroundColor: '$headerBackgroundColor',
-    justifyContent: 'space-between'
+    width: '$appWidth * 0.65',
+    backgroundColor: '$modalFormContentBackgroundColor',
+    borderRadius: 7,
+    elevation: 5
   },
   titleContainer: {
-    height: 40,
+    height: '$headerHeight',
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -43,14 +43,22 @@ const styles = EStyleSheet.create({
     marginHorizontal: 10,
   },
   buttonsContainer: {
-    height: 40,
     flexDirection: 'row',
-    justifyContent: 'flex-end'
+    justifyContent: 'center'
   },
   button: {
-    marginHorizontal: 20,
+    flex: 1,
+    height: '$headerHeight',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '$appMainColor',
+    borderBottomLeftRadius: 7,
+    borderBottomRightRadius: 7,
+  },
+  buttonText: {
+    fontSize: '$titleFontSize',
+    color: '$appMainTextColor',
+    fontFamily: 'bold'
   },
   icon: {
     color: '$elementActive',
@@ -59,7 +67,7 @@ const styles = EStyleSheet.create({
   },
   title: {
     fontSize: '$titleFontSize',
-    color: '$headerColor',
+    color: '$textMainColor',
     fontWeight: 'bold'
   }
 });
@@ -85,11 +93,8 @@ class ConfirmationForm extends Component {
               {this.props.children}
             </ScrollView>
             <View style={styles.buttonsContainer}>
-              <TouchableOpacity style={styles.button} onPress={this.props.onCancelPress}>
-                <Icon name='clear' color={styles._icon.color} backgroundColor={styles._icon.backgroundColor} size={styles._icon.fontSize} />
-              </TouchableOpacity>
               <TouchableOpacity style={styles.button} onPress={this.props.onConfirmPress}>
-                <Icon name='check' color={styles._icon.color} backgroundColor={styles._icon.backgroundColor} size={styles._icon.fontSize} />
+                <Text style={styles.buttonText}>{this.props.actionText}</Text>
               </TouchableOpacity>
             </View>
           </View>

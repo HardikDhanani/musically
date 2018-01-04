@@ -169,7 +169,7 @@ public class MusicFileManager extends ReactContextBaseJavaModule {
                                             title = thisTitle;
                                         }
         
-                                        if (art != null) {
+                                        if (art != null && art.length > 0) {
                                             Bitmap songImage = BitmapFactory.decodeByteArray(art, 0, art.length);
         
                                             try {
@@ -197,7 +197,7 @@ public class MusicFileManager extends ReactContextBaseJavaModule {
                                         items.putString("title", title);
                                         items.putString("genre", genre);
         
-                                        if (encoded == "") {
+                                        if (encoded == null || encoded == "") {
                                             items.putString("cover", "");
                                         } else {
                                             items.putString("cover", "file://" + encoded);

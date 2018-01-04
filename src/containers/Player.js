@@ -11,7 +11,7 @@ import Swiper from 'react-native-swiper';
 
 import Container from '../components/Container';
 import PlayerHeader from '../components/PlayerHeader';
-import Header from '../components/Header';
+import Header from '../components/common/headers/Header';
 import HeaderTitle from '../components/HeaderTitle';
 import ProgressBar from '../components/ProgressBar';
 import FloatMenu from '../components/FloatMenu';

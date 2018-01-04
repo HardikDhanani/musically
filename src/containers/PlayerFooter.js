@@ -5,29 +5,26 @@ import PropTypes from 'prop-types';
 
 import * as playerActions from '../redux/actions/playerActions';
 
-import { 
-  Text, 
-  TouchableWithoutFeedback, 
-  View, 
-  Dimensions, 
-  Image 
+import {
+  Text,
+  TouchableWithoutFeedback,
+  View,
+  Dimensions,
+  Image
 } from 'react-native';
-import Button from '../components/Button';
+import Footer from '../components/common/footers/Footer';
 import ProgressBar from '../components/ProgressBar';
 import PlayerFooterSongSection from '../components/PlayerFooterSongSection';
 import PlayerFooterControlsSection from '../components/PlayerFooterControlsSection';
 
 const styles = EStyleSheet.create({
-  container: {
-    height: '$footerHeight',
-    width: '$appWidth',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '$headerBackgroundColor'
-  },
   image: {
     width: '$footerHeight',
     height: '$footerHeight',
+  },
+  progressBar: {
+    backgroundColor: 'rgba(242,242,242,1)',
+    color: '$appMainColor'
   }
 });
 
@@ -53,9 +50,8 @@ class PlayerFooter extends Component {
     let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/music.png')
 
     return (
-      <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Player', { initialSong: this.props.currentSong })}>
-        <View style={styles.container}>
-          <Image source={source} style={styles.image} />
+      <Footer>
+        <TouchableWithoutFeedback onPress={() => this.props.navigation.navigate('Player', { initialSong: this.props.currentSong })}>
           <View style={{ flex: 1, flexDirection: 'column' }}>
             {this._progressBar()}
             <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -67,8 +63,8 @@ class PlayerFooter extends Component {
                 onNextPress={this.props.next} />
             </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </Footer>
     );
   }
 
@@ -80,8 +76,8 @@ class PlayerFooter extends Component {
         total={parseInt(total)}
         elapsed={this.props.elapsedTime}
         width={Dimensions.get('window').width}
-        color={'#ffa500'}
-        backgroundColor={'gray'}
+        color={styles._progressBar.color}
+        backgroundColor={styles._progressBar.backgroundColor}
       />
     );
   }

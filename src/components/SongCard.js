@@ -3,35 +3,45 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  View,
-  Text
+  View
 } from 'react-native';
-import Touchable from './common/buttons/Touchable';
+import Text from './common/Text';
 import IconButton from './common/buttons/IconButton';
+import PlayPauseButtonWhite from './common/buttons/PlayPauseButtonWhite';
 
 const styles = EStyleSheet.create({
   container: {
     flexDirection: 'row',
-    width: '$appWidth',
-    height: '$headerHeight',
-    backgroundColor: '$headerBackgroundColor',
+    height: '$headerHeight * 1.5',
+    backgroundColor: 'white',
     alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 10
+    marginHorizontal: 10,
+    marginVertical: 7,
+    borderRadius: 6,
+    elevation: 5
   },
-  text: {
-    color: '$headerColor',
+  detail: {
+    color: '$textColor',
     fontSize: '$textFontSize',
   },
-  textBold: {
-    color: '$headerColor',
+  title: {
+    color: '$textMainColor',
     fontSize: '$bigTextFontSize',
-    fontWeight: 'bold'
   },
-  button: {
-    color: '$elementInactive',
+  buttonEnabled: {
+    color: '$buttonEnabled',
     backgroundColor: 'transparent',
     fontSize: '$headerIconSize'
+  },
+  buttonDisabled: {
+    color: '$buttonDisabled',
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize'
+  },
+  plusButton: {
+    color: '$elementInactive',
+    backgroundColor: 'transparent',
+    fontSize: 35
   },
   infoContainer: {
     flexDirection: 'row',
@@ -44,89 +54,45 @@ const styles = EStyleSheet.create({
     alignItems: 'flex-start',
     height: '$headerHeight * 0.7'
   },
-  durationContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '$headerHeight * 0.7',
-    width: '$headerHeight * 0.7'
+  playPauseButton: {
+    marginHorizontal: 5
   }
 });
 
 class SongCard extends Component {
-  constructor(props) {
-    super(props);
-
-    this._onOptionPressed = this._onOptionPressed.bind(this);
-  }
-
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.id !== nextProps.id;
+    return this.props.id !== nextProps.id
+      || this.props.isFavorite !== nextProps.isFavorite
+      || this.props.isPlaying !== nextProps.isPlaying;
   }
 
   render() {
-    let duration = this._getDuration(this.props.duration);
-
     return (
-      <Touchable
-        onLongPress={this.props.onLongPress}
-        onLongIn={this.props.onLongIn}
-        onLongOut={this.props.onLongOut}
-        onPress={this.props.onPress}>
-        <View style={[styles.container, this.props.styles.container]}>
-          <IconButton iconName='play-arrow' onPress={this.props.onPlayPress} style={styles._button} iconSize={styles._button.fontSize} />
-          <View style={styles.infoContainer}>
-            <View style={styles.songInformation}>
-              <Text numberOfLines={1} style={[styles.textBold, this.props.styles.text]}>{this.props.name}</Text>
-              <Text numberOfLines={1} style={[styles.text, this.props.styles.text]}>{this.props.artist}</Text>
-            </View>
-            <View style={styles.durationContainer}>
-              <Text numberOfLines={1} style={[styles.text, this.props.styles.text]}>{duration || '00:00'}</Text>
-            </View>
+      <View style={styles.container}>
+        <PlayPauseButtonWhite iconName={this.props.isPlaying ? 'pause' : 'play-arrow'} style={styles.playPauseButton} onPress={this.props.onPlayPress} />
+        <View style={styles.infoContainer}>
+          <View style={styles.songInformation}>
+            <Text numberOfLines={1} style={styles.title}>{this.props.name}</Text>
+            <Text numberOfLines={1} style={styles.detail}>{this.props.artist}</Text>
           </View>
-          <IconButton iconName='more-vert' onPress={this._onOptionPressed} onRef={ref => this._options = ref} style={styles._button} iconSize={styles._button.fontSize} />
         </View>
-      </Touchable>
+        <IconButton iconName={'add'} onPress={this.props.onOptionPressed} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
+        <IconButton iconName={'favorite'} onPress={this.props.addToFavorites} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
+      </View>
     );
-  }
-
-  _getDuration(duration) {
-    if (duration) {
-      let d = new Date(parseInt(duration));
-      let minutes = "00" + d.getMinutes().toString();
-      let seconds = "00" + d.getSeconds().toString();
-      return minutes.substring(minutes.length - 2, minutes.length) + ":" + seconds.substring(seconds.length - 2, seconds.length);
-    }
-
-    return null;
-  }
-
-  _onOptionPressed() {
-    this._options.measure((fx, fy, width, height, px, py) => {
-      if (this.props.onOptionPressed)
-        this.props.onOptionPressed({
-          relativeX: fx,
-          relativeY: fy,
-          absoluteX: px,
-          absoluteY: py,
-          height,
-          width
-        });
-    });
-  }
-
-  _delayTouch(callback) {
-    setTimeout(callback, 100);
   }
 }
 
 SongCard.propTypes = {
   id: PropTypes.string.isRequired,
-  duration: PropTypes.string,
-  name: PropTypes.string,
+  name: PropTypes.string.isRequired,
   artist: PropTypes.string,
+  isFavorite: PropTypes.bool,
+  isPlaying: PropTypes.bool,
   onPress: PropTypes.func,
   onOptionPressed: PropTypes.func,
-  onPlayPress: PropTypes.func
+  onPlayPress: PropTypes.func,
+  addToFavorites: PropTypes.func
 };
 
 export default SongCard;

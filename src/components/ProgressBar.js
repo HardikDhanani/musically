@@ -15,12 +15,10 @@ const styles = EStyleSheet.create({
     alignItems: 'center'
   },
   elapsed: {
-    height: 4,
-    backgroundColor: '$elementActive'
+    height: 4
   },
   left: {
-    height: 4,
-    backgroundColor: '$elementInactive'
+    height: 4
   },
   button: {
     width: 20,
@@ -111,8 +109,8 @@ class ProgressBar extends Component {
 
     return (
       <View style={styles.container}>
-        <View style={[styles.elapsed, { flex: elapsedWidth }]} />
-        <View style={[styles.left, { flex: leftWidth }]} />
+        <View style={[styles.elapsed, { backgroundColor: this.props.color, flex: elapsedWidth }]} />
+        <View style={[styles.left, { backgroundColor: this.props.backgroundColor, flex: leftWidth }]} />
         {
           this.props.showButton
             ? <Animated.View hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }} style={[styles.button, imageStyle]} {...this._panResponder.panHandlers} />

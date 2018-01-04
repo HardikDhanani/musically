@@ -8,6 +8,7 @@ import {
 const styles = EStyleSheet.create({
   container: {
     alignSelf: 'center',
+    alignItems: 'center',
     justifyContent: 'flex-end',
     flexDirection: 'row'
   }
@@ -16,7 +17,7 @@ const styles = EStyleSheet.create({
 export default class HeaderRightSection extends Component {
   render() {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, this.props.style]}>
         {this.props.children}
       </View>
     );

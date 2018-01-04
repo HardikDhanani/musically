@@ -8,13 +8,15 @@ import {
 
 const styles = EStyleSheet.create({
   body: {
+    width: '$appWidth',
     alignItems: 'center',
     alignSelf: 'center',
     height: '$bodyHeight',
+    backgroundColor: '$bodyBackgroundColor'
   },
   paginationHeader: {
-    marginTop: '$paginationHeader',
-    height: '$paginationHeader'
+    marginTop: '$paginationHeaderHeight',
+    height: '$paginationHeaderHeight'
   }
 });
 

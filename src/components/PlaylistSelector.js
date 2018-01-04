@@ -1,76 +1,50 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
   View,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  BackHandler
+  FlatList
 } from 'react-native';
+import ModalFormWithAction from './common/forms/ModalFormWithAction';
+import Text from './common/Text';
+import Touchable from './common/buttons/Touchable';
 
 const styles = EStyleSheet.create({
-  mainContainer: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    width: '$appWidth',
-    height: '$appHeight',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  formContainer: {
-    width: '$appWidth * 0.95',
-    height: '$appHeight * 0.50',
-    backgroundColor: '$headerBackgroundColor',
-    justifyContent: 'space-between'
-  },
-  titleContainer: {
-    height: 40,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    marginHorizontal: 10
-  },
   contentContainer: {
-    marginHorizontal: 20,
+    flex: 1
   },
-  buttonsContainer: {
-    height: 40,
-    flexDirection: 'row',
-    justifyContent: 'flex-end'
+  contentHeight: {
+    height: '$modalFormHeight'
   },
   playlistContainer: {
-    height: '$headerHeight * 0.8',
-    justifyContent: 'center'
-  },
-  button: {
-    marginHorizontal: 20,
+    flexDirection: 'column',
+    width: '$modalFormWidth',
+    alignItems: 'flex-start',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  icon: {
-    color: '$elementActive',
-    backgroundColor: 'transparent',
-    fontSize: '$headerIconSize'
-  },
-  title: {
-    fontSize: '$titleFontSize',
-    color: '$headerColor',
-    fontWeight: 'bold'
+    paddingHorizontal: 20,
+    paddingVertical: 8
   },
   playlist: {
-    color: '$headerColor',
+    color: '$textMainColor',
     fontSize: '$textFontSize'
   },
   playlistDetail: {
     color: '$elementInactive',
     fontSize: '$detailFontSize',
     paddingLeft: 5
+  },
+  addNewContainer: {
+    flexDirection: 'column',
+    width: '$modalFormWidth',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 8
+  },
+  addNew: {
+    color: '$appMainColor',
+    fontSize: '$textFontSize'
   }
 });
 
@@ -78,62 +52,66 @@ class PlaylistSelector extends Component {
   constructor(props) {
     super(props);
 
-    this._backHandler = this._backHandler.bind(this);
+    this.state = {
+      selectedPlaylist: null
+    }
+
     this._renderPlaylist = this._renderPlaylist.bind(this);
-  }
-
-  componentDidMount() {
-    this._mounted = true;
-    BackHandler.addEventListener('hardwareBackPress', this._backHandler);
-  }
-
-  componentWillUnmount() {
-    this._mounted = false;
-    BackHandler.removeEventListener('hardwareBackPress', this._backHandler);
+    this._onPlayistSelected = this._onPlayistSelected.bind(this);
   }
 
   render() {
     return (
-      <View style={styles.mainContainer}>
-        <View style={styles.formContainer}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{'Select playlist'}</Text>
+      <ModalFormWithAction
+        style={{ height: styles._contentHeight.height }}
+        actionText={this.props.addNewButtonText}
+        title={this.props.title}
+        onCancelPress={this.props.onCancelPress}
+        onActionPress={() => {
+          if (this.props.onPlaylistSelected) {
+            this.props.onPlaylistSelected(this.state.selectedPlaylist);
+          }
+        }}
+        actionEnabled={this.state.selectedPlaylist !== null}>
+        <FlatList
+          style={styles.contentContainer}
+          initialNumToRender={8}
+          data={this.props.playlists}
+          renderItem={this._renderPlaylist}
+          keyExtractor={(item, index) => index} />
+        <Touchable onPress={this.props.onAddNewPress}>
+          <View style={styles.addNewContainer}>
+            <Text style={styles.addNew}>{this.props.addNewText}</Text>
           </View>
-          <ScrollView style={styles.contentContainer}>
-            <FlatList initialNumToRender={10} getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })} data={this.props.playlists} renderItem={this._renderPlaylist} keyExtractor={(item, index) => index} />
-          </ScrollView>
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.button} onPress={this.props.onCancelPress}>
-              <Icon name='clear' color={styles._icon.color} backgroundColor={styles._icon.backgroundColor} size={styles._icon.fontSize} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+        </Touchable>
+      </ModalFormWithAction>
     );
   }
 
-  _backHandler() {
-    if (this._mounted) {
-      this.props.onCancelPress();
-    }
+  _renderPlaylist(playlist) {
+    let fontWeight = (this.state.selectedPlaylist && this.state.selectedPlaylist.id === playlist.item.id) ? 'bold' : 'normal';
+    let color = fontWeight === 'bold' ? styles._addNew.color : undefined;
 
-    return true;
-  }
-
-  _renderPlaylist(playlist){
     return (
-      <TouchableOpacity onPress={() => this.props.onSelected(playlist.item)} style={styles.playlistContainer}>
-        <Text style={styles.playlist}>{playlist.item.name}</Text>
-        <Text style={styles.playlistDetail}>{playlist.item.songs.length + ' songs'}</Text>
-      </TouchableOpacity>
+      <Touchable onPress={() => this._onPlayistSelected(playlist.item)}>
+        <View style={styles.playlistContainer}>
+          <Text style={[styles.playlist, { fontWeight, color }]}>{playlist.item.name}</Text>
+        </View>
+      </Touchable>
     );
+  }
+
+  _onPlayistSelected(playlist) {
+    this.setState({ selectedPlaylist: playlist });
   }
 }
 
 PlaylistSelector.propTypes = {
-  playlists: PropTypes.array,
-  onSelected: PropTypes.func,
-  onCancelPress: PropTypes.func,
+  title: PropTypes.string.isRequired,
+  addNewText: PropTypes.string.isRequired,
+  playlists: PropTypes.array.isRequired,
+  onPlaylistSelected: PropTypes.func.isRequired,
+  onAddNewPress: PropTypes.func
 };
 
 export default PlaylistSelector;

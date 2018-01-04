@@ -11,7 +11,7 @@ import {
   FlatList
 } from 'react-native';
 import ContainerView from '../components/ContainerView';
-import Header from '../components/Header';
+import Header from '../components/common/headers/Header';
 import HeaderLeftSection from '../components/HeaderLeftSection';
 import HeaderCenterSection from '../components/HeaderCenterSection';
 import HeaderRightSection from '../components/HeaderRightSection';

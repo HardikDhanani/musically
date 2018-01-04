@@ -13,7 +13,6 @@ import {
   Text
 } from 'react-native';
 import ContainerView from '../components/ContainerView';
-import Header from '../components/Header';
 import SongCard from '../components/SongCard';
 import SongMenu from '../components/SongMenu';
 import HeaderMenu from '../components/HeaderMenu';

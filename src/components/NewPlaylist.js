@@ -6,49 +6,72 @@ import {
   View,
   TextInput
 } from 'react-native';
-import ConfirmationForm from './ConfirmationForm';
+import ModalFormWithAction from './common/forms/ModalFormWithAction';
 
 const styles = EStyleSheet.create({
+  contentHeight: {
+    height: '$modalFormHeight'
+  },
   inputContainer: {
-    flex: 1
+    flex: 1,
+    width: '$modalFormWidth',
+    justifyContent: 'center'
   },
   input: {
-    flex: 1,
-    marginHorizontal: 10,
-    fontSize: '$textFontSize',
-    color: '$headerColor',
+    margin: 10,
+    fontSize: '$titleFontSize',
+    color: '$textMainColor',
+    fontFamily: 'nunito'
   }
 });
 
 class NewPlaylist extends Component {
-  componentDidMount() {
-    this._text = 'My Playlist';
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      playlistName: this.props.defaultValue
+    }
   }
-
+  /*
+    <ConfirmationForm
+      actionText={this.props.dictionary.getWord('save').toUpperCase()}
+      onCancelPress={this.props.onCancelPress}
+      onConfirmPress={() => this.props.onConfirmPress(this._text)}>
+    </ConfirmationForm>
+  */
   render() {
-
     return (
-      <ConfirmationForm
-        title={'New Playlist'}
+      <ModalFormWithAction
+        style={{ height: styles._contentHeight.height }}
+        actionText={this.props.createButtonText}
+        title={this.props.title}
         onCancelPress={this.props.onCancelPress}
-        onConfirmPress={() => this.props.onConfirmPress(this._text)}>
+        onActionPress={() => {
+          if (this.props.onPlaylistCreated) {
+            this.props.onPlaylistCreated(this.state.playlistName);
+          }
+        }}
+        actionEnabled={!(!this.state.playlistName)}
+        backgroundTransparent={this.props.backgroundTransparent}>
         <View style={styles.inputContainer}>
           <TextInput
-            autoFocus={true}
-            defaultValue={'My Playlist'}
+            defaultValue={this.props.defaultValue}
             style={styles.input}
-            onChangeText={text => this._text = text}
-            value={this.props.text}
+            onChangeText={text => this.setState({ playlistName: text })}
+            value={this.props.playlistName}
             underlineColorAndroid={'transparent'} />
         </View>
-      </ConfirmationForm>
+      </ModalFormWithAction>
     );
   }
 }
 
 NewPlaylist.propTypes = {
-  onCancelPress: PropTypes.func,
-  onConfirmPress: PropTypes.func
+  title: PropTypes.string,
+  defaultValue: PropTypes.string,
+  createButtonText: PropTypes.string,
+  onPlaylistCreated: PropTypes.func.isRequired
 };
 
 export default NewPlaylist;

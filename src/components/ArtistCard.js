@@ -5,7 +5,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import {
   Text
 } from 'react-native';
-import CoverCard from './CoverCard';
+import CoverCard from './common/cards/CoverCard';
 
 const styles = EStyleSheet.create({
   text: {
@@ -24,10 +24,7 @@ class ArtistCard extends Component {
         onPress={this.props.onPress}
         source={this.props.source}
         imageUri={this.props.imageUri}
-        title={this.props.name}
-        onOptionPressed={this.props.onOptionPressed}>
-        <Text numberOfLines={1} style={styles.text}>{this.props.albums + ' albums'}</Text>
-        <Text numberOfLines={1} style={styles.text}>{this.props.songs + ' songs'}</Text>
+        title={this.props.name}>
       </CoverCard>
     );
   }

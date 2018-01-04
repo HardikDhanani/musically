@@ -1,19 +1,24 @@
 import { Dimensions, Platform, StatusBar } from 'react-native';
 
-const PRIMARY_COLOR = '#2E2E2E';
-const SECONDARY_COLOR = '#f1f1f1';
+const PRIMARY_COLOR = 'rgba(107,4,237,1)';
+const SECONDARY_COLOR = 'rgba(245,246,251,1)';
+const FORM_BACKGROUND_COLOR = 'rgba(255,255,255,1)';
+const FORM_MAIN_BACKGROUND_COLOR = 'rgba(245,246,251,0.9)';
 const BODY_1_BACKGROUND_COLOR = '#d3d3d3';
+
+const appWidth = Dimensions.get('window').width;
+const appHeight = Dimensions.get('window').height;
 
 const getHeaderHeight = () => {
   return Platform.OS === "ios" ? 64 : 56;
 }
 
 const getFooterHeight = () => {
-  return 60
+  return 80;
 }
 
 const getBodyHeight = () => {
-  return Dimensions.get('window').height - (getHeaderHeight() + getFooterHeight() + StatusBar.currentHeight);
+  return appHeight - (getHeaderHeight() + getFooterHeight() + StatusBar.currentHeight);
 }
 
 const getPaginationHeaderHeight = () => {
@@ -22,36 +27,63 @@ const getPaginationHeaderHeight = () => {
 
 const theme = {
   $theme: 'default',
-  $appWidth: Dimensions.get('window').width,
-  $appHeight: Dimensions.get('window').height,
+  $appWidth: appWidth,
+  $appHeight: appHeight,
+  $appMainColor: PRIMARY_COLOR,
+  $appMainTextColor: 'rgba(255,255,255,1)',
+
   $bodyHeight: getBodyHeight(),
 
   $headerHeight: getHeaderHeight(),
   $headerColor: 'white',
-  $headerBackgroundColor: PRIMARY_COLOR,
-  $paginationHeader: getPaginationHeaderHeight(),
+  $headerBackgroundColor: '#6B04ED',
+  $headerEndGradientBackgroundColor: PRIMARY_COLOR,
+  $headerStartGradientBackgroundColor: 'rgba(74,144,226,1)',
+
+  $paginationHeaderHeight: getPaginationHeaderHeight(),
+  $paginationHeaderColorLeft: 'rgba(40,66,171,1)',
+  $paginationHeaderColorRight: 'rgba(190,177,227,1)',
+  $paginationHeaderTextColor: 'rgba(255,255,255,1)',
 
   $footerHeight: getFooterHeight(),
-  $footerColor: 'white',
+  $footerWidth: appWidth,
+  $footerBackgroundColor: 'rgba(255,255,255,1)',
+  $footerTextColor: 'rgba(0,0,0,1)',
 
   $body_1_backgroundColor: BODY_1_BACKGROUND_COLOR,
   $bodyBackgroundColor: SECONDARY_COLOR,
   $bodySecondaryBackgroundColor: '#4c4c4c',
 
+  $cardBackgroundColor: 'white',
+
+  $modalFormWidth: appWidth * 0.65,
+  $modalFormHeight: appHeight * 0.5,
+  $modalFormBackgroundColor: FORM_MAIN_BACKGROUND_COLOR,
+  $modalFormContentBackgroundColor: FORM_BACKGROUND_COLOR,
+  $modalFormButtonColor: PRIMARY_COLOR,
+  $modalFormButtonTextColor: 'white',
+  $modalFormButtonDisabledColor: 'rgba(242,242,242,1)',
+
   $floatMenuContentBackgroundColor: 'black',
-  $floatMenuOptionTextColor: 'white',
+  $floatMenuOptionTextColor: FORM_BACKGROUND_COLOR,
   $floatMenuOptionHeight: getHeaderHeight() * 0.8,
 
+  $buttonEnabled: PRIMARY_COLOR,
+  $buttonDisabled: 'rgba(190,178,228,1)',
+
   $buttonSelected: 'orange',
-  $buttonUnselected: 'white',
+  $buttonUnselected: FORM_BACKGROUND_COLOR,
 
   $elementActive: 'orange',
-  $elementInactive: 'gray',
+  $elementInactive: 'rgba(200,200,200,1)',
 
+  $shadowBackgroundColor: 'rgba(0, 0, 0, 0.25)',
+
+  $textMainColor: 'black',
   $textColor: 'gray',
+  $fontFamily: 'nunito',
 
   '@media ios': {
-    $fontFamily: 'System',
     $titleFontSize: 17,
     $bigTextFontSize: 15,
     $textFontSize: 12,
@@ -60,7 +92,6 @@ const theme = {
     $iconSize: 15,
   },
   '@media android': {
-    $fontFamily: 'Roboto_medium',
     $titleFontSize: 19,
     $bigTextFontSize: 17,
     $textFontSize: 14,

@@ -14,7 +14,7 @@
   - [x] Add an artist to queue
   - [x] Add an genre to queue
   - [x] Remove items from the queue
-  - [ ] Remove multiple items from the queue
+  - [x] Remove multiple items from the queue
   - [x] Reorder items in the queue
   - [x] Like a song
   - [x] Unlike a song
@@ -62,7 +62,7 @@
   - [x] Splash Screen
   - [ ] Share this App
   - [x] Go to Player if playing and put in background
-  - [ ] Add to queue just after the current song
+  - [x] Add to queue just after the current song
   - [x] Set laguage
   - [ ] Set theme
   - [ ] Send feedback
@@ -78,6 +78,7 @@
   - [ ] A song must start automatically after playing it
   - [x] Can set as default language the current mobile language
   - [ ] Translate everything
+  - [ ] Read songs in batches asynchronously
   
 ## Settings
 
@@ -93,6 +94,8 @@
 
  - [ ] 1. Start playing a song
        Bug: Progress bar and elapsed time don't show correctly
+
+ - [ ] Some images are throwing an exception in the native code
 
  - Los tracks parecen terminar antes de lo que deberian terminar
  - Desde un album, menu song, Add to Playlist rompe la app

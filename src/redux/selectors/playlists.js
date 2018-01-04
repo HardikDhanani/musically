@@ -1,3 +1,5 @@
+import playlist from "../reducers/playlist";
+
 let _setPlaylistLength = (playlists, value, playlistName, sortSongs) => {
   let i = playlists.findIndex(p => p.name === playlistName);
   if (i > -1) {
@@ -25,6 +27,18 @@ playlists.setMostPlayedLengthOnPlaylists = (playlists, mostPlayedLength) => {
 
 playlists.setRecentlyPlayedLengthOnPlaylists = (playlists, recentlyPlayedLength) => {
   return _setPlaylistLength(playlists, recentlyPlayedLength, 'Recently played');
+}
+
+playlists.filterForAddSong = (playlists) => {
+  if (!playlists.length) {
+    return [];
+  }
+
+  return playlists.filter(playlist => {
+    return playlist.name.toLowerCase() !== 'most played'
+      && playlist.name.toLowerCase() !== 'favorites'
+      && playlist.name.toLowerCase() !== 'recently played';
+  });
 }
 
 export default playlists;

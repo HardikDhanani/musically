@@ -6,7 +6,7 @@ import {
   TextInput,
   View
 } from 'react-native';
-import Header from './Header';
+import Header from './common/headers/Header';
 import HeaderTitle from './HeaderTitle';
 import HeaderLeftSection from './HeaderLeftSection';
 import HeaderRightSection from './HeaderRightSection';
