@@ -7,7 +7,9 @@ import {
 
 const styles = EStyleSheet.create({
   container: {
-    width: '$appWidth * 0.7'
+    flex: 1,
+    alignSelf: 'flex-start',
+    alignItems: 'flex-start',
   }
 });
 

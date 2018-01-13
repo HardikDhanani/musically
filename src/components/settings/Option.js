@@ -3,26 +3,29 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  TouchableNativeFeedback,
   View
 } from 'react-native';
+import Touchable from '../common/buttons/Touchable';
 
 const styles = EStyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(215,215,215,1)',
+    paddingVertical: 18
   }
 });
 
 class Option extends PureComponent {
   render() {
     return (
-      <TouchableNativeFeedback onPress={this.props.onPress}>
+      <Touchable onPress={this.props.onPress}>
         <View style={[styles.container, this.props.style]}>
           {this.props.children}
         </View>
-      </TouchableNativeFeedback>
+      </Touchable>
     );
   }
 }

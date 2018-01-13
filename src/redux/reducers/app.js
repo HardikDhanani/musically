@@ -5,7 +5,7 @@ const initialState = {
   isReady: false,
   homePlaylistsReady: false,
   homeArtistsReady: false,
-  homeSlbumsReady: false,
+  homeAlbumsReady: false,
   homeSongsReady: false,
   goHome: false,
   session: null,
@@ -78,6 +78,42 @@ export default function app(state = initialState, action = {}) {
       return {
         ...state,
         playlists: JSON.parse(JSON.stringify(action.payload.playlists))
+      }
+    case 'FAVORITES_SONG_UPDATED':
+      for (let i = 0; i < state.songs.length; i++) {
+        if (state.songs[i].id === action.payload.song.id) {
+          state.songs[i] = action.payload.song;
+          break;
+        }
+      }
+
+      return {
+        ...state,
+        songs: JSON.parse(JSON.stringify(state.songs))
+      }
+    case 'FAVORITES_ALBUM_UPDATED':
+      for (let i = 0; i < state.albums.length; i++) {
+        if (state.albums[i].id === action.payload.album.id) {
+          state.albums[i] = action.payload.album;
+          break;
+        }
+      }
+
+      return {
+        ...state,
+        albums: JSON.parse(JSON.stringify(state.albums))
+      }
+    case 'FAVORITES_ARTIST_UPDATED':
+      for (let i = 0; i < state.artists.length; i++) {
+        if (state.artists[i].id === action.payload.artist.id) {
+          state.artists[i] = action.payload.artist;
+          break;
+        }
+      }
+
+      return {
+        ...state,
+        artists: JSON.parse(JSON.stringify(state.artists))
       }
     default:
       return state;

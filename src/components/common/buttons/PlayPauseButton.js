@@ -1,13 +1,11 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
-  TouchableOpacity,
-  View
+  TouchableOpacity
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const styles = EStyleSheet.create({
   container: {
@@ -22,12 +20,6 @@ const styles = EStyleSheet.create({
   button: {
     color: '$appMainTextColor',
     fontSize: 40
-  },
-  gradientStart: {
-    color: '$headerStartGradientBackgroundColor'
-  },
-  gradientEnd: {
-    color: '$headerEndGradientBackgroundColor'
   }
 });
 
@@ -43,7 +35,7 @@ class PlayPauseButton extends PureComponent {
 
 PlayPauseButton.propTypes = {
   iconName: PropTypes.string.isRequired,
-  onPress: PropTypes.func
+  onPress: PropTypes.func.isRequired
 };
 
 export default PlayPauseButton;

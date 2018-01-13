@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
   TouchableOpacity,
   Animated
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const styles = EStyleSheet.create({
   buttonContainer: {
@@ -79,7 +79,7 @@ class AddPlaylistButton extends Component {
 }
 
 AddPlaylistButton.propTypes = {
-  onPress: PropTypes.func
+  onPress: PropTypes.func.isRequired
 };
 
 export default AddPlaylistButton;

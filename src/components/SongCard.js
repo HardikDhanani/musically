@@ -17,6 +17,7 @@ const styles = EStyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 10,
     marginVertical: 7,
+    paddingHorizontal: 6,
     borderRadius: 6,
     elevation: 5
   },
@@ -76,8 +77,8 @@ class SongCard extends Component {
             <Text numberOfLines={1} style={styles.detail}>{this.props.artist}</Text>
           </View>
         </View>
-        <IconButton iconName={'add'} onPress={this.props.onOptionPressed} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
-        <IconButton iconName={'favorite'} onPress={this.props.addToFavorites} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
+        <IconButton iconName={'add'} onPress={this.props.onOptionPress} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
+        <IconButton iconName={'favorite'} onPress={this.props.onLikePress} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
       </View>
     );
   }
@@ -90,9 +91,9 @@ SongCard.propTypes = {
   isFavorite: PropTypes.bool,
   isPlaying: PropTypes.bool,
   onPress: PropTypes.func,
-  onOptionPressed: PropTypes.func,
+  onOptionPress: PropTypes.func,
   onPlayPress: PropTypes.func,
-  addToFavorites: PropTypes.func
+  onLikePress: PropTypes.func
 };
 
 export default SongCard;

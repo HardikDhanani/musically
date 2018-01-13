@@ -6,6 +6,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import * as appActions from '../redux/actions/appActions';
 import * as playerActions from '../redux/actions/playerActions';
 import * as homeActions from '../redux/actions/homeActions';
+import * as favoritesActions from '../redux/actions/favoritesActions';
 import playlists from '../redux/selectors/playlists';
 
 import {
@@ -28,7 +29,7 @@ const styles = EStyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    backgroundColor: '$bodyBackgroundColor',
+    backgroundColor: '$appBackgroundColor',
     width: '$appWidth'
   },
   confirmationContainer: {
@@ -110,8 +111,9 @@ class HomeSongs extends Component {
         artist={song.item.artist}
         isFavorite={song.item.isFavorite}
         isPlaying={isPlaying}
-        onOptionPressed={() => this.props.setMenu(targetMenu)}
-        onPlayPress={() => this._playSongs([song.item])} />
+        onOptionPress={() => this.props.setMenu(targetMenu)}
+        onPlayPress={() => this._playSongs([song.item])} 
+        onLikePress={() => this.props.like('song', song.item)} />
     );
   }
 
@@ -121,6 +123,7 @@ class HomeSongs extends Component {
 
     return (
       <ModalForm
+        title={this.props.targetMenu.payload.title}
         onCancelPress={() => this.props.setMenu()}>
         <ModalFormTouchable
           text={this.props.dictionary.getWord('add_to_playlist')}
@@ -128,6 +131,9 @@ class HomeSongs extends Component {
         <ModalFormTouchable
           text={this.props.dictionary.getWord('add_to_queue')}
           onPress={() => this._addToQueue([this.props.targetMenu.payload])} />
+        <ModalFormTouchable
+          text={'File detail'}
+          onPress={() => { }} />
       </ModalForm>
     );
   }
@@ -177,7 +183,7 @@ class HomeSongs extends Component {
         backgroundTransparent={true}
         title={this.props.dictionary.getWord('create_playlist')}
         createButtonText={this.props.dictionary.getWord('create').toUpperCase()}
-        onPlaylistCreated={this.props.addNewPlaylist}
+        onPlaylistCreated={playlistName => this.props.createNewPlaylistAndAddSong(playlistName, this.props.songToAddToPlaylist)}
         onCancelPress={this.props.cancelAddNewPlaylistForm}
         defaultValue={this.props.dictionary.getWord('my_playlist')} />
     );
@@ -220,8 +226,10 @@ const mapDispatchToProps = dispatch => {
     addSongToPlaylist: (song) => dispatch(homeActions.addSongToPlaylist(song)),
     cancelAddSongToPlaylist: () => dispatch(homeActions.cancelAddSongToPlaylist()),
     addSongToPlaylistConfirmed: (song, playlist) => homeActions.addSongToPlaylistConfirmed(song, playlist)(dispatch),
-    addNewPlaylist: () => dispatch(homeActions.addNewPlaylist()),
-    cancelAddNewPlaylistForm: () => dispatch(homeActions.cancelAddNewPlaylistForm())
+    addNewPlaylist: (playlistName, song) => dispatch(homeActions.addNewPlaylist()),
+    createNewPlaylistAndAddSong: (playlistName, song) => homeActions.createNewPlaylistAndAddSong(playlistName, song)(dispatch),
+    cancelAddNewPlaylistForm: () => dispatch(homeActions.cancelAddNewPlaylistForm()),
+    like: (type, album) => dispatch(favoritesActions.like(type, album)),
   }
 }
 

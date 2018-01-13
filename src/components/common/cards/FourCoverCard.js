@@ -22,11 +22,12 @@ const styles = EStyleSheet.create({
   coversContainer: {
     elevation: 5,
     flexDirection: 'column',
-    backgroundColor: 'white'
+    borderRadius: 5,
+    backgroundColor: '$appBackgroundColor'
   },
   imageContainer: {
     height: '$imageWidth',
-    width: '$imageWidth',
+    width: '$imageWidth'
   },
   image: {
     height: '$imageWidth',

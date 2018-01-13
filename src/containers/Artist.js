@@ -2,39 +2,134 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import LinearGradient from 'react-native-linear-gradient';
 
 import * as artistActions from '../redux/actions/artistActions';
 import * as appActions from '../redux/actions/appActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
-import * as playerActions from '../redux/actions/playerActions';
 
 import {
   View,
-  Text
+  FlatList,
+  Image
 } from 'react-native';
-import HeaderMenu from '../components/HeaderMenu';
-import SongMenu from '../components/SongMenu';
-import CardMenu from '../components/CardMenu';
-import ContainerView from '../components/ContainerView';
+import Text from '../components/common/Text';
 import SongCard from '../components/SongCard';
-import AlbumCard from '../components/AlbumCard';
-import FloatMenuOption from '../components/FloatMenuOption';
+import CoverCard from '../components/common/cards/CoverCard';
+import Touchable from '../components/common/buttons/Touchable';
+import Header from '../components/common/headers/Header';
+import HeaderLeftSection from '../components/HeaderLeftSection';
+import HeaderRightSection from '../components/HeaderRightSection';
+import HeaderCenterSection from '../components/HeaderCenterSection';
+import IconButton from '../components/common/buttons/IconButton';
+import FullViewContainer from '../components/common/containers/FullViewContainer';
+import Container from '../components/Container';
 import PlayerFooter from './PlayerFooter';
-import ThreeColumnContainer from '../components/ThreeColumnContainer';
 
 const styles = EStyleSheet.create({
-  container: {
-    backgroundColor: '$bodyBackgroundColor'
+  $containerWidth: '$appWidth / 2',
+  $cardWidth: '$containerWidth * 0.8',
+  pageContainer: {
+    flex: 1
   },
-  text: {
-    color: '$textColor'
+  paginationHeader: {
+    flexDirection: 'row',
+    height: '$headerHeight',
+    marginHorizontal: 15,
+    marginBottom: 15
   },
-  coverContentTitle: {
-    color: '$floatMenuOptionTextColor',
-    fontSize: '$titleFontSize'
+  paginationHeaderButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(192,192,192,1)'
   },
-  coverContentText: {
-    color: '$textColor'
+  paginationHeaderButtonSelected: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 5,
+    borderBottomColor: 'rgba(108,3,233,1)'
+  },
+  paginationHeaderButtonText: {
+    fontSize: 15,
+    color: 'rgba(152,152,152,1)',
+  },
+  paginationHeaderButtonSelectedText: {
+    fontSize: 17,
+    color: '$textMainColor',
+    fontWeight: 'bold'
+  },
+  listContainer: {
+    flex: 1,
+    flexDirection: 'column'
+  },
+  showMoreButton: {
+    height: '$headerHeight * 0.9',
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 7,
+    marginBottom: 20,
+    borderRadius: 6,
+    elevation: 5
+  },
+  showMoreButtonText: {
+    color: 'rgba(108,3,233,1)',
+    fontSize: 17
+  },
+  headerButton: {
+    color: '$headerColor',
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize'
+  },
+  headerButtonSelected: {
+    color: '$appMainColor',
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize'
+  },
+  headerContainer: {
+    height: '$headerHeight',
+    flexDirection: 'row'
+  },
+  imageContainer: {
+    elevation: 5,
+    backgroundColor: 'white',
+    width: '$cardWidth',
+    borderRadius: 3
+  },
+  image: {
+    height: '$cardWidth',
+    width: null,
+    borderRadius: 3
+  },
+  controlsContainer: {
+    flex: 1,
+    width: '$appWidth',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10
+  },
+  artistInfo: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  artistName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white'
+  },
+  artistDetail: {
+    fontSize: 15,
+    color: 'white'
+  },
+  gradientContainer: {
+    height: '$statusBarHeight',
+    width: '$appWidth',
+    backgroundColor: '$headerStartGradientBackgroundColor'
   }
 });
 
@@ -42,17 +137,20 @@ class Artist extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      currentIndex: 0
+    };
+
+    this._renderHeader = this._renderHeader.bind(this);
+    this._renderCover = this._renderCover.bind(this);
+    this._renderPagination = this._renderPagination.bind(this);
+    this._renderControls = this._renderControls.bind(this);
+    this._renderOverview = this._renderOverview.bind(this);
+    this._renderAllSongs = this._renderAllSongs.bind(this);
+    this._renderAlbums = this._renderAlbums.bind(this);
     this._renderSong = this._renderSong.bind(this);
     this._renderAlbum = this._renderAlbum.bind(this);
-    this._renderTargetMenu = this._renderTargetMenu.bind(this);
-    this._renderCoverContent = this._renderCoverContent.bind(this);
-    this._getSections = this._getSections.bind(this);
-    this._playSongs = this._playSongs.bind(this);
-    this._groupItems = this._groupItems.bind(this);
-    this._getArtistMenu = this._getArtistMenu.bind(this);
-    this._getCardMenu = this._getCardMenu.bind(this);
-    this._getSongMenu = this._getSongMenu.bind(this);
-    this._addToQueue = this._addToQueue.bind(this);
+    this._shufflePlay = this._shufflePlay.bind(this);
   }
 
   componentDidMount() {
@@ -61,40 +159,92 @@ class Artist extends Component {
   }
 
   render() {
-    let albums = this.props.artist ? this.props.artist.albums : [];
-    let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
-    let initialSong = songs.length > 0 ? songs[0] : null;
-
     return (
-      <ContainerView
-        title={''}
-        onBackPress={() => this.props.navigation.goBack()}
-        onSearchPress={() => this.props.navigation.navigate('Search', {})}
-        onLikePress={() => this.props.like(this.props.artist)}
-        onPlayPress={() => this._playSongs(initialSong, songs, false)}
-        onMenuPress={() => this.props.setMenu({ type: 'MENU' })}
-        coverContent={this._renderCoverContent()}
-        sections={this._getSections()}
-        source={require('../images/music.png')}
-        imageUri={this.props.artist ? this.props.artist.cover : null}
-        showMenu={this.props.showMenu && (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) === 'ARTIST'}
-        menuContent={this._renderTargetMenu()}
-        like={this.props.isFavorite}
-        footer={(<PlayerFooter navigation={this.props.navigation} />)}>
-      </ContainerView>
+      <Container fillStatusBar={false}>
+        <View style={styles.gradientContainer} />
+        <FullViewContainer
+          header={this._renderHeader()}
+          cover={this._renderCover()}
+          pagination={this._renderPagination()}
+          controls={this._renderControls()}>
+          {
+            this.state.currentIndex === 0 ?
+              this._renderOverview() :
+              null
+          }
+          {
+            this.state.currentIndex === 1 ?
+              this._renderAllSongs() :
+              null
+          }
+          {
+            this.state.currentIndex === 2 ?
+              this._renderAlbums() :
+              null
+          }
+        </FullViewContainer>
+        <PlayerFooter />
+      </Container>
     );
   }
 
-  _renderCoverContent() {
-    let artist = this.props.artist ? this.props.artist.artist : null;
-    let albums = this.props.artist ? this.props.artist.albums : [];
-    let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
+  _renderHeader() {
+    let favoriteStyle = this.props.isFavorite ? styles._headerButtonSelected : styles._headerButton;
 
     return (
-      <View>
-        <Text style={styles.coverContentTitle}>{artist}</Text>
-        <Text style={styles.coverContentText}>{albums.length + ' albums'}</Text>
-        <Text style={styles.coverContentText}>{songs.length + ' songs'}</Text>
+      <View style={styles.headerContainer}>
+        <HeaderLeftSection>
+          <IconButton iconName="arrow-back" onPress={() => this.props.navigation.goBack()} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+        </HeaderLeftSection>
+        <HeaderCenterSection />
+        <HeaderRightSection>
+          <IconButton iconName="favorite" onPress={() => this.props.like('artist', this.props.artist)} style={favoriteStyle} iconSize={styles._headerButton.fontSize} />
+          <IconButton iconName="search" onPress={() => this.props.navigation.navigate('Search', {})} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+        </HeaderRightSection>
+      </View>
+    );
+  }
+
+  _renderCover() {
+    let source = this.props.cover ? { uri: this.props.cover } : require('../images/music.png');
+    return (
+      <View style={styles.imageContainer}>
+        <Image source={source} style={styles.image} />
+      </View>
+    );
+  }
+
+  _renderControls() {
+    return (
+      <View style={styles.controlsContainer}>
+        <IconButton iconName="repeat" style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+        <View style={styles.artistInfo}>
+          <Text style={styles.artistName}>{this.props.name}</Text>
+          <Text style={styles.artistDetail}>{this.props.albums.length + ' Albums - ' + this.props.songs.length + ' Songs'}</Text>
+        </View>
+        <IconButton onPress={this._shufflePlay} iconName="shuffle" style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+      </View>
+    );
+  }
+
+  _renderPagination(index, total, context) {
+    return (
+      <View style={styles.paginationHeader}>
+        <Touchable onPress={() => this.setState({ currentIndex: 0 })}>
+          <View style={this.state.currentIndex === 0 ? styles.paginationHeaderButtonSelected : styles.paginationHeaderButton}>
+            <Text style={this.state.currentIndex === 0 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{'Overview'}</Text>
+          </View>
+        </Touchable>
+        <Touchable onPress={() => this.setState({ currentIndex: 1 })}>
+          <View style={this.state.currentIndex === 1 ? styles.paginationHeaderButtonSelected : styles.paginationHeaderButton}>
+            <Text style={this.state.currentIndex === 1 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{'All Songs'}</Text>
+          </View>
+        </Touchable>
+        <Touchable onPress={() => this.setState({ currentIndex: 2 })}>
+          <View style={this.state.currentIndex === 2 ? styles.paginationHeaderButtonSelected : styles.paginationHeaderButton}>
+            <Text style={this.state.currentIndex === 2 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{'Albums'}</Text>
+          </View>
+        </Touchable>
       </View>
     );
   }
@@ -105,169 +255,128 @@ class Artist extends Component {
       payload: song.item
     };
 
+    let isPlaying = this.props.isPlaying && this.props.playingSong.id === song.item.id;
+
     return (
       <SongCard
-        styles={{ container: styles.container, text: styles.text }}
         key={song.index}
         id={song.item.id}
         name={song.item.title}
         artist={song.item.artist}
-        duration={song.item.duration}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-        onPress={() => this._playSongs(song.item)}
-      />
+        isFavorite={song.item.isFavorite}
+        isPlaying={isPlaying}
+        onLikePress={() => this.props.like('song', song.item)} />
     );
   }
 
-  _renderAlbum(album) {
-    let targetMenu = {
-      type: 'ALBUM',
-      payload: album
-    };
-
+  _renderAlbum({ item }) {
     return (
-      <AlbumCard
-        onPress={() => this.props.navigation.navigate('Album', { album })}
-        id={album.id}
-        name={album.album}
-        artist={album.artist}
-        songs={album.songs.length}
+      <CoverCard
+        onPress={() => this.props.navigation.navigate('Album', { album: item })}
         source={require('../images/music.png')}
-        imageUri={album.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
+        imageUri={item.cover}
+        title={item.album}
+        detail={item.artist} />
     );
   }
 
-  _renderTargetMenu() {
-    if (!this.props.showMenu || (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) !== 'ARTIST')
-      return null;
-
-    switch (this.props.targetMenu.type.toLowerCase()) {
-      case 'song':
-        return this._getSongMenu(this.props.targetMenu.payload);
-      case 'album':
-        return this._getCardMenu(this.props.targetMenu.type.toLowerCase(), this.props.targetMenu.payload);
-      default:
-        return this._getArtistMenu();
-    }
-  }
-
-  _getSongMenu(song) {
-    let initialSong = song;
-    let queue = [initialSong];
-
+  _renderOverview() {
     return (
-      <SongMenu
-        positionX={this.props.menuPositionX}
-        positionY={this.props.menuPositionY}
-        isFavorite={song.isFavorite}
-        onPlayPress={() => this._playSongs(initialSong, queue, true)}
-        onAddToPlaylistPress={() => {
-          this.props.setMenu(null, 0, 0);
-          this.props.addSongToPlaylist(song);
-        }}
-        onAddToQueuePress={() => {
-          this._addToQueue(queue);
-        }}
-        onLikePress={() => {
-          this.props.setMenu(null, 0, 0);
-          this.props.like('song', song);
-        }}
-        onPress={() => this.props.setMenu(null, 0, 0)} />
+      <View style={styles.pageContainer}>
+        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Top Tracks'}</Text>
+        <FlatList
+          data={this.props.topSongs}
+          renderItem={this._renderSong}
+          keyExtractor={(item, index) => index}
+          style={styles.listContainer} />
+        {
+          this.props.showFiveMore ?
+            <Touchable onPress={() => this.props.showMore()}>
+              <View style={styles.showMoreButton}>
+                <Text style={styles.showMoreButtonText}>{'Show 5 more'}</Text>
+              </View>
+            </Touchable> :
+            null
+        }
+        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Related Artists'}</Text>
+        <FlatList
+          horizontal={true}
+          data={this.props.relatedArtists}
+          renderItem={this._renderAlbum}
+          keyExtractor={(item, index) => index} />
+      </View>
     );
   }
 
-  _getCardMenu(targetType, target) {
-    let queue = [].concat.apply([], target.albums.map(a => a.songs));
-
+  _renderAllSongs() {
     return (
-      <CardMenu
-        positionX={this.props.menuPositionX}
-        positionY={this.props.menuPositionY}
-        onPlayPress={() => this._playSongs(null, queue, true)}
-        onAddToQueuePress={() => this._addToQueue(queue)}
-        onPress={() => this.props.setMenu(null, 0, 0)} />
+      <View style={styles.pageContainer}>
+        <FlatList
+          data={this.props.songs}
+          renderItem={this._renderSong}
+          keyExtractor={(item, index) => index}
+          initialNumToRender={10}
+          style={styles.listContainer} />
+      </View>
     );
   }
 
-  _getArtistMenu() {
+  _renderAlbums() {
     return (
-      <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />
+      <View style={styles.pageContainer} >
+        <FlatList
+          data={this.props.albums}
+          renderItem={this._renderAlbum}
+          keyExtractor={(item, index) => index}
+          style={[styles.listContainer, { flexDirection: 'column' }]}
+          numColumns={2} />
+      </View>
     );
   }
 
-  _getSections() {
-    let albums = this.props.artist ? this.props.artist.albums : []
-    let albumsSongs = albums ? albums.map(a => a.songs) : [];
-    let songs = albumsSongs ? [].concat.apply([], albumsSongs) : [];
-
-    return [
-      {
-        data: songs,
-        renderItem: this._renderSong,
-        title: 'TRACKS'
-      },
-      {
-        data: this._groupItems(albums),
-        renderItem: items => (<ThreeColumnContainer items={items.item} renderItem={this._renderAlbum} />),
-        title: 'ALBUMS'
-      },
-    ];
-  }
-
-  _groupItems(items) {
-    let grupedItems = [];
-
-    for (let i = 0; i < items.length; i += 3) {
-      grupedItems.push(items.slice(i, 3 + i));
-    }
-
-    return grupedItems;
-  }
-
-  _playSongs(initialSong, queue, closeMenu = false) {
-    if (closeMenu)
-      this.props.setMenu(null, 0, 0);
-
-    this.props.navigation.navigate('Player', { queue, initialSong, reset: true });
-  }
-
-  _addToQueue(queue) {
-    this.props.setMenu(null, 0, 0);
-    this.props.addToQueue(queue);
+  _shufflePlay() {
+    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
   }
 }
 
 const mapStateToProps = state => {
   return {
     artist: state.artist.artist,
+    name: state.artist.name,
+    cover: state.artist.cover,
+    songs: state.artist.songs,
+    topSongs: state.artist.topSongs,
+    albums: state.artist.albums,
+    relatedArtists: state.artist.relatedArtists,
     isFavorite: state.artist.isFavorite,
-    showMenu: state.app.showMenu,
-    targetMenu: state.app.targetMenu,
-    menuPositionX: state.app.menuPositionX,
-    menuPositionY: state.app.menuPositionY,
+    showFiveMore: state.artist.showFiveMore,
+    // showMenu: state.app.showMenu,
+    // targetMenu: state.app.targetMenu,
+    dictionary: state.app.dictionary
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     load: (artist) => artistActions.load(artist)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'ARTIST' }, positionX, positionY)),
-    like: (artist) => dispatch(favoritesActions.like('artist', artist)),
-    addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
+    // setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'ARTIST' }, positionX, positionY)),
+    like: (type, artist) => dispatch(favoritesActions.like(type, artist)),
+    showMore: () => dispatch(artistActions.showMore()),
+    // addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
   }
 }
 
 Artist.propTypes = {
   artist: PropTypes.object,
-  targetMenu: PropTypes.object,
+  topSongs: PropTypes.array,
+  relatedArtists: PropTypes.array,
+  // targetMenu: PropTypes.object,
   isFavorite: PropTypes.bool,
-  showMenu: PropTypes.bool,
-  menuPositionX: PropTypes.number,
-  menuPositionY: PropTypes.number,
+  // showMenu: PropTypes.bool,
+  navigation: PropTypes.any.isRequired,
+  dictionary: PropTypes.any.isRequired,
   load: PropTypes.func,
-  setMenu: PropTypes.func,
+  // setMenu: PropTypes.func,
   like: PropTypes.func
 };
 

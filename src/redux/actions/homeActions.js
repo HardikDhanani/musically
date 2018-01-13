@@ -107,3 +107,36 @@ export function addSongToPlaylistConfirmed(song, playlist) {
     }, 4500);
   }
 }
+
+export function createNewPlaylistAndAddSong(playlistName, song) {
+  return dispatch => {
+    LocalService.getPlaylistByName(playlistName)
+      .then(playlist => {
+        let playlistToCreate = null;
+        if (playlist) {
+          playlistToCreate = playlist;
+        } else {
+          playlistToCreate = {
+            name: playlistName,
+            songs: []
+          }
+        }
+
+        playlistToCreate.songs.push(song)
+
+        LocalService.savePlaylist(playlistToCreate)
+          .then(LocalService.getPlaylists)
+          .then(playlists => {
+            dispatch(appActions.playlistSaved(playlists));
+
+            dispatch(showAddPlaylistSuccess(song, playlistToCreate));
+            setTimeout(() => {
+              dispatch(hideAddPlaylistSuccess());
+            }, 4500);
+          })
+          .catch(error => {
+            console.log('error in homeActions.createNewPlaylistAndAddSong - line 134');
+          });
+      });
+  }
+}

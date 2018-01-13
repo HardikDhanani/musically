@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
@@ -21,12 +20,5 @@ class Text extends PureComponent {
     );
   }
 }
-
-Text.propTypes = {
-  imageUri: PropTypes.string,
-  title: PropTypes.string,
-  onPress: PropTypes.func,
-  onOptionPressed: PropTypes.func,
-};
 
 export default Text;

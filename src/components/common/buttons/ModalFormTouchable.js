@@ -10,10 +10,12 @@ import Text from '../Text';
 
 const styles = EStyleSheet.create({
   container: {
+    flexDirection: 'column',
     width: '$modalFormWidth',
-    marginVertical: 10,
+    alignItems: 'flex-start',
     justifyContent: 'center',
-    alignItems: 'flex-start'
+    paddingHorizontal: 20,
+    paddingVertical: 8
   },
   text: {
     color: '$textMainColor',

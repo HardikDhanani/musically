@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import {
-  Text
-} from 'react-native';
+import Text from './common/Text';
 
 const styles = EStyleSheet.create({
   container: {
-    fontFamily: '$fontFamily',
     fontSize: '$titleFontSize',
     color: '$headerColor',
     alignSelf: 'center',

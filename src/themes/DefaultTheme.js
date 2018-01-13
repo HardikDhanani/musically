@@ -30,9 +30,11 @@ const theme = {
   $appWidth: appWidth,
   $appHeight: appHeight,
   $appMainColor: PRIMARY_COLOR,
+  $appBackgroundColor: SECONDARY_COLOR,
   $appMainTextColor: 'rgba(255,255,255,1)',
 
   $bodyHeight: getBodyHeight(),
+  $statusBarHeight: StatusBar.currentHeight,
 
   $headerHeight: getHeaderHeight(),
   $headerColor: 'white',
@@ -51,7 +53,6 @@ const theme = {
   $footerTextColor: 'rgba(0,0,0,1)',
 
   $body_1_backgroundColor: BODY_1_BACKGROUND_COLOR,
-  $bodyBackgroundColor: SECONDARY_COLOR,
   $bodySecondaryBackgroundColor: '#4c4c4c',
 
   $cardBackgroundColor: 'white',

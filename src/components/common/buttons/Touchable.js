@@ -25,7 +25,7 @@ class Touchable extends PureComponent {
 }
 
 Touchable.propTypes = {
-  onPress: PropTypes.func
+  onPress: PropTypes.func.isRequired
 };
 
 export default Touchable;

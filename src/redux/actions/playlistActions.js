@@ -47,6 +47,12 @@ const removingSongSuccess = (playlist) => {
   }
 }
 
+export const showMore = () => {
+  return {
+    type: 'PLAYLIST_SHOW_MORE'
+  }
+}
+
 export function load(playlistId) {
   return dispatch => {
     dispatch(loading())

@@ -22,6 +22,9 @@ const styles = EStyleSheet.create({
     fontSize: '$titleFontSize',
     color: '$textMainColor',
     fontFamily: 'nunito'
+  },
+  inputUnderlineColor: {
+    color: '$elementInactive'
   }
 });
 
@@ -33,13 +36,7 @@ class NewPlaylist extends Component {
       playlistName: this.props.defaultValue
     }
   }
-  /*
-    <ConfirmationForm
-      actionText={this.props.dictionary.getWord('save').toUpperCase()}
-      onCancelPress={this.props.onCancelPress}
-      onConfirmPress={() => this.props.onConfirmPress(this._text)}>
-    </ConfirmationForm>
-  */
+
   render() {
     return (
       <ModalFormWithAction
@@ -60,7 +57,7 @@ class NewPlaylist extends Component {
             style={styles.input}
             onChangeText={text => this.setState({ playlistName: text })}
             value={this.props.playlistName}
-            underlineColorAndroid={'transparent'} />
+            underlineColorAndroid={styles._inputUnderlineColor.color} />
         </View>
       </ModalFormWithAction>
     );

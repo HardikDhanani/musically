@@ -7,10 +7,12 @@ import {
 
 const styles = EStyleSheet.create({
   container: {
+    flex: 1,
     alignSelf: 'center',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    paddingRight: 10,
+    justifyContent: 'space-between'
   }
 });
 

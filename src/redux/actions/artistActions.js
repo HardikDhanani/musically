@@ -1,4 +1,5 @@
 import LocalService from '../../services/LocalService';
+import * as playerActions from './playerActions';
 
 export const loading = () => {
   return {
@@ -18,6 +19,12 @@ export const loadingSuccess = (artist) => {
 export const loadingError = () => {
   return {
     type: 'ARTIST_LOADING_ERROR'
+  }
+}
+
+export const showMore = () => {
+  return {
+    type: 'ARTIST_SHOW_MORE'
   }
 }
 

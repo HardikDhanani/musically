@@ -39,9 +39,6 @@ const styles = EStyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 10
   },
-  contentContainer: {
-    marginHorizontal: 10,
-  },
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'center'
@@ -89,7 +86,7 @@ class ConfirmationForm extends Component {
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{this.props.title}</Text>
             </View>
-            <ScrollView style={styles.contentContainer}>
+            <ScrollView>
               {this.props.children}
             </ScrollView>
             <View style={styles.buttonsContainer}>

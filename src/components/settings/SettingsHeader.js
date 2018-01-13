@@ -6,6 +6,7 @@ import Header from '../common/headers/Header';
 import HeaderTitle from '../HeaderTitle';
 import HeaderLeftSection from '../HeaderLeftSection';
 import HeaderCenterSection from '../HeaderCenterSection';
+import HeaderRightSection from '../HeaderRightSection';
 import IconButton from '../common/buttons/IconButton';
 
 const styles = EStyleSheet.create({
@@ -26,6 +27,7 @@ class SettingsHeader extends PureComponent {
         <HeaderCenterSection>
           <HeaderTitle>{this.props.title}</HeaderTitle>
         </HeaderCenterSection>
+        <HeaderRightSection />
       </Header>
     );
   }
@@ -33,7 +35,7 @@ class SettingsHeader extends PureComponent {
 
 SettingsHeader.propTypes = {
   title: PropTypes.string.isRequired,
-  onBackPress: PropTypes.func
+  onBackPress: PropTypes.func.isRequired
 };
 
 export default SettingsHeader;

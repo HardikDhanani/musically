@@ -48,9 +48,7 @@ class ModalForm extends PureComponent {
         transparent={true}
         visible={true}
         onRequestClose={() => {
-          if (this.props.onCancelPress) {
-            this.props.onCancelPress();
-          }
+          this.props.onCancelPress();
         }}>
         <View style={[styles.container, { backgroundColor }]}>
           <View style={[styles.contentContainer, this.props.style]}>

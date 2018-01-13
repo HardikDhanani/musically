@@ -3,30 +3,33 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  View,
-  PanResponder,
-  Animated,
-  Dimensions
+  View
 } from 'react-native';
 
 const styles = EStyleSheet.create({
+  appWidth: {
+    width: '$appWidth'
+  },
   container: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    height: 6,
+    backgroundColor: 'white'
   },
   elapsed: {
-    height: 4
+    height: 6,
+    borderTopLeftRadius: 5,
+    borderBottomLeftRadius: 5,
+    borderTopRightRadius: 5,
+    borderBottomRightRadius: 5,
   },
   left: {
-    height: 4
+    height: 6,
+    borderTopRightRadius: 5,
+    borderBottomRightRadius: 5,
   },
-  button: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 5,
-    position: 'absolute',
-    borderColor: '$elementActive'
+  elevation: {
+    elevation: 3
   }
 });
 
@@ -34,104 +37,66 @@ class ProgressBar extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      pan: new Animated.ValueXY(),
-    };
-
-    this._currentPosition = 0;
-    this._maxPosition = 320 - 20;
-    this._isPanWorking = false;
-    this._width = Dimensions.get('window').width;
-
-    this._onProgressChange = this._onProgressChange.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (!this._isPanWorking && this.props.elapsed !== nextProps.elapsed) {
-      let percentage = this.props.total ? ((nextProps.elapsed * 100) / this.props.total) / 100 : 0;
-      let newdx = this._maxPosition * percentage;
-      this._currentPosition = newdx;
-      this.state.pan.setOffset({ x: newdx, y: 0 });
-    } else if (this.props.elapsed !== nextProps.elapsed && nextProps.elapsed === 0) {
-      this.state.pan.setOffset({ x: -this._currentPosition, y: 0 });
-      this._currentPosition = 0;
-    }
-  }
-
-  componentWillMount() {
-    this._panResponder = PanResponder.create({
-      onMoveShouldSetResponderCapture: () => true, //Tell iOS that we are allowing the movement
-      onMoveShouldSetPanResponderCapture: () => true, // Same here, tell iOS that we allow dragging
-      onPanResponderGrant: (e, gestureState) => {
-        this.state.pan.setOffset({ x: this.state.pan.x._value, y: 0 });
-        //this.state.pan.setValue({ x: 0, y: 0 }); //Initial value
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        this._isPanWorking = true;
-        if (gestureState.dx !== 0) {
-          let newdx = gestureState.dx;
-          let position = this._currentPosition + gestureState.dx;
-
-          if (position < 0) {
-            newdx = -1 * this._currentPosition;
-            position = 0;
-          } else if (position > this._maxPosition) {
-            newdx = this._maxPosition - this._currentPosition;
-            position = this._maxPosition;
-          }
-
-          Animated.event([
-            null, { dx: this.state.pan.x, dy: 0 },
-          ])(evt, { dx: newdx, dy: 0 });
-
-          this._onProgressChange(position);
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (this._currentPosition + gestureState.dx < 0)
-          this._currentPosition = 0;
-        else if (this._currentPosition + gestureState.dx > this._maxPosition)
-          this._currentPosition = this._maxPosition;
-        else
-          this._currentPosition += gestureState.dx;
-
-        this._isPanWorking = false;
-        this.state.pan.flattenOffset(); // Flatten the offset so it resets the default positioning
-      }
-    });
+    this._calculateMainContainerStyle = this._calculateMainContainerStyle.bind(this);
+    this._calculateElapsedContainerStyle = this._calculateElapsedContainerStyle.bind(this);
+    this._calculateLeftContainerStyle = this._calculateLeftContainerStyle.bind(this);
   }
 
   render() {
     let percentage = this.props.total ? ((this.props.elapsed * 100) / this.props.total) / 100 : 0;
-    let elapsedWidth = this._width * percentage;
-    let leftWidth = this._width - elapsedWidth;
-    let imageStyle = { transform: [{ translateX: this.state.pan.x }, { translateY: 0 }] };
+    let elapsedWidth = styles._appWidth.width * percentage;
+    let leftWidth = styles._appWidth.width - elapsedWidth;
 
     return (
-      <View style={styles.container}>
-        <View style={[styles.elapsed, { backgroundColor: this.props.color, flex: elapsedWidth }]} />
-        <View style={[styles.left, { backgroundColor: this.props.backgroundColor, flex: leftWidth }]} />
-        {
-          this.props.showButton
-            ? <Animated.View hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }} style={[styles.button, imageStyle]} {...this._panResponder.panHandlers} />
-            : null
-        }
+      <View style={this._calculateMainContainerStyle()}>
+        <View style={this._calculateElapsedContainerStyle(elapsedWidth)} />
+        <View style={this._calculateLeftContainerStyle(leftWidth)} />
       </View>
     );
   }
 
-  _onProgressChange(position) {
-    let percentage = ((position * 100) / this._maxPosition) / 100;
-    console.log('percentage: ' + percentage);
-    this.props.onProgressChange(percentage);
+  _calculateMainContainerStyle() {
+    return [
+      styles.container,
+      this.props.showElevation ? styles.elevation : null,
+      {
+        borderTopLeftRadius: this.props.showBorderRadius ? 5 : 0,
+        borderBottomLeftRadius: this.props.showBorderRadius ? 5 : 0,
+        borderTopRightRadius: this.props.showBorderRadius ? 5 : 0,
+        borderBottomRightRadius: this.props.showBorderRadius ? 5 : 0,
+        backgroundColor: this.props.backgroundColor
+      }
+    ];
+  }
+
+  _calculateElapsedContainerStyle(elapsedWidth) {
+    return [
+      styles.elapsed,
+      {
+        borderTopLeftRadius: this.props.showBorderRadius ? 5 : 0,
+        borderBottomLeftRadius: this.props.showBorderRadius ? 5 : 0
+      },
+      { flex: elapsedWidth, backgroundColor: this.props.color }
+    ];
+  }
+
+  _calculateLeftContainerStyle(leftWidth) {
+    return [
+      styles.left,
+      {
+        borderTopRightRadius: this.props.showBorderRadius ? 5 : 0,
+        borderBottomRightRadius: this.props.showBorderRadius ? 5 : 0
+      },
+      { flex: leftWidth }
+    ];
   }
 }
 
 ProgressBar.propTypes = {
   elapsed: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,
-  showButton: PropTypes.bool,
-  onProgressChange: PropTypes.func
+  showElevation: PropTypes.bool,
+  showBorderRadius: PropTypes.bool
 };
 
 export default ProgressBar;

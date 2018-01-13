@@ -10,7 +10,7 @@ const styles = EStyleSheet.create({
     height: '$footerHeight',
     width: '$footerWidth',
     backgroundColor: '$footerBackgroundColor',
-    elevation: 15
+    elevation: 10
   }
 });
 

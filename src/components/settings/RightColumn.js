@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  TouchableNativeFeedback,
   View
 } from 'react-native';
 
@@ -16,7 +15,7 @@ const styles = EStyleSheet.create({
 export default class RightColumn extends PureComponent {
   render() {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, this.props.style]}>
         {this.props.children}
       </View>
     );

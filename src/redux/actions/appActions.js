@@ -170,15 +170,6 @@ const playlistAlreadyExists = () => {
   }
 }
 
-const playlistSaved = (playlists) => {
-  return {
-    type: 'APP_SAVING_NEW_PLAYLIST_SUCCEED',
-    payload: {
-      playlists
-    }
-  }
-}
-
 const errorSavingPlaylist = (message) => {
   return {
     type: 'APP_SAVING_NEW_PLAYLIST_ERROR',
@@ -259,6 +250,15 @@ const languageChangedAction = (dictionary) => {
     type: 'APP_LANGUAGE_CHANGED',
     payload: {
       dictionary
+    }
+  }
+}
+
+export const playlistSaved = (playlists) => {
+  return {
+    type: 'APP_SAVING_NEW_PLAYLIST_SUCCEED',
+    payload: {
+      playlists
     }
   }
 }

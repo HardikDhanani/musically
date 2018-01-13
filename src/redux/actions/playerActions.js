@@ -125,9 +125,58 @@ const _stopNotifyingProgress = (dispatch) => {
   clearInterval(timer);
 }
 
+const _updateSong = (song, dispatch) => {
+  let albumEdited = null;
+  return LocalService.saveSong(song)
+    .then(() => LocalService.getAlbumByName(song.album, song.artist))
+    .then(album => {
+      let i = album.songs.findIndex(s => s.id === song.id);
+      album.songs[i] = song;
+      albumEdited = album;
+
+      return LocalService.getArtistByName(song.artist);
+    })
+    .then(artist => {
+      let i = artist.albums.findIndex(a => a.id === albumEdited.id);
+      artist.albums[i] = albumEdited;
+
+      return LocalService.saveArtist(artist);
+    })
+    .then(() => LocalService.saveAlbum(albumEdited));
+}
+
 const _updateMostPlayedPlaylist = (song, dispatch) => {
-  return LocalService.getPlaylistByName('Most played')
-    .then(playlist => {
+  let playlistPromise = LocalService.getPlaylistByName('Most played');
+  let sessionPromise = LocalService.getSession();
+
+  // let playlistRet = null
+  // LocalService.getPlaylistByName('Most played')
+  //   .then(playlist => {
+  //     playlistRet = playlist;
+  //     return LocalService.getSession();
+  //   })
+  //   .then(session => {
+  //     if (session.mostPlayedReproductions > song.reproductions) {
+  //       return;
+  //     }
+
+  //     let index = playlistRet.songs.findIndex(s => s.id === song.id);
+  //     if (index !== -1) {
+  //       appActions.updateSongInPlaylist(song, playlistRet)(dispatch);
+  //     } else {
+  //       appActions.addSongToPlaylist(song, playlistRet)(dispatch);
+  //     }
+  //   });
+
+  Promise.all([playlistPromise, sessionPromise])
+    .then(results => {
+      let playlist = results[0];
+      let session = results[1];
+
+      if (session.mostPlayedReproductions > song.reproductions) {
+        return;
+      }
+
       let index = playlist.songs.findIndex(s => s.id === song.id);
       if (index !== -1) {
         appActions.updateSongInPlaylist(song, playlist)(dispatch);
@@ -229,7 +278,9 @@ export const load = (queue, startPlaying) => {
       .then(() => {
         dispatch(loadingSuccess(currentQueue, currentQueue[currentIndex], currentIndex));
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error)
+      });
   }
 }
 
@@ -307,6 +358,7 @@ export const initPlayer = () => {
 
       currentTrack.additionalInfo.reproductions += 1;
 
+      _updateSong(currentTrack.additionalInfo, dispatch);
       _updateMostPlayedPlaylist(currentTrack.additionalInfo, dispatch);
       _updateRecentPlayedPlaylist(currentTrack.additionalInfo, dispatch);
       dispatch(play());

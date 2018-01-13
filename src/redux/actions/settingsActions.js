@@ -32,12 +32,13 @@ const loading = () => {
   }
 }
 
-const loadingSuccess = (recentlyPlayedLength, mostPlayedLength) => {
+const loadingSuccess = (recentlyPlayedLength, mostPlayedLength, mostPlayedReproductions) => {
   return {
     type: 'SETTINGS_LOADING_SUCCESS',
     payload: {
       recentlyPlayedLength,
       mostPlayedLength,
+      mostPlayedReproductions
     }
   }
 }
@@ -95,6 +96,15 @@ const setMostPlayedLengthSuccess = (mostPlayedLength, playlists) => {
   }
 }
 
+const setMostPlayedReproductionsSuccess = (mostPlayedReproductions) => {
+  return {
+    type: 'SETTINGS_SET_MOST_PLAYED_REPRODUCTIONS_SUCCESS',
+    payload: {
+      mostPlayedReproductions
+    }
+  }
+}
+
 export const showSetSetting = (setting) => {
   return {
     type: 'SETTINGS_SHOW_SET_SETTING',
@@ -118,8 +128,9 @@ export function load() {
       .then(session => {
         let recentlyPlayedLength = session.recentlyPlayedLength || 0;
         let mostPlayedLength = session.mostPlayedLength || 0;
+        let mostPlayedReproductions = session.mostPlayedReproductions || 0;
 
-        dispatch(loadingSuccess(recentlyPlayedLength, mostPlayedLength));
+        dispatch(loadingSuccess(recentlyPlayedLength, mostPlayedLength, mostPlayedReproductions));
       })
       .catch(error => {
         dispatch(loadingError(error));
@@ -187,5 +198,23 @@ export function setMostPlayedLength(mostPlayedLength) {
       .catch(error => {
         dispatch(loadingError(error));
       });
+  }
+}
+
+export function setMostPlayedReproductions(reproductions) {
+  return dispatch => {
+    if (!reproductions) {
+      return;
+    }
+
+    let session = null;
+    LocalService.getSession()
+      .then(sess => {
+        session = sess;
+        session.mostPlayedReproductions = parseInt(reproductions);
+
+        return LocalService.saveSession(session);
+      })
+      .then(() => dispatch(setMostPlayedReproductionsSuccess(reproductions)));
   }
 }

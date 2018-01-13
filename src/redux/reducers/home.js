@@ -119,14 +119,16 @@ export default function home(state = initialState, action = {}) {
         showAddToPlaylistForm: false,
         showAddToPlaylistConfirmationForm: true,
         songToAddToPlaylist: action.payload.song,
-        playlistModified: action.payload.playlist
+        playlistModified: action.payload.playlist,
+        showAddNewPlaylistForm: false
       }
     case 'HOME_HIDE_ADD_PLAYLIST_SUCCESS':
       return {
         ...state,
         showAddToPlaylistConfirmationForm: false,
         songToAddToPlaylist: null,
-        playlistModified: null
+        playlistModified: null,
+        showAddNewPlaylistForm: false
       }
     case 'HOME_ADD_NEW_PLAYLIST':
       return {

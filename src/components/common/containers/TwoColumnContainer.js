@@ -9,7 +9,8 @@ import {
 const styles = EStyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   }
 });
 

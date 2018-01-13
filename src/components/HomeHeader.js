@@ -41,10 +41,10 @@ class HomeHeader extends Component {
 }
 
 HomeHeader.propTypes = {
-  title: PropTypes.string,
-  onSearchPress: PropTypes.func,
-  onMorePress: PropTypes.func,
-  onMenuPress: PropTypes.func
+  title: PropTypes.string.isRequired,
+  onSearchPress: PropTypes.func.isRequired,
+  onMorePress: PropTypes.func.isRequired,
+  onMenuPress: PropTypes.func.isRequired
 };
 
 export default HomeHeader;

@@ -3,27 +3,28 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  View,
-  Text
+  View
 } from 'react-native';
 import Option from './Option';
 import RadioButton from './RadioButton';
 import LeftColumn from './LeftColumn';
 import RightColumn from './RightColumn';
+import Text from '../common/Text';
 
 const styles = EStyleSheet.create({
   container: {
     flex: 1
   },
   option: {
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 0
   },
   sectionOptionText: {
     fontSize: 16
   },
   sectionOptionTextSelected: {
-    color: '$elementActive'
+    color: '$textMainColor'
   },
   sectionOptionTextUnselected: {
     color: '$elementInactive'
@@ -53,16 +54,10 @@ class LanguageSelector extends PureComponent {
   _renderOptions() {
     return this.props.items.map((item, index) => {
       let color = this.state.selectedOption === item.value ? styles.sectionOptionTextSelected : styles.sectionOptionTextUnselected;
+
       return (
         <Option key={index} onPress={() => this._selectOption(item.value)} style={styles.option}>
-          <LeftColumn>
-            <Text style={[styles.sectionOptionText, color]}>{item.text}</Text>
-          </LeftColumn>
-          <RightColumn>
-            <View>
-              <RadioButton selected={this.state.selectedOption === item.value} />
-            </View>
-          </RightColumn>
+          <Text style={[styles.sectionOptionText, color]}>{item.text}</Text>
         </Option>
       );
     });
@@ -70,15 +65,13 @@ class LanguageSelector extends PureComponent {
 
   _selectOption(selectedOption) {
     this.setState({ selectedOption }, () => {
-      if (this.props.onOptionChanged) {
-        this.props.onOptionChanged(this.state.selectedOption);
-      }
+      this.props.onOptionChanged(this.state.selectedOption);
     })
   }
 }
 
 LanguageSelector.propTypes = {
-  onOptionChanged: PropTypes.func
+  onOptionChanged: PropTypes.func.isRequired
 };
 
 export default LanguageSelector;

@@ -52,9 +52,9 @@ class CoverCard extends PureComponent {
 
 CoverCard.propTypes = {
   imageUri: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string.isRequired,
   detail: PropTypes.string,
-  onPress: PropTypes.func
+  onPress: PropTypes.func.isRequired
 };
 
 export default CoverCard;

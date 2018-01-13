@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  View,
-  Modal
+  View
 } from 'react-native';
 import Text from '../Text';
 import Touchable from '../buttons/Touchable';

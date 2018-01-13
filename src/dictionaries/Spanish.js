@@ -25,6 +25,7 @@ let words = {
   create_playlist: 'Crear lista',
   create: 'Crear',
   my_playlist: 'Mi lista',
+  now_playing: 'Sonando Ahora',
 
   settings_sectionTitle_lookAndFeel: 'Apariencia',
   settings_lookAndFeel_languague: 'Idioma',

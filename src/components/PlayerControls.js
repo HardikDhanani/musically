@@ -3,21 +3,26 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  View,
-  Text
+  View
 } from 'react-native';
 import ProgressBar from '../components/ProgressBar';
+import Text from '../components/common/Text';
+import IconButton from '../components/common/buttons/IconButton';
 
 const styles = EStyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    height: '$appHeight * 0.41',
-    backgroundColor: '$headerBackgroundColor'
+    width: '$appWidth'
+  },
+  topContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
   infoContainer: {
-    flexDirection: 'row', 
-    justifyContent: 'space-between'
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   title: {
     lineHeight: 25,
@@ -26,25 +31,38 @@ const styles = EStyleSheet.create({
   },
   text: {
     lineHeight: 25,
-    color: '$textColor'
+    color: 'rgb(200, 200, 200)'
   },
   progressBarContainer: {
     marginTop: 30
   },
   elapsedTimeContainer: {
-    paddingTop: 30,
     flexDirection: 'row',
     justifyContent: 'space-between'
-  }
+  },
+  button: {
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize',
+    color: '$elementInactive'
+  },
+  likedButton: {
+    color: '$appMainColor',
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize'
+  },
+  unlikedButton: {
+    color: '$elementInactive',
+    backgroundColor: 'transparent',
+    fontSize: '$headerIconSize'
+  },
 });
 
 class PlayerControls extends Component {
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.title !== nextProps.title
+    return this.props.liked !== nextProps.liked
+      || this.props.title !== nextProps.title
       || this.props.artist !== nextProps.artist
       || this.props.album !== nextProps.album
-      || this.props.currentIndex !== nextProps.currentIndex
-      || this.props.totalSongs !== nextProps.totalSongs
       || this.props.elapsedTime !== nextProps.elapsedTime
       || this.props.duration !== nextProps.duration;
   }
@@ -54,18 +72,23 @@ class PlayerControls extends Component {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>{this.props.title}</Text>
-        <Text style={styles.text}>{this.props.artist}</Text>
-        <View style={styles.infoContainer}>
-          <Text style={styles.text}>{this.props.album}</Text>
-          <Text style={styles.text}>{this.props.currentIndex + '/' + this.props.totalSongs}</Text>
+        <View style={styles.topContainer}>
+          <IconButton iconName='add' style={styles._button} iconSize={styles._button.fontSize + 6} />
+          <View style={styles.infoContainer}>
+            <Text numberOfLines={1} style={styles.title}>{this.props.title}</Text>
+            <Text numberOfLines={1} style={styles.text}>{this.props.artist + ' - ' + this.props.album}</Text>
+          </View>
+          <IconButton onPress={() => this.props.onLikePress()} iconName='favorite' style={this.props.liked ? styles._likedButton : styles._unlikedButton} iconSize={styles._button.fontSize} />
         </View>
         <View style={styles.progressBarContainer}>
           <ProgressBar
             total={this.props.total}
             elapsed={this.props.elapsedTime}
-            showButton={true}
-            onProgressChange={this.props.onProgressChange} />
+            showElevation={true}
+            onProgressChange={this.props.onProgressChange}
+            color={'rgba(190,177,227,1)'}
+            backgroundColor={'white'}
+            showBorderRadius={true} />
           <View style={styles.elapsedTimeContainer}>
             <Text style={styles.text}>{formattedElapsedTime}</Text>
             <Text style={styles.text}>{this.props.duration}</Text>
@@ -89,14 +112,14 @@ class PlayerControls extends Component {
 }
 
 PlayerControls.propTypes = {
-  title: PropTypes.string,
-  artist: PropTypes.string,
-  album: PropTypes.string,
-  currentIndex: PropTypes.number,
-  totalSongs: PropTypes.number,
-  elapsedTime: PropTypes.number,
-  duration: PropTypes.number,
-  onProgressChange: PropTypes.func
+  title: PropTypes.string.isRequired,
+  artist: PropTypes.string.isRequired,
+  album: PropTypes.string.isRequired,
+  elapsedTime: PropTypes.number.isRequired,
+  duration: PropTypes.string.isRequired,
+  liked: PropTypes.bool.isRequired,
+  onProgressChange: PropTypes.func.isRequired,
+  onLikePress: PropTypes.func.isRequired
 };
 
 export default PlayerControls;

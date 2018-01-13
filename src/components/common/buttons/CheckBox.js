@@ -1,11 +1,11 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {
   TouchableWithoutFeedback
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const styles = EStyleSheet.create({
   checkBox: {

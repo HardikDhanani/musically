@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import LinearGradient from 'react-native-linear-gradient';
 
 import * as playerActions from '../redux/actions/playerActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
 import * as appActions from '../redux/actions/appActions';
 
-import { StyleSheet, Image, View, Text, Dimensions, TouchableOpacity, Platform } from 'react-native';
+import { StatusBar, StyleSheet, Image, View, Text, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import Swiper from 'react-native-swiper';
 
 import Container from '../components/Container';
@@ -17,18 +18,58 @@ import ProgressBar from '../components/ProgressBar';
 import FloatMenu from '../components/FloatMenu';
 import PlayerControls from '../components/PlayerControls';
 import IconButton from '../components/common/buttons/IconButton';
+import PlayPauseButtonWhite from '../components/common/buttons/PlayPauseButtonWhite';
 
 const styles_2 = EStyleSheet.create({
+  $containerWidth: '$appWidth / 2',
+  $cardWidth: '$containerWidth * 0.9',
+  container: {
+    flex: 1
+  },
   buttonSelected: {
     backgroundColor: 'transparent',
     fontSize: '$headerIconSize',
-    color: '$buttonSelected'
+    color: '$appMainColor'
   },
   buttonUnselected: {
     backgroundColor: 'transparent',
     fontSize: '$headerIconSize',
-    color: '$buttonUnselected'
-  }
+    color: '$elementInactive'
+  },
+  gradientStart: {
+    color: '$headerStartGradientBackgroundColor'
+  },
+  gradientEnd: {
+    color: '$headerEndGradientBackgroundColor'
+  },
+  footer: {
+    width: '$appWidth',
+    height: '$footerHeight',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    paddingHorizontal: 20,
+    paddingBottom: 30
+  },
+  coverContainer: {
+    height: '$appHeight * 0.5',
+    width: '$appWidth',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    elevation: 5,
+    backgroundColor: 'white',
+    width: '$cardWidth',
+    borderRadius: 3
+  },
+  image: {
+    height: '$cardWidth',
+    width: '$cardWidth',
+    borderRadius: 3
+  },
 });
 
 class Player extends Component {
@@ -36,12 +77,9 @@ class Player extends Component {
     super(props);
 
     this._renderControls = this._renderControls.bind(this);
-    this._renderFloatMenu = this._renderFloatMenu.bind(this);
-    this._renderQueue = this._renderQueue.bind(this);
-    this._onMomentumScrollEnd = this._onMomentumScrollEnd.bind(this);
+    this._renderCover = this._renderCover.bind(this);
     this._renderFooter = this._renderFooter.bind(this);
     this._getRepeatIcon = this._getRepeatIcon.bind(this);
-    // this._progressBar = this._progressBar.bind(this);
     this._onProgressChange = this._onProgressChange.bind(this);
   }
 
@@ -52,53 +90,42 @@ class Player extends Component {
     if (this.props.navigation.state.params) {
       queue = this.props.navigation.state.params.queue;
       startPlaying = this.props.navigation.state.params.startPlaying;
+      random = this.props.navigation.state.params.random;
     }
 
-    this.props.load(queue, startPlaying);
+    this.props.load(queue, startPlaying || false, random || false);
   }
 
   render() {
     return (
-      <Container>
-        {this._renderQueue()}
-        <PlayerHeader
-          liked={this.props.isFavorite}
-          onBackPress={() => this.props.navigation.goBack()}
-          onLikePress={() => this.props.like(this.props.currentSong)}
-          onSharePress={() => { }}
-          onMenuPress={() => this.props.setMenu()} />
-        {this._renderControls()}
-        <TouchableOpacity style={styles.mixButton}></TouchableOpacity>
-        {this._renderFloatMenu()}
-        {this._renderFooter()}
+      <Container fillStatusBar={false}>
+        <LinearGradient
+          start={{ x: 0.0, y: 0.0 }}
+          end={{ x: 0.0, y: 1.0 }}
+          colors={[styles_2._gradientStart.color, styles_2._gradientStart.color, styles_2._gradientEnd.color]}
+          style={styles_2.container}>
+          <PlayerHeader
+            title={this.props.dictionary.getWord('now_playing')}
+            onBackPress={() => this.props.navigation.goBack()}/>
+          {this._renderCover()}
+          {this._renderControls()}
+          {/*this._renderFloatMenu()*/}
+          {this._renderFooter()}
+        </LinearGradient>
       </Container>
     );
   }
 
-  _renderQueue() {
-    let songs = this.props.queue ? this.props.queue.map((song, index) => {
-      let source = song.cover ? { uri: song.cover } : require('../images/music.png')
-      return (
-        <Image key={index} source={source} style={styles.image} />
-      );
-    }) : [];
+  _renderCover() {
+    let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/music.png')
 
     return (
-      <Swiper
-        showsPagination={false}
-        loop={false}
-        onMomentumScrollEnd={this._onMomentumScrollEnd}>
-        {songs}
-      </Swiper>
+      <View style={styles_2.coverContainer}>
+        <View style={styles_2.imageContainer}>
+          <Image source={source} style={styles_2.image} />
+        </View>
+      </View>
     );
-  }
-
-  _onMomentumScrollEnd(e, state, context) {
-    if(this.props.currentIndex > state.index){
-      this.props.prev();
-    } else if(this.props.currentIndex < state.index) {
-      this.props.next();
-    }
   }
 
   _renderControls() {
@@ -108,7 +135,7 @@ class Player extends Component {
     let currentIndex = this.props.currentIndex + 1;
     let totalSongs = this.props.queue.length;
     let duration = this.props.currentSong ? this._formatTime(this.props.currentSong.duration) : "00:00";
-    let total = this.props.currentSong ? this.props.currentSong.duration : 0;
+    let total = this.props.currentSong ? parseInt(this.props.currentSong.duration) : 0;
 
     return (
       <PlayerControls
@@ -120,7 +147,9 @@ class Player extends Component {
         duration={duration}
         elapsedTime={this.props.elapsedTime}
         total={total}
-        onProgressChange={this._onProgressChange} />
+        liked={this.props.isFavorite}
+        onProgressChange={this._onProgressChange} 
+        onLikePress={() => this.props.like(this.props.currentSong)}/>
     );
   }
 
@@ -148,38 +177,14 @@ class Player extends Component {
     }
   }
 
-  _renderFloatMenu() {
-    if (!this.props.showMenu)
-      return null;
-
-    return (
-      <FloatMenu onPress={() => this.props.setMenu()}>
-        <TouchableOpacity style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Sort Order'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'View Mode'}</Text>
-          <Text style={styles.floatMenuOptionText}>{'>'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Rescan Library'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.floatMenuOption}>
-          <Text style={styles.floatMenuOptionText}>{'Playlist Queue'}</Text>
-        </TouchableOpacity>
-      </FloatMenu>
-    );
-  }
-
   _renderFooter() {
     return (
-      <View style={[styles.footer, this.props.style]}>
-        <IconButton iconName='shuffle' onPress={this.props.random} style={this.props.randomActive ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
-        <IconButton iconName='skip-previous' onPress={this.props.prev} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
-        <IconButton iconName={this.props.playing ? 'pause' : 'play-arrow'} onPress={() => this.props.playPause(this.props.currentSong)} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
-        <IconButton iconName='skip-next' onPress={this.props.next} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+      <View style={[styles_2.footer, this.props.style]}>
         <IconButton iconName={this._getRepeatIcon()} onPress={() => this.props.repeat()} style={this.props.repeatMode !== 'NONE' ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName='fast-rewind' onPress={this.props.prev} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <PlayPauseButtonWhite onPress={() => this.props.playPause(this.props.currentSong)} iconName={this.props.playing ? 'pause' : 'play-arrow'} />
+        <IconButton iconName='fast-forward' onPress={this.props.next} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName='shuffle' onPress={this.props.random} style={this.props.randomActive ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
       </View>
     );
   }
@@ -194,72 +199,9 @@ class Player extends Component {
   }
 }
 
-const styles = StyleSheet.create({
-  button: {
-    height: Header.currentHeight * 0.7,
-    width: Header.currentHeight * 0.7,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5
-  },
-  buttonText: {
-    color: 'black',
-    fontSize: 20,
-  },
-  floatMenuOption: {
-    flexDirection: 'row',
-    height: Header.currentHeight * 0.8,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10
-  },
-  floatMenuOptionText: {
-    fontSize: 15,
-    color: 'white'
-  },
-  cover: {
-    flex: 1,
-  },
-  controls: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    height: Dimensions.get('window').height * 0.41,
-    backgroundColor: '#2E2E2E'
-  },
-  image: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height * 0.55,
-  },
-  mixButton: {
-    position: 'absolute',
-    top: 300,
-    right: 20,
-    height: Header.currentHeight,
-    width: Header.currentHeight,
-    borderRadius: 100,
-    backgroundColor: '#ffa500',
-  },
-  footer: {
-    height: Platform.OS === "ios" ? 55 : 55,
-    width: Dimensions.get('window').width,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    position: 'absolute',
-    bottom: 0,
-    paddingHorizontal: 20,
-  },
-  playerButton: {
-    width: Platform.OS === "ios" ? 55 : 55,
-    height: Platform.OS === "ios" ? 55 : 55,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
-});
-
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
     currentSong: state.player.currentSong,
     isFavorite: state.player.isFavorite,
     currentIndex: state.player.currentIndex,

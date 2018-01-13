@@ -7,17 +7,19 @@ import {
 
 const styles = EStyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: 'row',
     alignSelf: 'center',
     alignItems: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    paddingLeft: 10
   }
 });
 
 export default class HeaderLeftSection extends Component {
   render() {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, this.props.style]}>
         {this.props.children}
       </View>
     );

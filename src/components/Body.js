@@ -12,7 +12,7 @@ const styles = EStyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     height: '$bodyHeight',
-    backgroundColor: '$bodyBackgroundColor'
+    backgroundColor: '$appBackgroundColor'
   },
   paginationHeader: {
     marginTop: '$paginationHeaderHeight',
