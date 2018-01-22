@@ -41,7 +41,7 @@ export default function queue(state = initialState, action = {}) {
         selected: 0,
         selectedAll: false,
         showConfirmation: false,
-        queue: action.payload.queue
+        queue: JSON.parse(JSON.stringify(action.payload.queue))
       }
     case 'QUEUE_REMOVING_SONG_ERROR':
       return {

@@ -15,7 +15,7 @@ const styles = EStyleSheet.create({
 
 class AlbumCard extends Component {
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.id !== nextProps.id;
+    return false;
   }
 
   render() {
@@ -27,18 +27,17 @@ class AlbumCard extends Component {
         title={this.props.name}
         onOptionPressed={this.props.onOptionPressed}>
         <Text numberOfLines={1} style={styles.text}>{this.props.artist}</Text>
-        <Text numberOfLines={1} style={styles.text}>{this.props.songs + ' songs'}</Text>
+        <Text numberOfLines={1} style={styles.text}>{this.props.songsDescription}</Text>
       </CoverCard>
     );
   }
 }
 
 AlbumCard.propTypes = {
-  id: PropTypes.string.isRequired,
   imageUri: PropTypes.string,
-  name: PropTypes.string,
-  artist: PropTypes.string,
-  songs: PropTypes.number,
+  name: PropTypes.string.isRequired,
+  artist: PropTypes.string.isRequired,
+  songsDescription: PropTypes.number.isRequired,
   onPress: PropTypes.func,
   onOptionPressed: PropTypes.func
 };

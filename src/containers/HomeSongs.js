@@ -10,7 +10,6 @@ import * as favoritesActions from '../redux/actions/favoritesActions';
 import playlists from '../redux/selectors/playlists';
 
 import {
-  ActivityIndicator,
   FlatList,
   View
 } from 'react-native';
@@ -21,9 +20,7 @@ import ModalFormWithAction from '../components/common/forms/ModalFormWithAction'
 import ModalFormTouchable from '../components/common/buttons/ModalFormTouchable';
 import Touchable from '../components/common/buttons/Touchable';
 import Text from '../components/common/Text';
-import PlaylistSelector from '../components/PlaylistSelector';
-import NewPlaylist from '../components/NewPlaylist';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import BodyActivityIndicator from '../components/common/BodyActivityIndicator';
 
 const styles = EStyleSheet.create({
   container: {
@@ -69,9 +66,6 @@ class HomeSongs extends Component {
     this._renderMenu = this._renderMenu.bind(this);
     this._addToQueue = this._addToQueue.bind(this);
     this._addToPlaylist = this._addToPlaylist.bind(this);
-    this._renderAddToPlaylistForm = this._renderAddToPlaylistForm.bind(this);
-    this._renderConfirmationSuccessMessage = this._renderConfirmationSuccessMessage.bind(this);
-    this._renderAddNewPlaylistForm = this._renderAddNewPlaylistForm.bind(this);
   }
 
   render() {
@@ -79,7 +73,7 @@ class HomeSongs extends Component {
       <Body hasPaginationHeader={true}>
         {
           !this.props.isReady ?
-            <ActivityIndicator animating={true} size='large' /> :
+            <BodyActivityIndicator /> :
             <FlatList
               data={this.props.songs}
               renderItem={this._renderSong}
@@ -88,9 +82,6 @@ class HomeSongs extends Component {
               style={styles.container} />
         }
         {this._renderMenu()}
-        {this._renderAddToPlaylistForm()}
-        {this._renderConfirmationSuccessMessage()}
-        {this._renderAddNewPlaylistForm()}
       </Body>
     );
   }
@@ -112,7 +103,7 @@ class HomeSongs extends Component {
         isFavorite={song.item.isFavorite}
         isPlaying={isPlaying}
         onOptionPress={() => this.props.setMenu(targetMenu)}
-        onPlayPress={() => this._playSongs([song.item])} 
+        onPlayPress={() => this._playSongs([song.item])}
         onLikePress={() => this.props.like('song', song.item)} />
     );
   }
@@ -138,57 +129,6 @@ class HomeSongs extends Component {
     );
   }
 
-  _renderAddToPlaylistForm() {
-    if (!this.props.showAddToPlaylistForm)
-      return null;
-
-    return (
-      <PlaylistSelector
-        title={this.props.dictionary.getWord('choose_playlist')}
-        addNewButtonText={this.props.dictionary.getWord('add')}
-        addNewText={this.props.dictionary.getWord('add_new_playlist')}
-        onAddNewPress={this.props.addNewPlaylist}
-        onCancelPress={this.props.cancelAddSongToPlaylist}
-        onPlaylistSelected={playlist => this.props.addSongToPlaylistConfirmed(this.props.songToAddToPlaylist, playlist)}
-        playlists={this.props.playlists} />
-    );
-  }
-
-  _renderConfirmationSuccessMessage() {
-    if (!this.props.showAddToPlaylistConfirmationForm) {
-      return null;
-    }
-
-    return (
-      <ModalForm
-        style={styles.confirmationContainer}
-        onCancelPress={() => { }}>
-        <View style={styles.checkContainer}>
-          <Icon name='check' color={styles._check.color} backgroundColor={'transparent'} size={styles._check.fontSize} />
-        </View>
-        <Text style={styles.textBold}>{this.props.songToAddToPlaylist.title}</Text>
-        <Text style={styles.text}>{'has been added to'}</Text>
-        <Text style={styles.textBold}>{this.props.playlistModified.name}</Text>
-      </ModalForm>
-    );
-  }
-
-  _renderAddNewPlaylistForm() {
-    if (!this.props.showAddNewPlaylistForm) {
-      return null;
-    }
-
-    return (
-      <NewPlaylist
-        backgroundTransparent={true}
-        title={this.props.dictionary.getWord('create_playlist')}
-        createButtonText={this.props.dictionary.getWord('create').toUpperCase()}
-        onPlaylistCreated={playlistName => this.props.createNewPlaylistAndAddSong(playlistName, this.props.songToAddToPlaylist)}
-        onCancelPress={this.props.cancelAddNewPlaylistForm}
-        defaultValue={this.props.dictionary.getWord('my_playlist')} />
-    );
-  }
-
   _addToQueue(songs) {
     this.props.setMenu(null);
     this.props.addToQueue(songs);
@@ -196,26 +136,19 @@ class HomeSongs extends Component {
 
   _addToPlaylist(song) {
     this.props.setMenu(null);
-    this.props.addSongToPlaylist(song);
+    this.props.navigation.navigate('PlaylistSelector', { song })
   }
 }
 
 const mapStateToProps = state => {
   return {
     songs: state.app.songs,
-    playlists: playlists.filterForAddSong(state.app.playlists),
     showMenu: state.app.showMenu,
     targetMenu: state.app.targetMenu,
     isReady: state.app.homeSongsReady,
     currentSong: state.player.currentSong,
     playing: state.player.playing,
-    dictionary: state.app.dictionary,
-    showAddToPlaylistForm: state.home.showAddToPlaylistForm,
-    songToAddToPlaylist: state.home.songToAddToPlaylist,
-    selectedPlaylist: state.home.selectedPlaylist,
-    showAddToPlaylistConfirmationForm: state.home.showAddToPlaylistConfirmationForm,
-    playlistModified: state.home.playlistModified,
-    showAddNewPlaylistForm: state.home.showAddNewPlaylistForm
+    dictionary: state.app.dictionary
   }
 }
 
@@ -223,12 +156,6 @@ const mapDispatchToProps = dispatch => {
   return {
     setMenu: (target) => dispatch(appActions.setMenu({ ...target, caller: 'HOME_SONG' })),
     addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
-    addSongToPlaylist: (song) => dispatch(homeActions.addSongToPlaylist(song)),
-    cancelAddSongToPlaylist: () => dispatch(homeActions.cancelAddSongToPlaylist()),
-    addSongToPlaylistConfirmed: (song, playlist) => homeActions.addSongToPlaylistConfirmed(song, playlist)(dispatch),
-    addNewPlaylist: (playlistName, song) => dispatch(homeActions.addNewPlaylist()),
-    createNewPlaylistAndAddSong: (playlistName, song) => homeActions.createNewPlaylistAndAddSong(playlistName, song)(dispatch),
-    cancelAddNewPlaylistForm: () => dispatch(homeActions.cancelAddNewPlaylistForm()),
     like: (type, album) => dispatch(favoritesActions.like(type, album)),
   }
 }

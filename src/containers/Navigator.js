@@ -1,5 +1,7 @@
 import { StackNavigator } from 'react-navigation';
 
+import { Animated, Easing } from 'react-native';
+
 import Splash from './Splash';
 import Home from './Home';
 import Search from './Search';
@@ -12,6 +14,7 @@ import Playlist from './Playlist';
 import Settings from './Settings';
 import MostPlayedSettings from './MostPlayedSettings';
 import RecentlyPlayedSettings from './RecentlyPlayedSettings';
+import PlaylistSelector from './PlaylistSelector';
 
 const AppNavigator = StackNavigator(
     {
@@ -26,11 +29,13 @@ const AppNavigator = StackNavigator(
         Playlist: { screen: Playlist },
         Settings: { screen: Settings },
         MostPlayedSettings: { screen: MostPlayedSettings },
-        RecentlyPlayedSettings: { screen: RecentlyPlayedSettings }
+        RecentlyPlayedSettings: { screen: RecentlyPlayedSettings },
+        PlaylistSelector: { screen: PlaylistSelector }
     },
     {
         initialRouteName: 'Splash',
         headerMode: 'none',
+        mode: 'modal'
     }
 );
 

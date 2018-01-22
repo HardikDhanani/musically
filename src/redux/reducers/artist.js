@@ -6,9 +6,13 @@ const initialState = {
   topSongs: [],
   albums: [],
   relatedArtists: [],
+  playlists: [],
   isLoading: false,
   isFavorite: false,
-  showFiveMore: true
+  showFiveMore: true,
+  showSongMenuForm: false,
+  targetMenu: null,
+  showAddToPlaylistForm: false
 };
 let topSongs = [];
 let sortSongsByReproductions = (a, b) => {
@@ -37,9 +41,14 @@ export default function artist(state = initialState, action = {}) {
         songs,
         albums,
         topSongs: topSongs.slice(0, 5),
-        isFavorite: action.payload.artist.isFavorite,
+        isFavorite: action.payload.artist.isFavorite || false,
         isLoading: false,
         showFiveMore: topSongs.length > 5
+      }
+    case 'ARTIST_PLAYLISTS_LOADED':
+      return {
+        ...state,
+        playlists: action.payload.playlists
       }
     case 'ARTIST_LOADING_ERROR':
       return {
@@ -51,6 +60,18 @@ export default function artist(state = initialState, action = {}) {
         ...state,
         topSongs: topSongs.slice(0, state.topSongs.length + 5),
         showFiveMore: (state.topSongs.length + 5) < topSongs.length
+      }
+    case 'ARTIST_SHOW_SONG_MENU':
+      return {
+        ...state,
+        showSongMenuForm: true,
+        targetMenu: action.payload.targetMenu
+      }
+    case 'ARTIST_HIDE_SONG_MENU':
+      return {
+        ...state,
+        showSongMenuForm: false,
+        targetMenu: null
       }
     case 'FAVORITES_LIKE_SUCCESS':
       return {
@@ -89,7 +110,16 @@ export default function artist(state = initialState, action = {}) {
         ...state,
         albums: JSON.parse(JSON.stringify(state.albums))
       }
-
+    case 'ARTIST_SHOW_ADD_TO_PLAYLIST_FORM':
+      return {
+        ...state,
+        showAddToPlaylistForm: true
+      }
+    case 'ARTIST_HIDE_ADD_TO_PLAYLIST_FORM':
+      return {
+        ...state,
+        showAddToPlaylistForm: false
+      }
     default:
       return state;
   }

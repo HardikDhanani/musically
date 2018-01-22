@@ -22,7 +22,7 @@ export default class Header extends PureComponent {
         start={{ x: 0.0, y: 1.0 }}
         end={{ x: 1.0, y: 1.0 }}
         colors={[styles._gradientStart.color, styles._gradientEnd.color]}
-        style={styles.container}>
+        style={[styles.container, this.props.style]}>
         {this.props.children}
       </LinearGradient>
     );

@@ -25,7 +25,7 @@ class IconButton extends PureComponent {
 IconButton.propTypes = {
   iconName: PropTypes.string.isRequired,
   iconSize: PropTypes.number.isRequired,
-  onPress: PropTypes.func.isRequired,
+  onPress: PropTypes.func,
   onRef: PropTypes.func
 };
 

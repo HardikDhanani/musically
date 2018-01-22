@@ -26,6 +26,7 @@ let words = {
   create: 'Create',
   my_playlist: 'My playlist',
   now_playing: 'Now Playing',
+  file_detail: 'File detail',
   
   settings_sectionTitle_lookAndFeel: 'Look & Feel',
   settings_lookAndFeel_languague: 'Language',

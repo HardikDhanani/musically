@@ -27,7 +27,7 @@ export default class Container extends Component {
     let fillStatusBar = this.props.fillStatusBar === undefined || this.props.fillStatusBar === null ? true : this.props.fillStatusBar;
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, this.props.style]}>
         {
           !fillStatusBar ?
             null :

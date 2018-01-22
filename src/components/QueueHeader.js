@@ -29,7 +29,6 @@ class QueueHeader extends PureComponent {
         </HeaderCenterSection>
         <HeaderRightSection>
           <IconButton iconName='delete' onPress={this.props.onDeletePress} style={styles._button} iconSize={styles._button.fontSize - 2} />
-          <IconButton iconName='more-vert' onPress={this.props.onMorePress} style={styles._button} iconSize={styles._button.fontSize} />
         </HeaderRightSection>
       </Header>
     );
@@ -37,9 +36,8 @@ class QueueHeader extends PureComponent {
 }
 
 QueueHeader.propTypes = {
-  onBackPress: PropTypes.func,
-  onDeletePress: PropTypes.func,
-  onMorePress: PropTypes.func
+  onBackPress: PropTypes.func.isRequired,
+  onDeletePress: PropTypes.func.isRequired
 };
 
 export default QueueHeader;

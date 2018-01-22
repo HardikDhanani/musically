@@ -50,7 +50,6 @@ export default function home(state = initialState, action = {}) {
         ...state,
         showNewPlaylistForm: false
       }
-
     case 'HOME_DELETE_PLAYLIST':
       return {
         ...state,

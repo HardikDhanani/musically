@@ -7,6 +7,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import * as artistActions from '../redux/actions/artistActions';
 import * as appActions from '../redux/actions/appActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
+import * as playerActions from '../redux/actions/playerActions';
 
 import {
   View,
@@ -25,6 +26,8 @@ import IconButton from '../components/common/buttons/IconButton';
 import FullViewContainer from '../components/common/containers/FullViewContainer';
 import Container from '../components/Container';
 import PlayerFooter from './PlayerFooter';
+import ModalForm from '../components/common/forms/ModalForm';
+import ModalFormTouchable from '../components/common/buttons/ModalFormTouchable';
 
 const styles = EStyleSheet.create({
   $containerWidth: '$appWidth / 2',
@@ -141,6 +144,7 @@ class Artist extends Component {
       currentIndex: 0
     };
 
+    this._renderMenu = this._renderMenu.bind(this);
     this._renderHeader = this._renderHeader.bind(this);
     this._renderCover = this._renderCover.bind(this);
     this._renderPagination = this._renderPagination.bind(this);
@@ -151,9 +155,11 @@ class Artist extends Component {
     this._renderSong = this._renderSong.bind(this);
     this._renderAlbum = this._renderAlbum.bind(this);
     this._shufflePlay = this._shufflePlay.bind(this);
+    this._addToQueue = this._addToQueue.bind(this);
+    this._addToPlaylist = this._addToPlaylist.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { artist, artistName } = this.props.navigation.state.params;
     this.props.load(artist || artistName);
   }
@@ -183,8 +189,30 @@ class Artist extends Component {
               null
           }
         </FullViewContainer>
-        <PlayerFooter />
+        <PlayerFooter navigation={this.props.navigation} />
+        {this._renderMenu()}
       </Container>
+    );
+  }
+
+  _renderMenu() {
+    if (!this.props.showSongMenuForm)
+      return null;
+
+    return (
+      <ModalForm
+        title={this.props.targetMenu.title}
+        onCancelPress={() => this.props.hideSongMenu()}>
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_playlist')}
+          onPress={() => this._addToPlaylist(this.props.targetMenu)} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_queue')}
+          onPress={() => this._addToQueue([this.props.targetMenu])} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('file_detail')}
+          onPress={() => { }} />
+      </ModalForm>
     );
   }
 
@@ -250,11 +278,6 @@ class Artist extends Component {
   }
 
   _renderSong(song) {
-    let targetMenu = {
-      type: 'SONG',
-      payload: song.item
-    };
-
     let isPlaying = this.props.isPlaying && this.props.playingSong.id === song.item.id;
 
     return (
@@ -265,7 +288,9 @@ class Artist extends Component {
         artist={song.item.artist}
         isFavorite={song.item.isFavorite}
         isPlaying={isPlaying}
-        onLikePress={() => this.props.like('song', song.item)} />
+        onPlayPress={() => { /*if the song is actually in the queue, move to that song a play it, alse play it alone*/ }}
+        onLikePress={() => this.props.like('song', song.item)}
+        onOptionPress={() => this.props.showSongMenu(song.item)} />
     );
   }
 
@@ -337,10 +362,21 @@ class Artist extends Component {
   _shufflePlay() {
     this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
   }
+
+  _addToQueue(songs) {
+    this.props.hideSongMenu();
+    this.props.addToQueue(songs);
+  }
+
+  _addToPlaylist(song) {
+    this.props.hideSongMenu();
+    this.props.navigation.navigate('PlaylistSelector', { song })
+  }
 }
 
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
     artist: state.artist.artist,
     name: state.artist.name,
     cover: state.artist.cover,
@@ -350,34 +386,43 @@ const mapStateToProps = state => {
     relatedArtists: state.artist.relatedArtists,
     isFavorite: state.artist.isFavorite,
     showFiveMore: state.artist.showFiveMore,
-    // showMenu: state.app.showMenu,
-    // targetMenu: state.app.targetMenu,
-    dictionary: state.app.dictionary
+    playlists: state.artist.playlists,
+    showSongMenuForm: state.artist.showSongMenuForm,
+    targetMenu: state.artist.targetMenu
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     load: (artist) => artistActions.load(artist)(dispatch),
-    // setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'ARTIST' }, positionX, positionY)),
-    like: (type, artist) => dispatch(favoritesActions.like(type, artist)),
+    showSongMenu: (song) => dispatch(artistActions.showSongMenu(song)),
+    hideSongMenu: () => dispatch(artistActions.hideSongMenu()),
+    like: (type, item) => dispatch(favoritesActions.like(type, item)),
     showMore: () => dispatch(artistActions.showMore()),
-    // addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
+    addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch)
   }
 }
 
 Artist.propTypes = {
   artist: PropTypes.object,
-  topSongs: PropTypes.array,
   relatedArtists: PropTypes.array,
-  // targetMenu: PropTypes.object,
-  isFavorite: PropTypes.bool,
-  // showMenu: PropTypes.bool,
-  navigation: PropTypes.any.isRequired,
-  dictionary: PropTypes.any.isRequired,
-  load: PropTypes.func,
-  // setMenu: PropTypes.func,
-  like: PropTypes.func
+  dictionary: PropTypes.object.isRequired,
+  navigation: PropTypes.object.isRequired,
+  isFavorite: PropTypes.bool.isRequired,
+  name: PropTypes.string,
+  cover: PropTypes.string,
+  songs: PropTypes.array.isRequired,
+  topSongs: PropTypes.array.isRequired,
+  playlists: PropTypes.array.isRequired,
+  showFiveMore: PropTypes.bool.isRequired,
+  showSongMenuForm: PropTypes.bool.isRequired,
+  targetMenu: PropTypes.object,
+  load: PropTypes.func.isRequired,
+  showSongMenu: PropTypes.func.isRequired,
+  hideSongMenu: PropTypes.func.isRequired,
+  like: PropTypes.func.isRequired,
+  showMore: PropTypes.func.isRequired,
+  addToQueue: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Artist);

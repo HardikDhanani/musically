@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image
 } from 'react-native';
+import Cover from '../../Cover';
 import Text from '../Text';
 import TwoColumnContainer from '../containers/TwoColumnContainer';
 
@@ -22,16 +23,11 @@ const styles = EStyleSheet.create({
   coversContainer: {
     elevation: 5,
     flexDirection: 'column',
-    borderRadius: 5,
     backgroundColor: '$appBackgroundColor'
   },
   imageContainer: {
     height: '$imageWidth',
     width: '$imageWidth'
-  },
-  image: {
-    height: '$imageWidth',
-    width: null
   },
   title: {
     fontSize: '$bigTextFontSize',
@@ -50,23 +46,19 @@ class FourCoverCard extends PureComponent {
   render() {
     let firstPair = [
       {
-        imageUri: this.props.items[0] ? this.props.items[0].imageUri : null,
-        source: this.props.defaultSource,
+        imageUri: this.props.items[0] ? this.props.items[0].imageUri : null
       },
       {
-        imageUri: this.props.items[1] ? this.props.items[1].imageUri : null,
-        source: this.props.defaultSource,
+        imageUri: this.props.items[1] ? this.props.items[1].imageUri : null
       },
     ]
 
     let secondPair = [
       {
-        imageUri: this.props.items[2] ? this.props.items[2].imageUri : null,
-        source: this.props.defaultSource,
+        imageUri: this.props.items[2] ? this.props.items[2].imageUri : null
       },
       {
-        imageUri: this.props.items[3] ? this.props.items[3].imageUri : null,
-        source: this.props.defaultSource,
+        imageUri: this.props.items[3] ? this.props.items[3].imageUri : null
       },
     ]
 
@@ -88,9 +80,7 @@ class FourCoverCard extends PureComponent {
 
   _renderCover(item) {
     return (
-      <View style={styles.imageContainer}>
-        <Image source={item.imageUri ? { uri: item.imageUri } : require('../../../images/music.png')} style={styles.image} />
-      </View>
+      <Cover imageUri={item.imageUri} height={styles._imageContainer.height} width={styles._imageContainer.width} />
     );
   }
 }

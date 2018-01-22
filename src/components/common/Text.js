@@ -11,7 +11,7 @@ const styles = EStyleSheet.create({
   }
 });
 
-class Text extends PureComponent {
+export default class Text extends PureComponent {
   render() {
     return (
       <TextReact numberOfLines={this.props.numberOfLines} style={[styles.text, this.props.style]}>
@@ -20,5 +20,3 @@ class Text extends PureComponent {
     );
   }
 }
-
-export default Text;

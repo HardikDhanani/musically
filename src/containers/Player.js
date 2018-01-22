@@ -20,7 +20,7 @@ import PlayerControls from '../components/PlayerControls';
 import IconButton from '../components/common/buttons/IconButton';
 import PlayPauseButtonWhite from '../components/common/buttons/PlayPauseButtonWhite';
 
-const styles_2 = EStyleSheet.create({
+const styles = EStyleSheet.create({
   $containerWidth: '$appWidth / 2',
   $cardWidth: '$containerWidth * 0.9',
   container: {
@@ -102,8 +102,8 @@ class Player extends Component {
         <LinearGradient
           start={{ x: 0.0, y: 0.0 }}
           end={{ x: 0.0, y: 1.0 }}
-          colors={[styles_2._gradientStart.color, styles_2._gradientStart.color, styles_2._gradientEnd.color]}
-          style={styles_2.container}>
+          colors={[styles._gradientStart.color, styles._gradientStart.color, styles._gradientEnd.color]}
+          style={styles.container}>
           <PlayerHeader
             title={this.props.dictionary.getWord('now_playing')}
             onBackPress={() => this.props.navigation.goBack()}/>
@@ -120,9 +120,9 @@ class Player extends Component {
     let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/music.png')
 
     return (
-      <View style={styles_2.coverContainer}>
-        <View style={styles_2.imageContainer}>
-          <Image source={source} style={styles_2.image} />
+      <View style={styles.coverContainer}>
+        <View style={styles.imageContainer}>
+          <Image source={source} style={styles.image} />
         </View>
       </View>
     );
@@ -179,12 +179,12 @@ class Player extends Component {
 
   _renderFooter() {
     return (
-      <View style={[styles_2.footer, this.props.style]}>
-        <IconButton iconName={this._getRepeatIcon()} onPress={() => this.props.repeat()} style={this.props.repeatMode !== 'NONE' ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
-        <IconButton iconName='fast-rewind' onPress={this.props.prev} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+      <View style={[styles.footer, this.props.style]}>
+        <IconButton iconName={this._getRepeatIcon()} onPress={() => this.props.repeat()} style={this.props.repeatMode !== 'NONE' ? styles._buttonSelected : styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
+        <IconButton iconName='fast-rewind' onPress={this.props.prev} style={styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
         <PlayPauseButtonWhite onPress={() => this.props.playPause(this.props.currentSong)} iconName={this.props.playing ? 'pause' : 'play-arrow'} />
-        <IconButton iconName='fast-forward' onPress={this.props.next} style={styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
-        <IconButton iconName='shuffle' onPress={this.props.random} style={this.props.randomActive ? styles_2._buttonSelected : styles_2._buttonUnselected} iconSize={styles_2._buttonSelected.fontSize} />
+        <IconButton iconName='fast-forward' onPress={this.props.next} style={styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
+        <IconButton iconName='shuffle' onPress={this.props.random} style={this.props.randomActive ? styles._buttonSelected : styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
       </View>
     );
   }

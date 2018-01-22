@@ -303,7 +303,7 @@ export function start() {
           _isLoaded = true;
           playerActions.initPlayer()(dispatch);
           dispatch(goHome());
-        }, 3000);
+        }, 4000);
 
         LocalService.isFirstTime()
           .then(resp => {

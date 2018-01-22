@@ -6,7 +6,6 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import * as homeActions from '../redux/actions/homeActions';
 
 import {
-  ActivityIndicator,
   FlatList,
   View,
   Text
@@ -17,6 +16,7 @@ import ConfirmationForm from '../components/ConfirmationForm';
 import NewPlaylist from '../components/NewPlaylist';
 import FourCoverCard from '../components/common/cards/FourCoverCard';
 import CoverCard from '../components/common/cards/CoverCard';
+import BodyActivityIndicator from '../components/common/BodyActivityIndicator';
 
 const styles = EStyleSheet.create({
   addButton: {
@@ -40,7 +40,7 @@ class HomePlaylists extends Component {
         <Body hasPaginationHeader={true}>
           {
             !this.props.isReady ?
-              <ActivityIndicator animating={true} size='large' /> :
+              <BodyActivityIndicator /> :
               <FlatList
                 data={this.props.playlists}
                 renderItem={this._renderPlaylist}
@@ -50,7 +50,11 @@ class HomePlaylists extends Component {
                 numColumns={2} />
           }
         </Body>
-        <AddPlaylistButton hide={this.props.selectedSection !== 'playlists'} bottom={80} style={styles.addButton} onPress={this.props.createNewPlaylistForm} />
+        {
+          this.props.isReady ?
+            <AddPlaylistButton hide={this.props.selectedSection !== 'playlists'} bottom={80} style={styles.addButton} onPress={this.props.createNewPlaylistForm} /> :
+            null
+        }
         {this._showNewPlaylistForm()}
       </View>
     );

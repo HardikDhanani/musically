@@ -35,7 +35,7 @@ class PlayPauseButtonWhite extends PureComponent {
 
 PlayPauseButtonWhite.propTypes = {
   iconName: PropTypes.string.isRequired,
-  onPress: PropTypes.func.isRequired
+  onPress: PropTypes.func
 };
 
 export default PlayPauseButtonWhite;

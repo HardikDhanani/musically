@@ -133,15 +133,10 @@ export function removeFromQueue(song) {
           session.queue.splice(index, 1)
         };
 
-        if (session.currentSong.id === song.id) {
-          session.currentSong = session.queue[0];
-          session.currentIndex = 0;
-          dispatch(playerActions.songChanged(session.currentSong, session.currentIndex));
-        }
-
         return LocalService.saveSession(session);
       })
       .then(session => {
+        playerActions.removeFromQueue([song])(dispatch);
         dispatch(removingSongSuccess(session.queue))
       })
       .catch(error => {

@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import {
-  ActivityIndicator,
   FlatList,
   View
 } from 'react-native';
 import Body from '../components/Body';
 import CoverCard from '../components/common/cards/CoverCard';
+import BodyActivityIndicator from '../components/common/BodyActivityIndicator';
 
 class HomeAlbums extends Component {
   constructor(props) {
@@ -22,7 +22,7 @@ class HomeAlbums extends Component {
       <Body hasPaginationHeader={true}>
         {
           !this.props.isReady ?
-            <ActivityIndicator animating={true} size='large' /> :
+            <BodyActivityIndicator /> :
             <FlatList
               data={this.props.albums}
               renderItem={this._renderAlbum}

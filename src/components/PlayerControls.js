@@ -69,14 +69,17 @@ class PlayerControls extends Component {
 
   render() {
     let formattedElapsedTime = this._formatTime(this.props.elapsedTime);
+    let title = this.props.title || '';
+    let detail = this.props.artist || '';
+    detail = detail + (this.props.album ? ' - ' + this.props.album : '');
 
     return (
       <View style={styles.container}>
         <View style={styles.topContainer}>
           <IconButton iconName='add' style={styles._button} iconSize={styles._button.fontSize + 6} />
           <View style={styles.infoContainer}>
-            <Text numberOfLines={1} style={styles.title}>{this.props.title}</Text>
-            <Text numberOfLines={1} style={styles.text}>{this.props.artist + ' - ' + this.props.album}</Text>
+            <Text numberOfLines={1} style={styles.title}>{title}</Text>
+            <Text numberOfLines={1} style={styles.text}>{detail}</Text>
           </View>
           <IconButton onPress={() => this.props.onLikePress()} iconName='favorite' style={this.props.liked ? styles._likedButton : styles._unlikedButton} iconSize={styles._button.fontSize} />
         </View>

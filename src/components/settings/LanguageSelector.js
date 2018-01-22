@@ -6,7 +6,6 @@ import {
   View
 } from 'react-native';
 import Option from './Option';
-import RadioButton from './RadioButton';
 import LeftColumn from './LeftColumn';
 import RightColumn from './RightColumn';
 import Text from '../common/Text';

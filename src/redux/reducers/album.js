@@ -1,13 +1,17 @@
 const initialState = {
-  album: null,
-  name: null,
+  album: {},
+  name: '',
   cover: null,
   songs: [],
   topSongs: [],
   relatedAlbums: [],
+  playlists: [],
   isLoading: false,
   isFavorite: false,
-  showFiveMore: true
+  showFiveMore: true,
+  showSongMenuForm: false,
+  targetMenu: null,
+  showAddToPlaylistForm: false
 };
 let topSongs = [];
 let sortSongsByReproductions = (a, b) => {
@@ -39,6 +43,11 @@ export default function album(state = initialState, action = {}) {
         isLoading: false,
         showFiveMore: topSongs.length > 5
       }
+    case 'ALBUM_PLAYLISTS_LOADED':
+      return {
+        ...state,
+        playlists: action.payload.playlists
+      }
     case 'ALBUM_LOADING_ERROR':
       return {
         ...state,
@@ -49,6 +58,18 @@ export default function album(state = initialState, action = {}) {
         ...state,
         topSongs: topSongs.slice(0, state.topSongs.length + 5),
         showFiveMore: (state.topSongs.length + 5) < topSongs.length
+      }
+    case 'ALBUM_SHOW_SONG_MENU':
+      return {
+        ...state,
+        showSongMenuForm: true,
+        targetMenu: action.payload.targetMenu
+      }
+    case 'ALBUM_HIDE_SONG_MENU':
+      return {
+        ...state,
+        showSongMenuForm: false,
+        targetMenu: null
       }
     case 'FAVORITES_LIKE_SUCCESS':
       return {
@@ -71,6 +92,17 @@ export default function album(state = initialState, action = {}) {
         songs: JSON.parse(JSON.stringify(state.songs)),
         topSongs: JSON.parse(JSON.stringify(topSongs))
       }
+    case 'ALBUM_SHOW_ADD_TO_PLAYLIST_FORM':
+      return {
+        ...state,
+        showAddToPlaylistForm: true
+      }
+    case 'ALBUM_HIDE_ADD_TO_PLAYLIST_FORM':
+      return {
+        ...state,
+        showAddToPlaylistForm: false
+      }
+
     default:
       return state;
   }

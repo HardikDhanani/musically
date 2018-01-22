@@ -25,6 +25,8 @@ import HeaderCenterSection from '../components/HeaderCenterSection';
 import IconButton from '../components/common/buttons/IconButton';
 import Container from '../components/Container';
 import PlayerFooter from './PlayerFooter';
+import ModalForm from '../components/common/forms/ModalForm';
+import ModalFormTouchable from '../components/common/buttons/ModalFormTouchable';
 
 const styles = EStyleSheet.create({
   $containerWidth: '$appWidth / 2',
@@ -141,6 +143,7 @@ class Album extends Component {
       currentIndex: 0
     };
 
+    this._renderMenu = this._renderMenu.bind(this);
     this._renderHeader = this._renderHeader.bind(this);
     this._renderCover = this._renderCover.bind(this);
     this._renderPagination = this._renderPagination.bind(this);
@@ -150,9 +153,11 @@ class Album extends Component {
     this._renderSong = this._renderSong.bind(this);
     this._renderAlbum = this._renderAlbum.bind(this);
     this._shufflePlay = this._shufflePlay.bind(this);
+    this._addToQueue = this._addToQueue.bind(this);
+    this._addToPlaylist = this._addToPlaylist.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { album, albumName, artistName } = this.props.navigation.state.params;
     this.props.load(album || albumName, artistName);
   }
@@ -177,8 +182,30 @@ class Album extends Component {
               null
           }
         </FullViewContainer>
-        <PlayerFooter />
+        <PlayerFooter navigation={this.props.navigation} />
+        {this._renderMenu()}
       </Container>
+    );
+  }
+
+  _renderMenu() {
+    if (!this.props.showSongMenuForm)
+      return null;
+
+    return (
+      <ModalForm
+        title={this.props.targetMenu.title}
+        onCancelPress={() => this.props.hideSongMenu()}>
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_playlist')}
+          onPress={() => this._addToPlaylist(this.props.targetMenu)} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_queue')}
+          onPress={() => this._addToQueue([this.props.targetMenu])} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('file_detail')}
+          onPress={() => { }} />
+      </ModalForm>
     );
   }
 
@@ -290,7 +317,9 @@ class Album extends Component {
         artist={song.item.artist}
         isFavorite={song.item.isFavorite}
         isPlaying={isPlaying}
-        onLikePress={() => this.props.like('song', song.item)} />
+        onPlayPress={() => { /*if the song is actually in the queue, move to that song a play it, alse play it alone*/ }}
+        onLikePress={() => this.props.like('song', song.item)}
+        onOptionPress={() => this.props.showSongMenu(song.item)} />
     );
   }
 
@@ -308,10 +337,21 @@ class Album extends Component {
   _shufflePlay() {
     this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
   }
+
+  _addToQueue(songs) {
+    this.props.hideSongMenu();
+    this.props.addToQueue(songs);
+  }
+
+  _addToPlaylist(song) {
+    this.props.hideSongMenu();
+    this.props.navigation.navigate('PlaylistSelector', { song });
+  }
 }
 
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
     album: state.album.album,
     isFavorite: state.album.isFavorite,
     name: state.album.name,
@@ -319,35 +359,44 @@ const mapStateToProps = state => {
     songs: state.album.songs,
     topSongs: state.album.topSongs,
     relatedAlbums: state.album.relatedAlbums,
+    playlists: state.album.playlists,
     showFiveMore: state.album.showFiveMore,
-    dictionary: state.app.dictionary
+    showSongMenuForm: state.album.showSongMenuForm,
+    targetMenu: state.album.targetMenu
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     load: (album, artist) => albumActions.load(album, artist)(dispatch),
-    // setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'ALBUM' }, positionX, positionY)),
-    like: (type, album) => dispatch(favoritesActions.like(type, album)),
+    showSongMenu: (song) => dispatch(albumActions.showSongMenu(song)),
+    hideSongMenu: () => dispatch(albumActions.hideSongMenu()),
+    like: (type, item) => dispatch(favoritesActions.like(type, item)),
     showMore: () => dispatch(albumActions.showMore()),
-    // addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch),
+    addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch)
   }
 }
 
 Album.propTypes = {
+  dictionary: PropTypes.object.isRequired,
+  navigation: PropTypes.object.isRequired,
   album: PropTypes.object.isRequired,
   isFavorite: PropTypes.bool.isRequired,
-  showMenu: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
-  cover: PropTypes.string.isRequired,
+  cover: PropTypes.string,
   songs: PropTypes.array.isRequired,
   topSongs: PropTypes.array.isRequired,
   relatedAlbums: PropTypes.array.isRequired,
+  playlists: PropTypes.array.isRequired,
   showFiveMore: PropTypes.bool.isRequired,
-  dictionary: PropTypes.object.isRequired,
+  showSongMenuForm: PropTypes.bool.isRequired,
+  targetMenu: PropTypes.object,
   load: PropTypes.func.isRequired,
-  setMenu: PropTypes.func.isRequired,
-  like: PropTypes.func.isRequired
+  showSongMenu: PropTypes.func.isRequired,
+  hideSongMenu: PropTypes.func.isRequired,
+  like: PropTypes.func.isRequired,
+  showMore: PropTypes.func.isRequired,
+  addToQueue: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Album);

@@ -3,6 +3,10 @@ import Storage from 'react-native-storage';
 
 import Cache from './Cache';
 
+const FAVORITES_PLAYLIST_NAME = 'favorites';
+const RECENTLY_PLAYED_PLAYLIST_NAME = 'recently played';
+const MOST_PLAYED_PLAYLIST_NAME = 'most played';
+
 class LocalService {
   constructor() {
     this.__initLocalStorage = this.__initLocalStorage.bind(this);
@@ -305,6 +309,23 @@ class LocalService {
           throw new Exception(err);
       }
     });
+  }
+
+  getUserPlaylists() {
+    return this.getPlaylists()
+      .then(playlists => {
+        return playlists.filter(p => {
+          switch (p.name.toLowerCase()) {
+            case FAVORITES_PLAYLIST_NAME:
+            case RECENTLY_PLAYED_PLAYLIST_NAME:
+            case MOST_PLAYED_PLAYLIST_NAME:
+              return false;
+
+            default:
+              return true;
+          }
+        });
+      });
   }
 
   getFavorites() {

@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 
 import {
   TouchableNativeFeedback
@@ -23,9 +22,5 @@ class Touchable extends PureComponent {
     }
   }
 }
-
-Touchable.propTypes = {
-  onPress: PropTypes.func.isRequired
-};
 
 export default Touchable;

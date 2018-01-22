@@ -47,9 +47,84 @@ const removingSongSuccess = (playlist) => {
   }
 }
 
+const deletingPlaylist = () => {
+  return {
+    type: 'PLAYLIST_DELETING_PLAYLIST'
+  }
+}
+
+const deletingPlaylistSuccess = () => {
+  return {
+    type: 'PLAYLIST_DELETING_PLAYLIST_SUCCESS'
+  }
+}
+
+const closePlaylistForm = () => {
+  return {
+    type: 'PLAYLIST_CLOSE_PLAYLIST_FORM'
+  }
+}
+
+const deletingPlaylistError = (error) => {
+  return {
+    type: 'PLAYLIST_DELETING_PLAYLIST_ERROR',
+    payload: {
+      error
+    }
+  }
+}
+
+const playlistsUpdated = (playlists) => {
+  return {
+    type: 'PLAYLIST_UPDATED',
+    payload: {
+      playlists
+    }
+  }
+}
+
 export const showMore = () => {
   return {
     type: 'PLAYLIST_SHOW_MORE'
+  }
+}
+
+export const showSongMenu = (targetMenu) => {
+  return {
+    type: 'PLAYLIST_SHOW_SONG_MENU',
+    payload: {
+      targetMenu
+    }
+  }
+}
+
+export const hideSongMenu = () => {
+  return {
+    type: 'PLAYLIST_HIDE_SONG_MENU'
+  }
+}
+
+export const showAddToPlaylist = () => {
+  return {
+    type: 'PLAYLIST_SHOW_ADD_TO_PLAYLIST_FORM'
+  }
+}
+
+export const hideAddToPlaylist = () => {
+  return {
+    type: 'PLAYLIST_HIDE_ADD_TO_PLAYLIST_FORM'
+  }
+}
+
+export const showDeletePlaylistConfirmation = () => {
+  return {
+    type: 'PLAYLIST_SHOW_DELETE_PLAYLIST_CONFIRMATION'
+  }
+}
+
+export const cancelDeletePlaylistConfirmation = () => {
+  return {
+    type: 'PLAYLIST_CANCEL_SHOW_DELETE_PLAYLIST_CONFIRMATION'
   }
 }
 
@@ -87,5 +162,25 @@ export function removeSong(playlistId, songId) {
             dispatch(removingSongSuccess(playlist));
           });
       });
+  }
+}
+
+export function deletePlaylist(playlist) {
+  return dispatch => {
+    if (!playlist) {
+      dispatch(deletingPlaylistError({ message: 'PLaylist cannot be null' }));
+    } else {
+      dispatch(deletingPlaylist());
+      LocalService.deletePlaylist(playlist)
+        .then(() => {
+          dispatch(deletingPlaylistSuccess());
+          setTimeout(() => {
+            dispatch(closePlaylistForm());
+          }, 3000);
+        })
+        .then(LocalService.getPlaylists)
+        .then(playlists => dispatch(playlistsUpdated()))
+        .catch(error => dispatch(deletingPlaylistError(error)));
+    }
   }
 }

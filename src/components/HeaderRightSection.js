@@ -9,10 +9,9 @@ const styles = EStyleSheet.create({
   container: {
     flex: 1,
     alignSelf: 'center',
-    alignItems: 'center',
     flexDirection: 'row',
     paddingRight: 10,
-    justifyContent: 'space-between'
+    justifyContent: 'flex-end'
   }
 });
 

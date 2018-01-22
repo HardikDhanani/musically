@@ -4,10 +4,10 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
   View,
-  TouchableOpacity,
-  Image
+  TouchableOpacity
 } from 'react-native';
 import Text from '../Text';
+import Cover from '../../Cover';
 
 const styles = EStyleSheet.create({
   $containerWidth: '$appWidth / 2',
@@ -19,11 +19,15 @@ const styles = EStyleSheet.create({
   },
   imageContainer: {
     elevation: 5,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    height: '$cardWidth',
+    width: '$cardWidth',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   image: {
     height: '$cardWidth',
-    width: null
+    width: '$cardWidth'
   },
   title: {
     fontSize: '$bigTextFontSize',
@@ -34,10 +38,13 @@ const styles = EStyleSheet.create({
 
 class CoverCard extends PureComponent {
   render() {
+    let imageHeight = this.props.imageUri ? styles._image.height : styles._image.height * 0.75;
+    let imageWidth = this.props.imageUri ? styles._image.width : styles._image.width * 0.75;
+
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={this.props.onPress} style={styles.imageContainer} activeOpacity={0.7}>
-          <Image source={this.props.imageUri ? { uri: this.props.imageUri } : this.props.source} style={styles.image} />
+          <Cover imageUri={this.props.imageUri} height={imageHeight} width={imageWidth} />
         </TouchableOpacity>
         <Text numberOfLines={1} style={styles.title}>{this.props.title}</Text>
         {

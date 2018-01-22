@@ -1,11 +1,19 @@
 const initialState = {
+  playlist: null,
   isLoading: false,
   isRemovingSong: false,
-  id: null,
-  name: null,
+  name: '',
   songs: [],
   topSongs: [],
-  showFiveMore: true
+  playlists: [],
+  showFiveMore: true,
+  showSongMenuForm: false,
+  targetMenu: null,
+  showAddToPlaylistForm: false,
+  showDeletePlaylistConfirmationForm: false,
+  showDeletePlaylistSuccessConfirmation: false,
+  closeForm: false,
+  deletingPlaylist: false
 };
 let topSongs = [];
 let sortSongsByReproductions = (a, b) => {
@@ -18,7 +26,7 @@ export default function playlist(state = initialState, action = {}) {
   switch (action.type) {
     case 'PLAYLIST_LOADING':
       return {
-        ...state,
+        ...initialState,
         isLoading: true
       }
     case 'PLAYLIST_LOADING_SUCCESS':
@@ -26,8 +34,8 @@ export default function playlist(state = initialState, action = {}) {
       topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions);
       return {
         ...state,
+        playlist: action.payload.playlist,
         isLoading: false,
-        id: action.payload.playlist.id,
         name: action.payload.playlist.name,
         songs,
         topSongs: topSongs.slice(0, 5),
@@ -37,6 +45,11 @@ export default function playlist(state = initialState, action = {}) {
       return {
         ...state,
         isLoading: false,
+      }
+    case 'PLAYLIST_PLAYLISTS_LOADED':
+      return {
+        ...state,
+        playlists: action.payload.playlists
       }
     case 'PLAYLIST_REMOVING_SONG':
       return {
@@ -54,6 +67,47 @@ export default function playlist(state = initialState, action = {}) {
         ...state,
         topSongs: topSongs.slice(0, state.topSongs.length + 5),
         showFiveMore: (state.topSongs.length + 5) < topSongs.length
+      }
+    case 'PLAYLIST_SHOW_SONG_MENU':
+      return {
+        ...state,
+        showSongMenuForm: true,
+        targetMenu: action.payload.targetMenu
+      }
+    case 'PLAYLIST_HIDE_SONG_MENU':
+      return {
+        ...state,
+        showSongMenuForm: false,
+        targetMenu: null
+      }
+    case 'PLAYLIST_SHOW_DELETE_PLAYLIST_CONFIRMATION':
+      return {
+        ...state,
+        showDeletePlaylistConfirmationForm: true
+      }
+    case 'PLAYLIST_CANCEL_SHOW_DELETE_PLAYLIST_CONFIRMATION':
+      return {
+        ...state,
+        showDeletePlaylistConfirmationForm: false
+      }
+    case 'PLAYLIST_DELETING_PLAYLIST':
+      return {
+        ...state,
+        showDeletePlaylistConfirmationForm: false,
+        deletingPlaylist: true
+      }
+    case 'PLAYLIST_DELETING_PLAYLIST_SUCCESS':
+      return {
+        ...state,
+        showDeletePlaylistConfirmationForm: false,
+        showDeletePlaylistSuccessConfirmation: true,
+        deletingPlaylist: false
+      }
+    case 'PLAYLIST_CLOSE_PLAYLIST_FORM':
+      return {
+        ...state,
+        showDeletePlaylistSuccessConfirmation: false,
+        closeForm: true
       }
     default:
       return state;

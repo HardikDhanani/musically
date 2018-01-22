@@ -75,6 +75,7 @@ export default function app(state = initialState, action = {}) {
     case 'SETTINGS_RESET_RECENTLY_PLAYED_SUCCESS':
     case 'SETTINGS_SET_RECENTLY_PLAYED_LENGTH_SUCCESS':
     case 'SETTINGS_SET_MOST_PLAYED_LENGTH_SUCCESS':
+    case 'PLAYLIST_UPDATED':
       return {
         ...state,
         playlists: JSON.parse(JSON.stringify(action.payload.playlists))

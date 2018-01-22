@@ -77,7 +77,9 @@ class SongCard extends Component {
             <Text numberOfLines={1} style={styles.detail}>{this.props.artist}</Text>
           </View>
         </View>
-        <IconButton iconName={'add'} onPress={this.props.onOptionPress} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
+        <View style={{marginRight: 10}}>
+          <IconButton iconName={'add'} onPress={this.props.onOptionPress} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
+        </View>
         <IconButton iconName={'favorite'} onPress={this.props.onLikePress} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
       </View>
     );

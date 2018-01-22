@@ -33,7 +33,6 @@ class HomeHeader extends Component {
         </HeaderCenterSection>
         <HeaderRightSection>
           <IconButton iconName="search" onPress={this.props.onSearchPress} style={styles._button} iconSize={styles._button.fontSize} />
-          <IconButton iconName="more-vert" onPress={this.props.onMorePress} style={styles._button} iconSize={styles._button.fontSize} />
         </HeaderRightSection>
       </Header>
     );

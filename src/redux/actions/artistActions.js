@@ -1,6 +1,15 @@
 import LocalService from '../../services/LocalService';
 import * as playerActions from './playerActions';
 
+const playlistsLoaded = (playlists) => {
+  return {
+    type: 'ARTIST_PLAYLISTS_LOADED',
+    payload: {
+      playlists
+    }
+  }
+}
+
 export const loading = () => {
   return {
     type: 'ARTIST_LOADING'
@@ -28,6 +37,33 @@ export const showMore = () => {
   }
 }
 
+export const showSongMenu = (targetMenu) => {
+  return {
+    type: 'ARTIST_SHOW_SONG_MENU',
+    payload: {
+      targetMenu
+    }
+  }
+}
+
+export const hideSongMenu = () => {
+  return {
+    type: 'ARTIST_HIDE_SONG_MENU'
+  }
+}
+
+export const showAddToPlaylist = () => {
+  return {
+    type: 'ARTIST_SHOW_ADD_TO_PLAYLIST_FORM'
+  }
+}
+
+export const hideAddToPlaylist = () => {
+  return {
+    type: 'ARTIST_HIDE_ADD_TO_PLAYLIST_FORM'
+  }
+}
+
 export function load(artist) {
   return dispatch => {
     dispatch(loading())
@@ -43,5 +79,10 @@ export function load(artist) {
         dispatch(loadingSuccess(artist));
       }
     }
+
+    LocalService.getUserPlaylists()
+      .then(playlists => {
+        dispatch(playlistsLoaded(playlists));
+      });
   }
 }

@@ -165,6 +165,10 @@ const _saveSongAndAddOrRemoveToFavoritesPlaylist = (song, removeFromFavorites, d
 
 export function like(type, target, removeFromFavorites = true) {
   return dispatch => {
+    if (!type || !target) {
+      return;
+    }
+
     target.isFavorite = !target.isFavorite;
     switch (type.toLowerCase()) {
       case 'song':

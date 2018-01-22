@@ -2,14 +2,18 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import * as playlistActions from '../redux/actions/playlistActions';
 import * as appActions from '../redux/actions/appActions';
+import * as favoritesActions from '../redux/actions/favoritesActions';
+import * as playerActions from '../redux/actions/playerActions';
 
 import {
   View,
   FlatList,
-  Image
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import Text from '../components/common/Text';
 import Touchable from '../components/common/buttons/Touchable';
@@ -22,6 +26,10 @@ import HeaderCenterSection from '../components/HeaderCenterSection';
 import IconButton from '../components/common/buttons/IconButton';
 import TwoColumnContainer from '../components/common/containers/TwoColumnContainer';
 import Container from '../components/Container';
+import PlayerFooter from './PlayerFooter';
+import ModalForm from '../components/common/forms/ModalForm';
+import ModalFormTouchable from '../components/common/buttons/ModalFormTouchable';
+import ModalFormWithAction from '../components/common/forms/ModalFormWithAction';
 
 const styles = EStyleSheet.create({
   $containerWidth: '$appWidth / 2',
@@ -97,12 +105,16 @@ const styles = EStyleSheet.create({
     backgroundColor: 'white',
     width: '$cardWidth',
     height: '$cardWidth',
-    borderRadius: 3
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   image: {
     height: '$cardWidth',
-    width: '$cardWidth',
-    borderRadius: 3
+    width: '$cardWidth'
+  },
+  defaultImage: {
+    height: '$cardWidth * 0.75',
+    width: '$cardWidth * 0.75'
   },
   controlsContainer: {
     flex: 1,
@@ -137,7 +149,37 @@ const styles = EStyleSheet.create({
     height: '$statusBarHeight',
     width: '$appWidth',
     backgroundColor: '$headerStartGradientBackgroundColor'
-  }
+  },
+  contentHeight: {
+    height: '$modalFormHeight'
+  },
+  textContainer: {
+    flex: 1,
+    width: '$modalFormWidth',
+    justifyContent: 'center',
+    padding: 15
+  },
+  text: {
+    fontSize: '$titleFontSize'
+  },
+  confirmationContainer: {
+    alignItems: 'center',
+    height: '$modalFormHeight'
+  },
+  checkContainer: {
+    height: '$headerHeight',
+    width: '$headerHeight',
+    backgroundColor: '$appMainColor',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: '$headerHeight',
+    marginBottom: 20,
+    elevation: 5
+  },
+  check: {
+    color: 'white',
+    fontSize: 24
+  },
 });
 
 class Playlist extends Component {
@@ -148,6 +190,7 @@ class Playlist extends Component {
       currentIndex: 0
     };
 
+    this._renderMenu = this._renderMenu.bind(this);
     this._renderSong = this._renderSong.bind(this);
     this._renderOverview = this._renderOverview.bind(this);
     this._renderAllSongs = this._renderAllSongs.bind(this);
@@ -155,16 +198,27 @@ class Playlist extends Component {
     this._renderControls = this._renderControls.bind(this);
     this._renderCover = this._renderCover.bind(this);
     this._renderImage = this._renderImage.bind(this);
+    this._shufflePlay = this._shufflePlay.bind(this);
+    this._addToQueue = this._addToQueue.bind(this);
+    this._addToPlaylist = this._addToPlaylist.bind(this);
+    this._removeSong = this._removeSong.bind(this);
+    this._renderDeletePlaylistForm = this._renderDeletePlaylistForm.bind(this);
+    this._renderDeletingPlaylist = this._renderDeletingPlaylist.bind(this);
+    this._renderDeletePlaylistSuccessForm = this._renderDeletePlaylistSuccessForm.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const { playlistId } = this.props.navigation.state.params;
     this.props.load(playlistId);
   }
 
-  render() {
-    // var queue = this.props.songs;
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.closeForm) {
+      this.props.navigation.goBack();
+    }
+  }
 
+  render() {
     return (
       <Container fillStatusBar={false}>
         <View style={styles.gradientContainer} />
@@ -184,11 +238,42 @@ class Playlist extends Component {
               null
           }
         </FullViewContainer>
+        <PlayerFooter navigation={this.props.navigation} />
+        {this._renderMenu()}
+        {this._renderDeletePlaylistForm()}
+        {this._renderDeletingPlaylist()}
+        {this._renderDeletePlaylistSuccessForm()}
       </Container>
     );
   }
 
+  _renderMenu() {
+    if (!this.props.showSongMenuForm)
+      return null;
+
+    return (
+      <ModalForm
+        title={this.props.targetMenu.title}
+        onCancelPress={() => this.props.hideSongMenu()}>
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_playlist')}
+          onPress={() => this._addToPlaylist(this.props.targetMenu)} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_queue')}
+          onPress={() => this._addToQueue([this.props.targetMenu])} />
+        <ModalFormTouchable
+          text={'Remove from playlist'}
+          onPress={() => this._removeSong(this.props.targetMenu)} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('file_detail')}
+          onPress={() => { }} />
+      </ModalForm>
+    );
+  }
+
   _renderHeader() {
+    let showDeleteButton = (this.props.playlist && (this.props.playlist.name != 'Favorites' && this.props.playlist.name != 'Most played' && this.props.playlist.name != 'Recently played'));
+
     return (
       <View style={styles.headerContainer}>
         <HeaderLeftSection style={{ flex: 1 }}>
@@ -196,20 +281,29 @@ class Playlist extends Component {
         </HeaderLeftSection>
         <HeaderCenterSection style={{ flex: 2 }} />
         <HeaderRightSection style={{ flex: 1, justifyContent: 'flex-end' }}>
-          <IconButton iconName="search" onPress={() => this.props.navigation.navigate('Search', {})} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+          <View style={{ marginRight: 15 }}>
+            <IconButton iconName="search" onPress={() => this.props.navigation.navigate('Search', {})} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+          </View>
+          {
+            showDeleteButton ?
+              <View style={{ marginRight: 15 }}>
+                <IconButton iconName="delete" onPress={() => this.props.showDeletePlaylistConfirmation()} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
+              </View> :
+              null
+          }
         </HeaderRightSection>
       </View>
     );
   }
 
   _renderCover() {
-    let defaultSource = require('../images/music.png');
+    let defaultSource = require('../images/default-cover.png');
 
     if (this.props.songs.length <= 1) {
-      let source = this.props.songs[0] ? { uri: this.props.songs[0].cover } : defaultSource;
+      let source = (this.props.songs[0] && this.props.songs[0].cover) ? { uri: this.props.songs[0].cover } : defaultSource;
       return (
         <View style={styles.imageContainer}>
-          <Image source={source} style={styles.image} />
+          <Image source={source} style={source.uri ? styles.image : styles.defaultImage} />
         </View>
       );
     }
@@ -257,7 +351,11 @@ class Playlist extends Component {
   _renderOverview(topSongs) {
     return (
       <View style={styles.pageContainer}>
-        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Top Tracks'}</Text>
+        {
+          (topSongs && topSongs.length > 0) ?
+            <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Top Tracks'}</Text> :
+            null
+        }
         <FlatList
           data={topSongs}
           renderItem={this._renderSong}
@@ -272,7 +370,6 @@ class Playlist extends Component {
             </Touchable> :
             null
         }
-        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Related Albums'}</Text>
       </View>
     );
   }
@@ -291,12 +388,7 @@ class Playlist extends Component {
   }
 
   _renderSong(song) {
-    let targetMenu = {
-      type: 'SONG',
-      payload: song.item
-    };
-
-    let isPlaying = this.props.playing && this.props.currentSong.is === song.item.id;
+    let isPlaying = this.props.isPlaying && this.props.playingSong.id === song.item.id;
 
     return (
       <SongCard
@@ -305,7 +397,10 @@ class Playlist extends Component {
         name={song.item.title}
         artist={song.item.artist}
         isFavorite={song.item.isFavorite}
-        isPlaying={isPlaying} />
+        isPlaying={isPlaying}
+        onPlayPress={() => { /*if the song is actually in the queue, move to that song a play it, alse play it alone*/ }}
+        onLikePress={() => this.props.like('song', song.item)}
+        onOptionPress={() => this.props.showSongMenu(song.item)} />
     );
   }
 
@@ -314,6 +409,62 @@ class Playlist extends Component {
       <View style={styles.imagex4Container}>
         <Image source={item.imageUri ? { uri: item.imageUri } : item.source} style={styles.imagex4} />
       </View>
+    );
+  }
+
+  _renderDeletePlaylistForm() {
+    if (!this.props.showDeletePlaylistConfirmationForm) {
+      return null;
+    }
+
+    return (
+      <ModalFormWithAction
+        style={{ height: styles._contentHeight.height }}
+        actionText={'Delete'}
+        title={'Delete playlist'}
+        onCancelPress={() => this.props.cancelDeletePlaylistConfirmation()}
+        onActionPress={() => this.props.deletePlaylist(this.props.playlist)}
+        actionEnabled={true}>
+        <View style={styles.textContainer}>
+          <Text style={styles.text}>{'You are going to delete the playlist ' + this.props.playlist.name + '.'}</Text>
+          <Text style={styles.text}>{'Are you sure?'}</Text>
+        </View>
+      </ModalFormWithAction>
+    );
+  }
+
+  _renderDeletingPlaylist() {
+    if (!this.props.deletingPlaylist) {
+      return null;
+    }
+
+    return (
+      <ModalForm
+        style={styles.confirmationContainer}
+        onCancelPress={() => { }}>
+        <View style={styles.checkContainer}>
+          <ActivityIndicator animating={true} size='large' color='white' />
+        </View>
+        <Text style={styles.text}>{'Deleting playlist...'}</Text>
+      </ModalForm>
+    );
+  }
+
+  _renderDeletePlaylistSuccessForm() {
+    if (!this.props.showDeletePlaylistSuccessConfirmation) {
+      return null;
+    }
+
+    return (
+      <ModalForm
+        style={styles.confirmationContainer}
+        onCancelPress={() => { }}>
+        <View style={styles.checkContainer}>
+          <Icon name='delete' color={styles._check.color} backgroundColor={'transparent'} size={styles._check.fontSize} />
+        </View>
+        <Text style={styles.textBold}>{this.props.playlist.name}</Text>
+        <Text style={styles.text}>{'has been deleted.'}</Text>
+      </ModalForm>
     );
   }
 
@@ -365,14 +516,43 @@ class Playlist extends Component {
       ]
     ];
   }
+
+  _shufflePlay() {
+    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
+  }
+
+  _addToQueue(songs) {
+    this.props.hideSongMenu();
+    this.props.addToQueue(songs);
+  }
+
+  _addToPlaylist(song) {
+    this.props.hideSongMenu();
+    this.props.navigation.navigate('PlaylistSelector', { song, exclude: (playlist) => playlist.id != this.props.playlist.id });
+  }
+
+  _removeSong(song) {
+    this.props.hideSongMenu();
+    this.props.removeSong(this.props.playlist.id, song.id);
+  }
 }
 
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
+    playlist: state.playlist.playlist,
     name: state.playlist.name,
+    cover: state.playlist.cover,
     songs: state.playlist.songs,
+    topSongs: state.playlist.topSongs,
     showFiveMore: state.playlist.showFiveMore,
-    showMenu: state.app.showMenu
+    playlists: state.playlist.playlists,
+    showSongMenuForm: state.playlist.showSongMenuForm,
+    targetMenu: state.playlist.targetMenu,
+    showDeletePlaylistConfirmationForm: state.playlist.showDeletePlaylistConfirmationForm,
+    showDeletePlaylistSuccessConfirmation: state.playlist.showDeletePlaylistSuccessConfirmation,
+    closeForm: state.playlist.closeForm,
+    deletingPlaylist: state.playlist.deletingPlaylist
   }
 }
 
@@ -380,20 +560,37 @@ const mapDispatchToProps = dispatch => {
   return {
     load: (playlistId) => playlistActions.load(playlistId)(dispatch),
     removeSong: (playlistId, songId) => playlistActions.removeSong(playlistId, songId)(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'PLAYLIST' }, positionX, positionY)),
-    showMore: () => dispatch(playlistActions.showMore())
+    showSongMenu: (song) => dispatch(playlistActions.showSongMenu(song)),
+    hideSongMenu: () => dispatch(playlistActions.hideSongMenu()),
+    showMore: () => dispatch(playlistActions.showMore()),
+    showDeletePlaylistConfirmation: () => dispatch(playlistActions.showDeletePlaylistConfirmation()),
+    cancelDeletePlaylistConfirmation: () => dispatch(playlistActions.cancelDeletePlaylistConfirmation()),
+    deletePlaylist: (playlist) => playlistActions.deletePlaylist(playlist)(dispatch),
+    like: (type, item) => dispatch(favoritesActions.like(type, item)),
+    addToQueue: (queue) => playerActions.addToQueue(queue)(dispatch)
   }
 }
 
 Playlist.propTypes = {
-  name: PropTypes.string,
   songs: PropTypes.array.isRequired,
-  showFiveMore: PropTypes.bool.isRequired,
-  showMenu: PropTypes.bool.isRequired,
-  load: PropTypes.func.isRequired,
   removeSong: PropTypes.func.isRequired,
-  setMenu: PropTypes.func.isRequired,
-  showMore: PropTypes.func.isRequired
+  showMore: PropTypes.func.isRequired,
+  playlist: PropTypes.object,
+  dictionary: PropTypes.object.isRequired,
+  navigation: PropTypes.object.isRequired,
+  name: PropTypes.string.isRequired,
+  topSongs: PropTypes.array.isRequired,
+  playlists: PropTypes.array.isRequired,
+  showFiveMore: PropTypes.bool.isRequired,
+  showSongMenuForm: PropTypes.bool.isRequired,
+  targetMenu: PropTypes.object,
+  load: PropTypes.func.isRequired,
+  showSongMenu: PropTypes.func.isRequired,
+  hideSongMenu: PropTypes.func.isRequired,
+  like: PropTypes.func.isRequired,
+  addToQueue: PropTypes.func.isRequired,
+  showDeletePlaylistConfirmation: PropTypes.func.isRequired,
+  cancelDeletePlaylistConfirmation: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

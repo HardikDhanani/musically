@@ -149,25 +149,6 @@ const _updateMostPlayedPlaylist = (song, dispatch) => {
   let playlistPromise = LocalService.getPlaylistByName('Most played');
   let sessionPromise = LocalService.getSession();
 
-  // let playlistRet = null
-  // LocalService.getPlaylistByName('Most played')
-  //   .then(playlist => {
-  //     playlistRet = playlist;
-  //     return LocalService.getSession();
-  //   })
-  //   .then(session => {
-  //     if (session.mostPlayedReproductions > song.reproductions) {
-  //       return;
-  //     }
-
-  //     let index = playlistRet.songs.findIndex(s => s.id === song.id);
-  //     if (index !== -1) {
-  //       appActions.updateSongInPlaylist(song, playlistRet)(dispatch);
-  //     } else {
-  //       appActions.addSongToPlaylist(song, playlistRet)(dispatch);
-  //     }
-  //   });
-
   Promise.all([playlistPromise, sessionPromise])
     .then(results => {
       let playlist = results[0];
