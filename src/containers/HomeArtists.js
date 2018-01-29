@@ -28,7 +28,6 @@ class HomeArtists extends Component {
               renderItem={this._renderArtist}
               keyExtractor={(item, index) => index}
               initialNumToRender={8}
-              getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
               style={{ flexDirection: 'column' }}
               numColumns={2} />
         }

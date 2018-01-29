@@ -105,12 +105,22 @@ export default function queue(state = initialState, action = {}) {
     case 'QUEUE_DELETE_SONGS_CONFIRMATION':
       return {
         ...state,
-        showConfirmation: true
+        showConfirmation: state.selected > 0
       }
     case 'QUEUE_DELETE_SONGS_CANCEL':
       return {
         ...state,
         showConfirmation: false
+      }
+    case 'FAVORITES_SONG_UPDATED':
+      let i = state.queue.findIndex(s => s.id === action.payload.song.id);
+      if (i !== -1) {
+        state.queue[i] = action.payload.song;
+      }
+
+      return {
+        ...state,
+        queue: JSON.parse(JSON.stringify(state.queue))
       }
     default:
       return state;

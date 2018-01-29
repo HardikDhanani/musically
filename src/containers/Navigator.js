@@ -29,14 +29,24 @@ const AppNavigator = StackNavigator(
         Playlist: { screen: Playlist },
         Settings: { screen: Settings },
         MostPlayedSettings: { screen: MostPlayedSettings },
-        RecentlyPlayedSettings: { screen: RecentlyPlayedSettings },
-        PlaylistSelector: { screen: PlaylistSelector }
+        RecentlyPlayedSettings: { screen: RecentlyPlayedSettings }
     },
     {
         initialRouteName: 'Splash',
+        headerMode: 'none',
+        mode: 'none'
+    }
+);
+
+const _modalNavigator = StackNavigator(
+    {
+        Main: { screen: AppNavigator },
+        PlaylistSelector: { screen: PlaylistSelector }
+    },
+    {
         headerMode: 'none',
         mode: 'modal'
     }
 );
 
-export default AppNavigator;
+export default _modalNavigator;

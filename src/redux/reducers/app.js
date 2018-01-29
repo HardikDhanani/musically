@@ -15,9 +15,7 @@ const initialState = {
   genres: [],
   playlists: [],
   showMenu: false,
-  targetMenu: null,
-  menuPositionX: null,
-  menuPositionY: null
+  targetMenu: null
 };
 
 export default function app(state = initialState, action = {}) {
@@ -61,9 +59,7 @@ export default function app(state = initialState, action = {}) {
       return {
         ...state,
         showMenu: !state.showMenu,
-        targetMenu: action.payload.target,
-        menuPositionX: action.payload.positionX,
-        menuPositionY: action.payload.positionY,
+        targetMenu: action.payload.target
       }
     case 'APP_SAVING_NEW_PLAYLIST_SUCCEED':
     case 'APP_ADDING_SONG_TO_PLAYLIST_SUCCEED':

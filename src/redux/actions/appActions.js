@@ -75,8 +75,16 @@ function _groupAndSaveGenres(songs) {
 
 function _groupAndSaveMusic(songs) {
   let ordererSongs = songsSelector.orderBy(songs, s => s.title).map(song => {
+    let duration = 0;
+    try {
+      duration = parseInt(song.duration);
+    } catch (error) {
+      
+    }
+
     return {
       ...song,
+      duration,
       reproductions: 0,
       isFavorite: false
     };
@@ -263,13 +271,11 @@ export const playlistSaved = (playlists) => {
   }
 }
 
-export const setMenu = (target, positionX, positionY) => {
+export const setMenu = (target) => {
   return {
     type: 'APP_SET_MENU',
     payload: {
-      target,
-      positionX,
-      positionY
+      target
     }
   }
 }
@@ -293,7 +299,6 @@ export function start() {
   return (dispatch) => {
     try {
       if (_isLoaded) {
-        playerActions.initPlayer()(dispatch);
         dispatch(goHome());
       } else {
         dispatch(starting());

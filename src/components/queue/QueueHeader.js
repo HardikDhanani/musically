@@ -2,12 +2,11 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import Header from './common/headers/Header';
-import HeaderTitle from './HeaderTitle';
-import HeaderLeftSection from './HeaderLeftSection';
-import HeaderRightSection from './HeaderRightSection';
-import HeaderCenterSection from './HeaderCenterSection';
-import IconButton from './common/buttons/IconButton';
+import Header from '../common/headers/Header';
+import HeaderLeftSectionWithBackButton from '../common/headers/HeaderLeftSectionWithBackButton';
+import HeaderCenterSectionWithTitle from '../common/headers/HeaderCenterSectionWithTitle';
+import HeaderRightSection from '../common/headers/HeaderRightSection';
+import IconButton from '../common/buttons/IconButton';
 
 const styles = EStyleSheet.create({
   button: {
@@ -21,12 +20,8 @@ class QueueHeader extends PureComponent {
   render() {
     return (
       <Header>
-        <HeaderLeftSection>
-          <IconButton iconName='arrow-back' onPress={this.props.onBackPress} style={styles._button} iconSize={styles._button.fontSize} />
-        </HeaderLeftSection>
-        <HeaderCenterSection>
-          <HeaderTitle>{this.props.title}</HeaderTitle>
-        </HeaderCenterSection>
+        <HeaderLeftSectionWithBackButton onBackPress={this.props.onBackPress} />
+        <HeaderCenterSectionWithTitle title={this.props.title} />
         <HeaderRightSection>
           <IconButton iconName='delete' onPress={this.props.onDeletePress} style={styles._button} iconSize={styles._button.fontSize - 2} />
         </HeaderRightSection>
@@ -36,7 +31,6 @@ class QueueHeader extends PureComponent {
 }
 
 QueueHeader.propTypes = {
-  onBackPress: PropTypes.func.isRequired,
   onDeletePress: PropTypes.func.isRequired
 };
 

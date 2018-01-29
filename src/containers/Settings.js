@@ -63,7 +63,7 @@ class Settings extends Component {
 
   render() {
     return (
-      <Container>
+      <Container fillStatusBar={false}>
         <SettingsHeader title={this.props.dictionary.getWord('settings_title')} onBackPress={() => this.props.navigation.goBack()} />
         <ScrollView>
           <Section title={this.props.dictionary.getWord('settings_sectionTitle_lookAndFeel')}>

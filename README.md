@@ -75,10 +75,11 @@
   - [ ] Total number of genres
   - [ ] Total number of playlists
   - [ ] Alphabetical lists
-  - [ ] A song must start automatically after playing it
+  - [x] A song must start automatically after playing it
   - [x] Can set as default language the current mobile language
   - [ ] Translate everything
   - [ ] Read songs in batches asynchronously
+  - [ ] Songs that is actually playing should be identified everywhere
   
 ## Settings
 
@@ -87,22 +88,15 @@
 
 ## Bugs
 
- - [ ] 1. Go to Home and select Songs section
-       2. Try to select the menu on any song
-       Bug: All songs are added to Queue
-       Expectation: Just that song is added
-
  - [ ] 1. Start playing a song
        Bug: Progress bar and elapsed time don't show correctly
 
  - [ ] Some images are throwing an exception in the native code
 
  - Los tracks parecen terminar antes de lo que deberian terminar
- - Desde un album, menu song, Add to Playlist rompe la app
- - Desde un album, menu song, Add to Favorites no funciona
- - Desde un artist, menu album, Add to Playlist rompe la app
- - Desde un artist, menu album, Add to Favorites no funciona
  - Escuchando con blueooth, al apagar el auticular, el sonido swiche a altavoz. Deberia pausar la reproduccion
- - No funciona el swiper del player
- - Adding a song from Home/Songs to the queue adds everything
 
+ - [ ] 0 songs in the queue, add one, start playing, add another one. The new song is added to the 
+       beginning of the queue instead of at the end.
+
+ - [ ] Empty the queue one by one, last song remains in the player

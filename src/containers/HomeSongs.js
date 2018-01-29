@@ -92,7 +92,7 @@ class HomeSongs extends Component {
       payload: song.item
     };
 
-    let isPlaying = this.props.playing && this.props.currentSong.is === song.item.id;
+    let isPlaying = this.props.playing && this.props.currentSong.id === song.item.id;
 
     return (
       <SongCard

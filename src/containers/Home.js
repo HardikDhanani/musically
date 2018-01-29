@@ -51,7 +51,7 @@ class Home extends Component {
   render() {
     return (
       <ControlPanel onRef={this._onRef} navigation={this.props.navigation}>
-        <Container>
+        <Container fillStatusBar={false}>
           <HomeHeader
             title={this.props.dictionary.getWord('my_music')}
             onMenuPress={() => this._drawer.open()}

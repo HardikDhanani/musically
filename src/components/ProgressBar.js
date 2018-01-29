@@ -73,6 +73,8 @@ class ProgressBar extends Component {
     return [
       styles.elapsed,
       {
+        borderTopRightRadius: this.props.showBorderRadius ? 5 : 0,
+        borderBottomRightRadius: this.props.showBorderRadius ? 5 : 0,
         borderTopLeftRadius: this.props.showBorderRadius ? 5 : 0,
         borderBottomLeftRadius: this.props.showBorderRadius ? 5 : 0
       },
@@ -85,9 +87,11 @@ class ProgressBar extends Component {
       styles.left,
       {
         borderTopRightRadius: this.props.showBorderRadius ? 5 : 0,
-        borderBottomRightRadius: this.props.showBorderRadius ? 5 : 0
+        borderBottomRightRadius: this.props.showBorderRadius ? 5 : 0,
+        borderTopLeftRadius: this.props.showBorderRadius ? 5 : 0,
+        borderBottomLeftRadius: this.props.showBorderRadius ? 5 : 0
       },
-      { flex: leftWidth }
+      { flex: leftWidth, backgroundColor: this.props.backgroundColor }
     ];
   }
 }

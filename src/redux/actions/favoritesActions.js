@@ -1,7 +1,83 @@
 import LocalService from '../../services/LocalService';
-import * as appActions from './appActions';
-import { updatePlaylists, playlistDeleted } from './appActions';
 
+import * as appActions from './appActions';
+import * as playerActions from './playerActions';
+
+/* Internal methods */
+const _saveSongAndAddOrRemoveToFavoritesPlaylist = (song, removeFromFavorites, dispatch) => {
+  let saveSongPromise = LocalService.saveSong(song)
+    .then(() => dispatch(songUpdated(song)));
+  let updateAlbumPromise = LocalService.getAlbumByName(song.album, song.artist)
+    .then(album => {
+      if (!album) {
+        return Promise.resolve();
+      }
+
+      let i = album.songs.findIndex(s => s.id === song.id);
+      album.songs[i] = song;
+
+      return LocalService.saveAlbum(album)
+        .then(() => {
+          dispatch(albumUpdated(album));
+          return Promise.resolve(album);
+        });
+    });
+  let updateArtistPromise = LocalService.getArtistByName(song.artist)
+    .then(artist => {
+      if (!artist) {
+        return Promise.resolve();
+      }
+
+      let i = artist.albums.findIndex(s => s.album === song.album);
+      let j = artist.albums[i].songs.findIndex(s => s.id === song.id);
+      artist.albums[i].songs[j] = song;
+
+      return LocalService.saveArtist(artist)
+        .then(() => {
+          dispatch(artistUpdated(artist));
+          return Promise.resolve(artist);
+        });
+    });
+  let updatePlaylistsPromise = LocalService.getPlaylists()
+    .then(playlists => {
+      for (let i = 0; i < playlists.length; i++) {
+        if (playlists[i].name !== 'favorites') {
+          let j = playlists[i].songs.findIndex(s => s.id === song.id);
+          if (j !== -1) {
+            playlists[i].songs[j] = song;
+          }
+        }
+      }
+
+      return LocalService.savePlaylists(playlists);
+    })
+    .then(() => LocalService.getPlaylists())
+    .then(playlists => dispatch(playlistsUpdated(playlists)));
+  let updateFavoritesPromise = LocalService.getPlaylistByName('favorites')
+    .then(playlist => {
+      if (removeFromFavorites) {
+        if (song.isFavorite) {
+          appActions.addSongToPlaylist(song, playlist)(dispatch);
+        } else {
+          appActions.removeSongFromPlaylist(song, playlist)(dispatch);
+        }
+      }
+
+      return Promise.resolve();
+    });
+
+  let promises = [
+    saveSongPromise,
+    updateAlbumPromise,
+    updateArtistPromise,
+    updateFavoritesPromise,
+    updatePlaylistsPromise
+  ];
+
+  return Promise.all(promises);
+}
+
+/* Internal actions */
 const likeSuccess = (type, target) => {
   return {
     type: 'FAVORITES_LIKE_SUCCESS',
@@ -57,6 +133,7 @@ const playlistsUpdated = (playlists) => {
   }
 }
 
+/* Public constant actions */
 export const loading = (criteria) => {
   return {
     type: 'FAVORITES_LOADING',
@@ -84,6 +161,7 @@ export const loadingError = (criteria) => {
   }
 }
 
+/* Public function actions */
 export function load() {
   return dispatch => {
     dispatch(loading());
@@ -96,71 +174,6 @@ export function load() {
         dispatch(loadingError(err));
       });
   }
-}
-
-const _saveSongAndAddOrRemoveToFavoritesPlaylist = (song, removeFromFavorites, dispatch) => {
-  let saveSongPromise = LocalService.saveSong(song)
-    .then(() => dispatch(songUpdated(song)));
-  let updateAlbumPromise = LocalService.getAlbumByName(song.album, song.artist)
-    .then(album => {
-      let i = album.songs.findIndex(s => s.id === song.id);
-      album.songs[i] = song;
-
-      return LocalService.saveAlbum(album)
-        .then(() => {
-          dispatch(albumUpdated(album));
-          Promise.resolve(album);
-        });
-    });
-  let updateArtistPromise = LocalService.getArtistByName(song.artist)
-    .then(artist => {
-      let i = artist.albums.findIndex(s => s.album === song.album);
-      let j = artist.albums[i].songs.findIndex(s => s.id === song.id);
-      artist.albums[i].songs[j] = song;
-
-      return LocalService.saveArtist(artist)
-        .then(() => {
-          dispatch(artistUpdated(artist));
-          return Promise.resolve(artist);
-        });
-    });
-  let updatePlaylistsPromise = LocalService.getPlaylists()
-    .then(playlists => {
-      for (let i = 0; i < playlists.length; i++) {
-        if (playlists[i].name !== 'favorites') {
-          let j = playlists[i].songs.findIndex(s => s.is === song.id);
-          if (j !== -1) {
-            playlists[i].songs[j] = song;
-          }
-        }
-      }
-
-      return LocalService.savePlaylists(playlists);
-    })
-    .then(() => LocalService.getPlaylists())
-    .then(playlists => dispatch(playlistsUpdated(playlists)));
-  let updateFavoritesPromise = LocalService.getPlaylistByName('favorites')
-    .then(playlist => {
-      if (removeFromFavorites) {
-        if (song.isFavorite) {
-          appActions.addSongToPlaylist(song, playlist)(dispatch);
-        } else {
-          appActions.removeSongFromPlaylist(song, playlist)(dispatch);
-        }
-      }
-
-      return Promise.resolve();
-    });
-
-  let promises = [
-    saveSongPromise,
-    updateAlbumPromise,
-    updateArtistPromise,
-    updateFavoritesPromise,
-    updatePlaylistsPromise
-  ];
-
-  return Promise.all(promises);
 }
 
 export function like(type, target, removeFromFavorites = true) {
@@ -205,3 +218,14 @@ export function like(type, target, removeFromFavorites = true) {
   }
 }
 
+export function setMenu(target) {
+  return dispatch => {
+    dispatch(appActions.setMenu({ ...target, caller: 'FAVORITES' }));
+  }
+}
+
+export function addToQueue(queue) {
+  return dispatch => {
+    playerActions.addToQueue(queue)(dispatch);
+  }
+}

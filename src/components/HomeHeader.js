@@ -24,7 +24,7 @@ class HomeHeader extends Component {
 
   render() {
     return (
-      <Header>
+      <Header useElevation={false}>
         <HeaderLeftSection>
           <IconButton iconName="menu" onPress={this.props.onMenuPress} style={styles._button} iconSize={styles._button.fontSize} />
         </HeaderLeftSection>

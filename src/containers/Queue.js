@@ -3,33 +3,23 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SortableListView from 'react-native-sortable-listview';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import * as queueActions from '../redux/actions/queueActions';
-import * as appActions from '../redux/actions/appActions';
-import * as playerActions from '../redux/actions/playerActions';
 
 import {
-  View,
-  ActivityIndicator,
-  FlatList,
   BackHandler,
   TouchableOpacity
 } from 'react-native';
 import Container from '../components/Container';
-import QueueHeader from '../components/QueueHeader';
-import QueueDeleteModeHeader from '../components/QueueDeleteModeHeader';
+import QueueHeader from '../components/queue/QueueHeader';
+import DeleteModeQueue from '../components/queue/DeleteModeQueue';
 import Body from '../components/Body';
 import SongCard from '../components/SongCard';
-import CheckBox from '../components/common/buttons/CheckBox';
-import IconButton from '../components/common/buttons/IconButton';
-import Touchable from '../components/common/buttons/Touchable';
-import ConfirmationForm from '../components/ConfirmationForm';
 import PlayerFooter from './PlayerFooter';
 import ModalForm from '../components/common/forms/ModalForm';
 import ModalFormTouchable from '../components/common/buttons/ModalFormTouchable';
-import RowCard from '../components/common/cards/RowCard';
 import Text from '../components/common/Text';
+import BodyActivityIndicator from '../components/common/BodyActivityIndicator';
 
 const styles = EStyleSheet.create({
   listContainer: {
@@ -44,31 +34,11 @@ const styles = EStyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10
   },
-  infoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 1,
-    paddingHorizontal: 5
-  },
-  text: {
-    color: '$textColor',
-    fontSize: '$textFontSize'
-  },
-  textBold: {
-    color: '$textMainColor',
-    fontSize: '$bigTextFontSize'
-  },
   durationContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     height: '$headerHeight * 0.7',
     width: '$headerHeight * 0.7'
-  },
-  checkboxChecked: {
-    color: '$appMainColor',
-  },
-  checkboxUnchecked: {
-    color: '$elementInactive',
   },
   button: {
     color: '$headerColor',
@@ -86,36 +56,20 @@ const styles = EStyleSheet.create({
     top: 0,
     left: 0,
     alignItems: 'center'
-  },
-  deleteButton: {
-    flex: 1,
-    width: '$appWidth',
-    backgroundColor: '$appMainColor',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 10
-  },
-  deleteButtonIcon: {
-    color: '$headerColor',
-    backgroundColor: 'transparent',
-    fontSize: '$headerIconSize',
-  },
-  confirmationTextContainer: {
-    marginHorizontal: 10,
-    marginBottom: 10
   }
 });
 
 class SorteableItem extends Component {
   render() {
     return (
-      <TouchableOpacity {...this.props.sortHandlers}>
+      <TouchableOpacity {...this.props.sortHandlers} delayPressIn={2000}>
         <SongCard
           styles={{ container: styles.item, text: styles.itemText }}
           id={this.props.song.id}
           name={this.props.song.title}
           artist={this.props.song.artist}
           duration={this.props.song.duration}
+          isFavorite={this.props.song.isFavorite}
           onOptionPress={this.props.onOptionPress}
           onPlayPress={this.props.onPlayPress}
           onLikePress={this.props.onLikePress} />
@@ -131,14 +85,13 @@ class Queue extends Component {
     this._renderDeleteMode = this._renderDeleteMode.bind(this);
     this._renderViewMode = this._renderViewMode.bind(this);
     this._renderSong = this._renderSong.bind(this);
-    this._renderDeleteSong = this._renderDeleteSong.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
     this._removeFromQueue = this._removeFromQueue.bind(this);
     this._navigateTo = this._navigateTo.bind(this);
     this._renderList = this._renderList.bind(this);
     this._backHandler = this._backHandler.bind(this);
-    this._renderDeleteConfirmation = this._renderDeleteConfirmation.bind(this);
     this._addToPlaylist = this._addToPlaylist.bind(this);
+    this._playSong = this._playSong.bind(this);
   }
 
   componentWillMount() {
@@ -160,31 +113,24 @@ class Queue extends Component {
 
   _renderDeleteMode() {
     return (
-      <Container fillStatusBar={false}>
-        <QueueDeleteModeHeader
-          title={this.props.selected + ' selected'}
-          selectedAll={this.props.selectedAll}
-          onBackPress={this.props.setDeleteModeOff}
-          onSelectAllPress={this.props.onSelectAllPress} />
-        <Body>
-          <FlatList
-            data={this.props.queueDelete}
-            renderItem={this._renderDeleteSong}
-            keyExtractor={(item, index) => item.id} />
-        </Body>
-        <Touchable onPress={this.props.showDeleteSongsConfirmation}>
-          <View style={styles.deleteButton}>
-            <Icon name='delete' color={styles._deleteButtonIcon.color} backgroundColor={styles._deleteButtonIcon.backgroundColor} size={styles._deleteButtonIcon.fontSize} />
-          </View>
-        </Touchable>
-        {this._renderDeleteConfirmation()}
-      </Container>
+      <DeleteModeQueue
+        data={this.props.queueDelete}
+        selected={this.props.selected}
+        selectedAll={this.props.selectedAll}
+        showConfirmation={this.props.showConfirmation}
+        dictionary={this.props.dictionary}
+        onBackPress={this.props.setDeleteModeOff}
+        onSelectAllPress={this.props.onSelectAllPress}
+        onDeletePress={this.props.showDeleteSongsConfirmation}
+        onSelecteSong={(song) => this.props.selectSong(song.id)}
+        onCancelPress={this.props.deleteSelectedSongsCancel}
+        onConfirmPress={() => this.props.deleteSelectedSongs(this.props.queueDelete)} />
     );
   }
 
   _renderViewMode() {
     return (
-      <Container>
+      <Container fillStatusBar={false}>
         <QueueHeader
           title={this.props.dictionary.getWord('queue')}
           onBackPress={() => this.props.navigation.goBack()}
@@ -192,7 +138,7 @@ class Queue extends Component {
         <Body>
           {
             this.props.isLoading ?
-              <ActivityIndicator animating={true} size='large' /> :
+              <BodyActivityIndicator /> :
               this._renderList()
           }
         </Body>
@@ -231,33 +177,8 @@ class Queue extends Component {
         song={song}
         targetMenu={targetMenu}
         onOptionPress={() => this.props.setMenu(targetMenu)}
-        onPlayPress={() => this._playSongs([song])}
+        onPlayPress={() => this._playSong(song)}
         onLikePress={() => this.props.like('song', song)} />
-    );
-  }
-
-  _renderDeleteSong({ item }) {
-    let duration = '00:00';
-    if (item.duration) {
-      let d = new Date(parseInt(duration));
-      let minutes = "00" + d.getMinutes().toString();
-      let seconds = "00" + d.getSeconds().toString();
-      duration = minutes.substring(minutes.length - 2, minutes.length) + ":" + seconds.substring(seconds.length - 2, seconds.length);
-    }
-
-    return (
-      <RowCard onPress={() => this.props.selectSong(item.id)}>
-        <View style={styles.infoContainer}>
-          <View style={styles.songInformation}>
-            <Text numberOfLines={1} style={styles.textBold}>{item.title}</Text>
-            <Text numberOfLines={1} style={styles.text}>{item.artist}</Text>
-          </View>
-          <View style={styles.durationContainer}>
-            <Text numberOfLines={1} style={styles.text}>{duration}</Text>
-          </View>
-        </View>
-        <CheckBox onChange={() => this.props.selectSong(item.id)} style={item.selected ? styles.checkboxChecked : styles.checkboxUnchecked} />
-      </RowCard>
     );
   }
 
@@ -273,42 +194,33 @@ class Queue extends Component {
           text={this.props.dictionary.getWord('add_to_playlist')}
           onPress={() => this._addToPlaylist(this.props.targetMenu.payload)} />
         <ModalFormTouchable
-          text={'Remove from queue'}
+          text={this.props.dictionary.getWord('remove_from_queue')}
           onPress={() => this._removeFromQueue(this.props.targetMenu.payload)} />
         <ModalFormTouchable
-          text={'File detail'}
+          text={this.props.dictionary.getWord('file_detail')}
           onPress={() => { }} />
       </ModalForm>
     );
   }
 
-  _renderDeleteConfirmation() {
-    if (!this.props.showConfirmation) {
-      return null;
-    }
-
-    return (
-      <ConfirmationForm
-        title={'Delete from queue'}
-        actionText={'Delete'}
-        onCancelPress={this.props.deleteSelectedSongsCancel}
-        onConfirmPress={() => this.props.deleteSelectedSongs(this.props.queueDelete)}>
-        <View style={styles.confirmationTextContainer}>
-          <Text style={styles.confirmationText}>{'You are removing ' + this.props.selected + ' songs from the queue.\n'}</Text>
-          <Text style={styles.confirmationText}>{'Are you sure?'}</Text>
-        </View>
-      </ConfirmationForm>
-    );
-  }
-
   _navigateTo(route, params) {
-    this.props.setMenu(null, 0, 0);
+    this.props.setMenu(null);
     this.props.navigation.navigate(route, params);
   }
 
   _removeFromQueue(song) {
     this.props.setMenu(null);
     this.props.removeFromQueue(song);
+  }
+
+  _addToPlaylist(song) {
+    this.props.setMenu(null);
+    this.props.navigation.navigate('PlaylistSelector', { song })
+  }
+
+  _playSong(song) {
+    this.props.setMenu(null);
+    this.props.playSong(song);
   }
 
   _backHandler() {
@@ -318,11 +230,6 @@ class Queue extends Component {
     }
 
     return false;
-  }
-
-  _addToPlaylist(song) {
-    this.props.setMenu(null);
-    this.props.navigation.navigate('PlaylistSelector', { song })
   }
 }
 
@@ -337,8 +244,6 @@ const mapStateToProps = state => {
     showConfirmation: state.queue.showConfirmation,
     showMenu: state.app.showMenu,
     targetMenu: state.app.targetMenu,
-    menuPositionX: state.app.menuPositionX,
-    menuPositionY: state.app.menuPositionY,
     dictionary: state.app.dictionary
   }
 }
@@ -346,9 +251,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     load: () => dispatch(queueActions.load()),
-    songChanged: (song) => { },
     removeFromQueue: song => queueActions.removeFromQueue(song)(dispatch),
-    setMenu: (target) => dispatch(appActions.setMenu({ ...target, caller: 'QUEUE' })),
+    setMenu: (target) => queueActions.setMenu(target)(dispatch),
     moveSong: (songId, from, to) => queueActions.moveSong(songId, from, to)(dispatch),
     selectSong: (songId) => dispatch(queueActions.selectSong(songId)),
     setDeleteModeOn: () => dispatch(queueActions.setDeleteModeOn()),
@@ -356,8 +260,37 @@ const mapDispatchToProps = dispatch => {
     onSelectAllPress: () => dispatch(queueActions.onSelectAllPress()),
     showDeleteSongsConfirmation: () => dispatch(queueActions.showDeleteSongsConfirmation()),
     deleteSelectedSongsCancel: () => dispatch(queueActions.deleteSelectedSongsCancel()),
-    deleteSelectedSongs: (queue) => queueActions.deleteSelectedSongs(queue)(dispatch)
+    deleteSelectedSongs: (queue) => queueActions.deleteSelectedSongs(queue)(dispatch),
+    playSong: (song) => queueActions.playSong(song)(dispatch),
+    like: (type, item) => queueActions.like(type, item)(dispatch)
   }
 }
+
+Queue.propTypes = {
+  dictionary: PropTypes.object.isRequired,
+  navigation: PropTypes.object.isRequired,
+  queue: PropTypes.array.isRequired,
+  queueDelete: PropTypes.array.isRequired,
+  deleteMode: PropTypes.bool.isRequired,
+  selectedAll: PropTypes.bool.isRequired,
+  selected: PropTypes.number.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  showConfirmation: PropTypes.bool.isRequired,
+  showMenu: PropTypes.bool.isRequired,
+  targetMenu: PropTypes.object,
+  load: PropTypes.func.isRequired,
+  removeFromQueue: PropTypes.func.isRequired,
+  setMenu: PropTypes.func.isRequired,
+  moveSong: PropTypes.func.isRequired,
+  selectSong: PropTypes.func.isRequired,
+  setDeleteModeOn: PropTypes.func.isRequired,
+  setDeleteModeOff: PropTypes.func.isRequired,
+  onSelectAllPress: PropTypes.func.isRequired,
+  showDeleteSongsConfirmation: PropTypes.func.isRequired,
+  deleteSelectedSongsCancel: PropTypes.func.isRequired,
+  deleteSelectedSongs: PropTypes.func.isRequired,
+  playSong: PropTypes.func.isRequired,
+  like: PropTypes.func.isRequired,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Queue);

@@ -29,7 +29,7 @@ const styles = EStyleSheet.create({
   buttonSelected: {
     backgroundColor: 'transparent',
     fontSize: '$headerIconSize',
-    color: '$appMainColor'
+    color: 'white'
   },
   buttonUnselected: {
     backgroundColor: 'transparent',

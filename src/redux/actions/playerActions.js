@@ -116,7 +116,7 @@ const _startNotifyingProgress = (dispatch) => {
   timer = setInterval(() => {
     _musicPlayerService.getCurrentTime()
       .then(currentTime => {
-        dispatch(timeElapsed(currentTime / 1000));
+        dispatch(timeElapsed(currentTime * 1000));
       });
   }, 500);
 }
@@ -126,23 +126,21 @@ const _stopNotifyingProgress = (dispatch) => {
 }
 
 const _updateSong = (song, dispatch) => {
-  let albumEdited = null;
-  return LocalService.saveSong(song)
-    .then(() => LocalService.getAlbumByName(song.album, song.artist))
-    .then(album => {
-      let i = album.songs.findIndex(s => s.id === song.id);
-      album.songs[i] = song;
-      albumEdited = album;
+  LocalService.saveSong(song);
+  let getAlbumPromise = LocalService.getAlbumByName(song.album, song.artist);
+  let getArtistPromise = LocalService.getArtistByName(song.artist);
 
-      return LocalService.getArtistByName(song.artist);
-    })
-    .then(artist => {
-      let i = artist.albums.findIndex(a => a.id === albumEdited.id);
-      artist.albums[i] = albumEdited;
+  Promise.all([getAlbumPromise, getArtistPromise])
+    .then(result => {
+      let album = result[0];
+      let artist = result[1];
 
-      return LocalService.saveArtist(artist);
-    })
-    .then(() => LocalService.saveAlbum(albumEdited));
+      album.songs = album.songs.map(s => s.id === song.id ? song : s);
+      artist.albums = artist.albums.map(a => a.id === album.id ? album : a);
+
+      LocalService.saveArtist(artist);
+      LocalService.saveAlbum(album);
+    });
 }
 
 const _updateMostPlayedPlaylist = (song, dispatch) => {
@@ -154,7 +152,7 @@ const _updateMostPlayedPlaylist = (song, dispatch) => {
       let playlist = results[0];
       let session = results[1];
 
-      if (session.mostPlayedReproductions > song.reproductions) {
+      if (session.mostPlayedReproductions === 0 || session.mostPlayedReproductions > song.reproductions) {
         return;
       }
 
@@ -182,22 +180,16 @@ const _updateRecentPlayedPlaylist = (song, dispatch) => {
     .then(() => appActions.updatePlaylists()(dispatch));
 }
 
-const _trackChanged = (track, dispatch) => {
-  let currentSong = null;
-  let currentIndex = 0;
-
+const _trackChanged = (song, position, dispatch) => {
   LocalService.getSession()
     .then(session => {
-      session.currentSong = track.additionalInfo;
-      session.currentIndex = track.position;
-
-      currentSong = track.additionalInfo;
-      currentIndex = track.position;
+      session.currentSong = song;
+      session.currentIndex = position;
 
       return LocalService.saveSession(session);
     })
     .then(() => {
-      dispatch(songChangedAction(currentSong, currentIndex));
+      dispatch(songChangedAction(song, position));
     });
 }
 
@@ -205,9 +197,19 @@ const _mapTrack = (song) => {
   let additionalInfo = {
     ...song,
     artwork: song.cover,
-    duration: parseFloat(song.duration) / 1000
+    duration: parseFloat(song.duration)
   }
   return new Track({ id: song.id, path: song.path, additionalInfo });
+}
+
+const _udpdateStatistics = (song, dispatch) => {
+  song.reproductions += 1;
+
+  _updateSong(song, dispatch);
+  _updateMostPlayedPlaylist(song, dispatch);
+  _updateRecentPlayedPlaylist(song, dispatch);
+
+  return Promise.resolve(song);
 }
 
 /* Public Constants Actions */
@@ -274,11 +276,11 @@ export const addToQueue = (queue) => {
         newSession = session;
         let tracks = queue.map(_mapTrack);
 
-        if (_musicPlayerService.queue.length > 0) {
-          return _musicPlayerService.appendToQueue(tracks, session.currentIndex !== -1 ? (session.currentIndex + 1) : null);
-        } else {
-          return _musicPlayerService.setQueue(tracks);
-        }
+        // if (_musicPlayerService.queue.length > 0) {
+        return _musicPlayerService.appendToQueue(tracks, _musicPlayerService.currentIndex + 1);
+        // } else {
+        //   return _musicPlayerService.setQueue(tracks);
+        // }
       })
       .then(returnedQueue => {
         newSession.queue = returnedQueue.map(t => t.additionalInfo);
@@ -301,8 +303,12 @@ export const removeFromQueue = (songsToRemove) => {
         return LocalService.getSession();
       })
       .then(session => {
-        session.currentSong = _musicPlayerService.queue[_musicPlayerService.currentIndex].additionalInfo;
         session.currentIndex = _musicPlayerService.currentIndex;
+        if (_musicPlayerService.queue.length > 0) {
+          session.currentSong = _musicPlayerService.queue[_musicPlayerService.currentIndex].additionalInfo;
+        } else {
+          session.currentSong = null;
+        }
 
         return LocalService.saveSession(session);
       })
@@ -337,12 +343,8 @@ export const initPlayer = () => {
     _musicPlayerService.addEventListener(Events.Play, currentTrack => {
       _startNotifyingProgress(dispatch);
 
-      currentTrack.additionalInfo.reproductions += 1;
-
-      _updateSong(currentTrack.additionalInfo, dispatch);
-      _updateMostPlayedPlaylist(currentTrack.additionalInfo, dispatch);
-      _updateRecentPlayedPlaylist(currentTrack.additionalInfo, dispatch);
-      dispatch(play());
+      _udpdateStatistics(currentTrack.additionalInfo, dispatch)
+        .then(song => dispatch(play()));
     });
 
     _musicPlayerService.addEventListener(Events.Pause, () => {
@@ -351,20 +353,29 @@ export const initPlayer = () => {
     });
 
     _musicPlayerService.addEventListener(Events.Next, nextTrack => {
-      _trackChanged(nextTrack, dispatch)
+      _trackChanged(nextTrack.additionalInfo, nextTrack.position, dispatch)
     });
 
     _musicPlayerService.addEventListener(Events.Previous, prevTrack => {
-      _trackChanged(prevTrack, dispatch)
+      _trackChanged(prevTrack.additionalInfo, prevTrack.position, dispatch)
     });
 
+    let session = null;
     LocalService.getSession()
-      .then(session => {
+      .then(ses => {
+        session = ses;
+
         if (session.queue && session.queue.length) {
           let tracks = session.queue.map(_mapTrack);
           return _musicPlayerService.setQueue(tracks);
         } else {
           return Promise.resolve([]);
+        }
+      })
+      .then(returnedQueue => {
+        let index = parseInt(session.currentIndex)
+        if (index > -1) {
+          _musicPlayerService.setCurrentIndex(index);
         }
       });
   }
@@ -392,4 +403,9 @@ export const repeat = () => {
     _musicPlayerService.setRepeatMode(repeatMode);
     dispatch(repeatAction(repeatMode));
   }
+}
+
+export const playSongs = (params) => {
+  // { songs: [song], addToQueueIfNotExists: true }
+
 }

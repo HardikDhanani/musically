@@ -112,7 +112,7 @@ class PlaylistSelector extends Component {
 
   render() {
     return (
-      <Container fillStatusBar={false} style={{ backgroundColor: 'transparent' }}>
+      <Container fillStatusBar={false}>
         <View style={styles.gradientContainer} />
         {this._renderPlaylistSelector()}
         {this._renderAddNewPlaylistForm()}

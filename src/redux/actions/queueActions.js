@@ -1,5 +1,8 @@
 import LocalService from '../../services/LocalService';
+
 import * as playerActions from './playerActions';
+import * as appActions from './appActions';
+import * as favoritesActions from './favoritesActions';
 
 const loading = () => {
   return {
@@ -184,5 +187,23 @@ export function deleteSelectedSongs(queue) {
       .catch(error => {
         dispatch(removingSongError(error));
       });
+  }
+}
+
+export function setMenu(target) {
+  return dispatch => {
+    dispatch(appActions.setMenu({ ...target, caller: 'QUEUE' }));
+  }
+}
+
+export function playSong(song) {
+  return dispatch => {
+    playerActions.playSongs({ songs: [song], addToQueueIfNotExists: true })(dispatch);
+  }
+}
+
+export function like(type, item) {
+  return dispatch => {
+    favoritesActions.like(type, item)(dispatch);
   }
 }

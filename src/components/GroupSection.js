@@ -12,15 +12,13 @@ const styles = EStyleSheet.create({
   title: {
     width: '$appWidth',
     height: '$headerHeight * 0.7',
-    backgroundColor: '$bodySecondaryBackgroundColor',
-    borderBottomWidth: 1,
-    borderBottomColor: '$elementInactive',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     paddingLeft: 10,
-    marginBottom: 5,
+    marginTop: 5,
   },
   text: {
-    color: '$headerColor',
+    color: '$elementInactive',
     fontSize: '$textFontSize',
     fontWeight: 'bold'
   }
@@ -42,7 +40,8 @@ class GroupSection extends Component {
           getItemLayout={this.props.getItemLayout}
           data={this.props.data}
           renderItem={this.props.renderItem}
-          keyExtractor={this.props.keyExtractor} />
+          keyExtractor={this.props.keyExtractor}
+          numColumns={this.props.numColumns} />
       </View>
     );
   }

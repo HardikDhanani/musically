@@ -179,7 +179,7 @@ export function deletePlaylist(playlist) {
           }, 3000);
         })
         .then(LocalService.getPlaylists)
-        .then(playlists => dispatch(playlistsUpdated()))
+        .then(playlists => dispatch(playlistsUpdated(playlists)))
         .catch(error => dispatch(deletingPlaylistError(error)));
     }
   }

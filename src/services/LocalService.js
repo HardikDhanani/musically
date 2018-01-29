@@ -201,8 +201,12 @@ class LocalService {
           return {
             isFirstTime: true,
             currentSong: null,
-            currentIndex: 0,
+            currentIndex: -1,
             queue: [],
+            language: null,
+            mostPlayedLength: 0,
+            recentlyPlayedLength: 0,
+            mostPlayedReproductions: 0
           };
 
         default:

@@ -88,13 +88,17 @@ class HomePlaylists extends Component {
   }
 
   _showNewPlaylistForm() {
-    if (this.props.showNewPlaylistForm)
+    if (this.props.showNewPlaylistForm) {
       return (
         <NewPlaylist
-          dictionary={this.props.dictionary}
+          backgroundTransparent={false}
+          title={this.props.dictionary.getWord('create_playlist')}
+          createButtonText={this.props.dictionary.getWord('create').toUpperCase()}
+          onPlaylistCreated={this.props.newPlaylistConfirmed}
           onCancelPress={this.props.closeNewPlaylistForm}
-          onConfirmPress={this.props.newPlaylistConfirmed} />
+          defaultValue={this.props.dictionary.getWord('my_playlist')} />
       );
+    }
 
     return null;
   }

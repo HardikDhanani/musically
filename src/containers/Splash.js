@@ -10,7 +10,8 @@ import * as appActions from '../redux/actions/appActions';
 import {
   Image,
   View,
-  Animated
+  Animated,
+  Easing
 } from 'react-native';
 import Text from '../components/common/Text';
 
@@ -81,26 +82,20 @@ class Splash extends Component {
     let { top } = this.state;
 
     return (
-      <Animated.View style={{ top }}>
-        <LinearGradient
-          start={{ x: 1.0, y: 0.0 }}
-          end={{ x: 1.0, y: 1.0 }}
-          colors={[styles._gradientStart.color, styles._gradientEnd.color]}
-          style={styles.container}>
-          <Image source={require('../images/splash-logo-white.png')} style={styles.image} />
-        </LinearGradient>
-        <View style={styles.fullScreenImageContainer}>
-          <Image source={require('../images/(t-3).png')} style={styles.fullScreenImage} />
-          <Text style={styles.text}>
-            <Text style={{ color: 'green' }}>console</Text>
-            <Text style={{ color: 'white' }}>.</Text>
-            <Text style={{ color: 'yellow' }}>log</Text>
-            <Text style={{ color: 'white' }}>(</Text>
-            <Text style={{ color: 'red' }}>'Revolutioning the innovation...'</Text>
-            <Text style={{ color: 'white' }}>);</Text>
-          </Text>
-        </View>
-      </Animated.View>
+      <View style={{ flex: 1, backgroundColor: styles._gradientStart.color }}>
+        <Animated.View style={{ top }}>
+          <LinearGradient
+            start={{ x: 1.0, y: 0.0 }}
+            end={{ x: 1.0, y: 1.0 }}
+            colors={[styles._gradientStart.color, styles._gradientEnd.color]}
+            style={styles.container}>
+            <Image source={require('../images/splash-logo-white.png')} style={styles.image} />
+          </LinearGradient>
+          <View style={styles.fullScreenImageContainer}>
+            <Image source={require('../images/(t-3).png')} style={styles.fullScreenImage} />
+          </View>
+        </Animated.View>
+      </View>
     );
   }
 
@@ -116,8 +111,9 @@ class Splash extends Component {
         Animated.timing(
           this.state.top,
           {
+            easing: Easing.elastic(4),
             toValue: 0,
-            duration: 300,
+            duration: 1500,
           }
         ).start();
       }, 2000);

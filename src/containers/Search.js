@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
+import * as searchActions from '../redux/actions/searchActions';
+import * as appActions from '../redux/actions/appActions';
+
 import {
   ScrollView,
   View,
   Text
 } from 'react-native';
-import { connect } from 'react-redux';
-import * as searchActions from '../redux/actions/searchActions';
-import * as appActions from '../redux/actions/appActions';
-
 import StyleManager from '../styles/StyleManager';
-
+import Container from '../components/Container';
 import Body from '../components/Body';
 import SearchHeader from '../components/SearchHeader';
 import GroupSection from '../components/GroupSection';
@@ -46,7 +47,7 @@ class Search extends Component {
 
   render() {
     return (
-      <View style={this._container}>
+      <Container>
         <SearchHeader
           onBackPress={() => this.props.navigation.goBack()}
           search={text => this.props.search(text)}
@@ -68,7 +69,7 @@ class Search extends Component {
         </Body>
         {this._renderMenu()}
         <PlayerFooter navigation={this.props.navigation} />
-      </View>
+      </Container>
     );
   }
 
@@ -248,7 +249,7 @@ class Search extends Component {
       return null;
 
     return (
-      <FloatMenu positionY={this.props.menuPositionY} positionX={this.props.menuPositionX} onPress={() => this.props.setMenu(null, 0, 0)}>
+      <FloatMenu onPress={() => this.props.setMenu(null, 0, 0)}>
         {this._getTargetMenu(this.props.targetMenu.type)}
       </FloatMenu>
     );
@@ -296,9 +297,7 @@ const mapStateToProps = state => {
     artists: state.search.result.byArtist,
     genres: state.search.result.byGenre,
     showMenu: state.app.showMenu,
-    targetMenu: state.app.targetMenu,
-    menuPositionX: state.app.menuPositionX,
-    menuPositionY: state.app.menuPositionY,
+    targetMenu: state.app.targetMenu
   }
 }
 

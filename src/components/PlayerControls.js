@@ -8,6 +8,7 @@ import {
 import ProgressBar from '../components/ProgressBar';
 import Text from '../components/common/Text';
 import IconButton from '../components/common/buttons/IconButton';
+import FavoriteButton from '../components/common/buttons/FavoriteButton';
 
 const styles = EStyleSheet.create({
   container: {
@@ -48,12 +49,14 @@ const styles = EStyleSheet.create({
   likedButton: {
     color: '$appMainColor',
     backgroundColor: 'transparent',
-    fontSize: '$headerIconSize'
+    fontSize: '$headerIconSize',
+    borderColor: 'white'
   },
   unlikedButton: {
     color: '$elementInactive',
     backgroundColor: 'transparent',
-    fontSize: '$headerIconSize'
+    fontSize: '$headerIconSize',
+    borderColor: '$elementInactive'
   },
 });
 
@@ -81,7 +84,7 @@ class PlayerControls extends Component {
             <Text numberOfLines={1} style={styles.title}>{title}</Text>
             <Text numberOfLines={1} style={styles.text}>{detail}</Text>
           </View>
-          <IconButton onPress={() => this.props.onLikePress()} iconName='favorite' style={this.props.liked ? styles._likedButton : styles._unlikedButton} iconSize={styles._button.fontSize} />
+          <FavoriteButton borderColor={this.props.liked ? styles._likedButton.borderColor : styles._unlikedButton.borderColor} onPress={() => this.props.onLikePress()} iconName='favorite' style={this.props.liked ? styles._likedButton : styles._unlikedButton} iconSize={styles._button.fontSize} />
         </View>
         <View style={styles.progressBarContainer}>
           <ProgressBar
@@ -89,7 +92,7 @@ class PlayerControls extends Component {
             elapsed={this.props.elapsedTime}
             showElevation={true}
             onProgressChange={this.props.onProgressChange}
-            color={'rgba(190,177,227,1)'}
+            color={styles._button.color}
             backgroundColor={'white'}
             showBorderRadius={true} />
           <View style={styles.elapsedTimeContainer}>

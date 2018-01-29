@@ -1,34 +1,22 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import EStyleSheet from 'react-native-extended-stylesheet';
+import PropTypes from 'prop-types';
 
 import * as favoritesActions from '../redux/actions/favoritesActions';
-import * as appActions from '../redux/actions/appActions';
 
 import {
   ScrollView,
   View
 } from 'react-native';
-
-import FavoritesHeader from '../components/FavoritesHeader';
+import RowCoverCard from '../components/common/cards/RowCoverCard';
+import Container from '../components/Container';
+import FavoritesHeader from '../components/favorites/FavoritesHeader';
 import Body from '../components/Body';
 import SongCard from '../components/SongCard';
-import AlbumCard from '../components/AlbumCard';
-import ArtistCard from '../components/ArtistCard';
-import GenreCard from '../components/GenreCard';
-import ThreeColumnContainer from '../components/ThreeColumnContainer';
 import PlayerFooter from './PlayerFooter';
-import SongMenu from '../components/SongMenu';
-import HeaderMenu from '../components/HeaderMenu';
 import GroupSection from '../components/GroupSection';
-
-const styles = EStyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '$bodySecondaryBackgroundColor'
-  }
-});
+import ModalForm from '../components/common/forms/ModalForm';
+import ModalFormTouchable from '../components/common/buttons/ModalFormTouchable';
 
 class Favorites extends Component {
   constructor(props) {
@@ -40,83 +28,71 @@ class Favorites extends Component {
     this._renderArtist = this._renderArtist.bind(this);
     this._renderAlbums = this._renderAlbums.bind(this);
     this._renderAlbum = this._renderAlbum.bind(this);
-    this._renderGenres = this._renderGenres.bind(this);
-    this._renderGenre = this._renderGenre.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
-    this._groupItems = this._groupItems.bind(this);
     this._playSongs = this._playSongs.bind(this);
+    this._addToPlaylist = this._addToPlaylist.bind(this);
+    this._addToQueue = this._addToQueue.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.props.load();
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.update != this.props.update && nextProps.update)
+    if (nextProps.update != this.props.update && nextProps.update) {
       this.props.load();
+    }
   }
 
   render() {
     return (
-      <View style={styles.container}>
+      <Container fillStatusBar={false}>
         <FavoritesHeader
-          onBackPress={() => this.props.navigation.goBack()}
-          onMorePress={() => this.props.setMenu({ type: 'MENU' })} />
+          title={this.props.dictionary.getWord('favorites')}
+          onBackPress={() => this.props.navigation.goBack()} />
         <Body>
           <ScrollView>
             {this.props.songs.length ? this._renderSongs() : null}
             {this.props.albums.length ? this._renderAlbums() : null}
             {this.props.artists.length ? this._renderArtists() : null}
-            {this.props.genres.length ? this._renderGenres() : null}
           </ScrollView>
         </Body>
         {this._renderMenu()}
         <PlayerFooter navigation={this.props.navigation} />
-      </View>
+      </Container>
     );
   }
 
   _renderSongs() {
     return (
       <GroupSection
-        title={'Songs'}
-        getItemLayout={(data, index) => ({ length: 56, offset: 56 * index, index })}
+        title={this.props.dictionary.getWord('songs')}
         data={this.props.songs}
-        renderItem={this._renderSong}
-        keyExtractor={(item, index) => item.id} />
+        renderItem={song => this._renderSong(song.item)}
+        keyExtractor={(item, index) => item.id}
+        numColumns={1} />
     );
   }
 
   _renderAlbums() {
     return (
       <GroupSection
-        title={'Albums'}
-        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-        data={this._groupItems(this.props.albums)}
-        renderItem={album => this._renderItem(album, this._renderAlbum)}
-        keyExtractor={(item, index) => index} />
+        title={this.props.dictionary.getWord('albums')}
+        data={this.props.albums}
+        renderItem={album => this._renderAlbum(album.item)}
+        keyExtractor={(item, index) => index}
+        numColumns={2} />
     );
   }
 
   _renderArtists() {
     return (
       <GroupSection
-        title={'Artists'}
-        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-        data={this._groupItems(this.props.artists)}
-        renderItem={artist => this._renderItem(artist, this._renderArtist)}
-        keyExtractor={(item, index) => index} />
-    );
-  }
-
-  _renderGenres() {
-    return (
-      <GroupSection
-        title={'Genres'}
-        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-        data={this._groupItems(this.props.genres)}
-        renderItem={genre => this._renderItem(genre, this._renderGenre)}
-        keyExtractor={(item, index) => index} />
+        title={this.props.dictionary.getWord('artists')}
+        data={this.props.artists}
+        renderItem={artist => this._renderArtist(artist.item)}
+        keyExtractor={(item, index) => index}
+        numColumns={2} />
     );
   }
 
@@ -127,181 +103,117 @@ class Favorites extends Component {
     };
 
     return (
-      <View key={song.index}>
-        <SongCard
-          styles={{ container: styles.item, text: styles.itemText }}
-          id={song.item.id}
-          name={song.item.title}
-          artist={song.item.artist}
-          duration={song.item.duration}
-          onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-          onPress={() => this._playSongs(song.item)}
-        />
-      </View>
+      <SongCard
+        id={song.id}
+        name={song.title}
+        artist={song.artist}
+        isFavorite={song.isFavorite}
+        isPlaying={false}
+        onOptionPress={() => this.props.setMenu(targetMenu)}
+        onPlayPress={() => this._playSongs([song])}
+        onLikePress={() => this.props.like('song', song)} />
     );
   }
 
   _renderAlbum(album) {
-    let targetMenu = {
-      type: 'ALBUM',
-      payload: album
-    };
-
-    let songCount = album.songs.length;
-
     return (
-      <AlbumCard
+      <RowCoverCard
+        title={album.album}
+        detail={album.artist + ' - ' + album.songs.length + ' ' + this.props.dictionary.getWord('songs')}
+        cover={album.cover}
+        isFavorite={album.isFavorite}
         onPress={() => this.props.navigation.navigate('Album', { album })}
-        id={album.id}
-        name={album.album}
-        artist={album.artist}
-        songs={songCount}
-        source={require('../images/music.png')}
-        imageUri={album.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
+        onLikePress={() => this.props.like('album', album)} />
     );
   }
 
   _renderArtist(artist) {
-    let targetMenu = {
-      type: 'ARTIST',
-      payload: artist
-    };
-
-    let songCount = 0;
-    for (let i = 0; i < artist.albums.length; i++) {
-      songCount += artist.albums[i].songs.length;
-    }
-    let albumCount = (artist && artist.albums) ? artist.albums.length : 0;
+    let albums = artist.albums.length;
+    let songs = artist.albums.reduce(((sum, album) => sum + album.songs.length), 0);
 
     return (
-      <ArtistCard
+      <RowCoverCard
+        title={artist.artist}
+        detail={albums + ' ' + this.props.dictionary.getWord('albums') + ' - ' + songs + ' ' + this.props.dictionary.getWord('songs')}
+        cover={artist.cover}
+        isFavorite={artist.isFavorite}
         onPress={() => this.props.navigation.navigate('Artist', { artist })}
-        id={artist.id}
-        name={artist.artist}
-        albums={albumCount}
-        songs={songCount}
-        source={require('../images/music.png')}
-        imageUri={artist.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
-    );
-  }
-
-  _renderGenre(genre) {
-    let targetMenu = {
-      type: 'GENRE',
-      payload: genre
-    };
-
-    let songCount = 0;
-    for (let i = 0; i < genre.albums.length; i++) {
-      songCount += genre.albums[i].songs.length;
-    }
-    let albumCount = (genre && genre.albums) ? genre.albums.length : 0;
-
-    return (
-      <GenreCard
-        onPress={() => this.props.navigation.navigate('Genre', { genre })}
-        id={genre.id}
-        name={genre.genre}
-        albums={albumCount}
-        songs={songCount}
-        source={require('../images/music.png')}
-        imageUri={genre.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
+        onLikePress={() => this.props.like('artist', artist)} />
     );
   }
 
   _renderMenu() {
-    if (!this.props.showMenu || this.props.targetMenu.caller !== 'FAVORITES')
+    if (!this.props.showMenu || (!this.props.targetMenu ? undefined : this.props.targetMenu.caller) !== 'FAVORITES')
       return null;
 
-    switch (this.props.targetMenu.type.toLowerCase()) {
-      case 'song':
-      case 'artist':
-      case 'album':
-      case 'genre':
-        return (
-          <SongMenu
-            isFavorite={true} positionX={this.props.menuPositionX}
-            positionY={this.props.menuPositionY}
-            onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })}/>
-        );
-
-      default:
-        return <HeaderMenu onPress={() => this.props.setMenu({ type: this.props.targetMenu.type })} positionX={this.props.menuPositionX} positionY={this.props.menuPositionY} />;
-    }
-  }
-
-  _renderItem(items, renderCard) {
     return (
-      <ThreeColumnContainer items={items.item} renderItem={renderCard} />
+      <ModalForm
+        title={this.props.targetMenu.payload.title}
+        onCancelPress={() => this.props.setMenu()}>
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_playlist')}
+          onPress={() => this._addToPlaylist(this.props.targetMenu.payload)} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('add_to_queue')}
+          onPress={() => this._addToQueue([this.props.targetMenu.payload])} />
+        <ModalFormTouchable
+          text={this.props.dictionary.getWord('file_detail')}
+          onPress={() => { }} />
+      </ModalForm>
     );
   }
 
-  _groupItems(items) {
-    let grupedItems = [];
+  _playSongs(songs) {
 
-    for (let i = 0; i < items.length; i += 3) {
-      grupedItems.push(items.slice(i, 3 + i));
-    }
-
-    return grupedItems;
   }
 
-  _playSongs(song) {
-    let queue = this.props.songs;
+  _addToPlaylist(song) {
+    this.props.setMenu(null);
+    this.props.navigation.navigate('PlaylistSelector', { song });
+  }
 
-    if (song) {
-      let index = queue.findIndex(s => s.artist === song.artist && s.album === song.album && s.name === song.name);
-      if (index !== -1) {
-        queue.splice(index, 1);
-        queue.unshift(song);
-      }
-    }
-
-    this.props.navigation.navigate('Player', { queue })
+  _addToQueue(songs) {
+    this.props.setMenu(null);
+    this.props.addToQueue(songs);
   }
 }
 
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
     isLoading: state.favorites.isLoading,
     update: state.favorites.update,
     songs: state.favorites.songs,
     albums: state.favorites.albums,
     artists: state.favorites.artists,
-    genres: state.favorites.genres,
     showMenu: state.app.showMenu,
-    targetMenu: state.app.targetMenu,
-    menuPositionX: state.app.menuPositionX,
-    menuPositionY: state.app.menuPositionY,
+    targetMenu: state.app.targetMenu
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     load: () => favoritesActions.load()(dispatch),
-    setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'FAVORITES' }, positionX, positionY)),
+    setMenu: (target) => favoritesActions.setMenu(target)(dispatch),
+    like: (type, song) => favoritesActions.like(type, song)(dispatch),
+    addToQueue: (queue) => favoritesActions.addToQueue(queue)(dispatch)
   }
 }
 
 Favorites.propTypes = {
-  isLoading: PropTypes.bool,
-  update: PropTypes.bool,
-  songs: PropTypes.array,
-  albums: PropTypes.array,
-  artists: PropTypes.array,
-  genres: PropTypes.array,
-  showMenu: PropTypes.bool,
+  dictionary: PropTypes.object.isRequired,
+  navigation: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  update: PropTypes.bool.isRequired,
+  songs: PropTypes.array.isRequired,
+  albums: PropTypes.array.isRequired,
+  artists: PropTypes.array.isRequired,
+  showMenu: PropTypes.bool.isRequired,
   targetMenu: PropTypes.object,
-  menuPositionX: PropTypes.number,
-  menuPositionY: PropTypes.number,
-  load: PropTypes.func,
-  setMenu: PropTypes.func
+  load: PropTypes.func.isRequired,
+  setMenu: PropTypes.func.isRequired,
+  like: PropTypes.func.isRequired,
+  addToQueue: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Favorites);

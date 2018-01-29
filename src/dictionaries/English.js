@@ -27,7 +27,14 @@ let words = {
   my_playlist: 'My playlist',
   now_playing: 'Now Playing',
   file_detail: 'File detail',
-  
+  selected: 'Selected',
+  delete: 'Delete',
+  delete_from_queue: 'Delete from queue',
+  are_you_sure: 'Are you sure?',
+  you_are_removing: 'You are removing',
+  songs_from_the_queue: 'songs from the queue',
+  remove_from_queue: 'Remove from queue',
+
   settings_sectionTitle_lookAndFeel: 'Look & Feel',
   settings_lookAndFeel_languague: 'Language',
   settings_lookAndFeel_select_languague: 'Select language',
