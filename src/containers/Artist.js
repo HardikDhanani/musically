@@ -164,6 +164,17 @@ class Artist extends Component {
     this.props.load(artist || artistName);
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.topSongs !== this.props.topSongs
+      || nextProps.showFiveMore !== this.props.showFiveMore
+      || nextProps.isFavorite !== this.props.isFavorite
+      || nextProps.playing !== this.props.playing
+      || nextProps.language !== this.props.language
+      || nextProps.showSongMenuForm !== this.props.showSongMenuForm
+      || nextProps.targetMenu !== this.props.targetMenu
+      || nextState.currentIndex !== this.state.currentIndex;
+  }
+
   render() {
     return (
       <Container fillStatusBar={false}>
@@ -226,7 +237,9 @@ class Artist extends Component {
         </HeaderLeftSection>
         <HeaderCenterSection />
         <HeaderRightSection>
-          <IconButton iconName="favorite" onPress={() => this.props.like('artist', this.props.artist)} style={favoriteStyle} iconSize={styles._headerButton.fontSize} />
+          <View style={{ marginRight: 20 }}>
+            <IconButton iconName="favorite" onPress={() => this.props.like('artist', this.props.artist)} style={favoriteStyle} iconSize={styles._headerButton.fontSize} />
+          </View>
           <IconButton iconName="search" onPress={() => this.props.navigation.navigate('Search', {})} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
         </HeaderRightSection>
       </View>
@@ -234,7 +247,7 @@ class Artist extends Component {
   }
 
   _renderCover() {
-    let source = this.props.cover ? { uri: this.props.cover } : require('../images/music.png');
+    let source = this.props.cover ? { uri: this.props.cover } : require('../images/default-cover.png');
     return (
       <View style={styles.imageContainer}>
         <Image source={source} style={styles.image} />
@@ -248,7 +261,7 @@ class Artist extends Component {
         <IconButton iconName="repeat" style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
         <View style={styles.artistInfo}>
           <Text style={styles.artistName}>{this.props.name}</Text>
-          <Text style={styles.artistDetail}>{this.props.albums.length + ' Albums - ' + this.props.songs.length + ' Songs'}</Text>
+          <Text style={styles.artistDetail}>{this.props.albums.length + ' ' + this.props.dictionary.getWord('albums') + ' - ' + this.props.songs.length + ' ' + this.props.dictionary.getWord('songs')}</Text>
         </View>
         <IconButton onPress={this._shufflePlay} iconName="shuffle" style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
       </View>
@@ -260,17 +273,17 @@ class Artist extends Component {
       <View style={styles.paginationHeader}>
         <Touchable onPress={() => this.setState({ currentIndex: 0 })}>
           <View style={this.state.currentIndex === 0 ? styles.paginationHeaderButtonSelected : styles.paginationHeaderButton}>
-            <Text style={this.state.currentIndex === 0 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{'Overview'}</Text>
+            <Text style={this.state.currentIndex === 0 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{this.props.dictionary.getWord('overview')}</Text>
           </View>
         </Touchable>
         <Touchable onPress={() => this.setState({ currentIndex: 1 })}>
           <View style={this.state.currentIndex === 1 ? styles.paginationHeaderButtonSelected : styles.paginationHeaderButton}>
-            <Text style={this.state.currentIndex === 1 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{'All Songs'}</Text>
+            <Text style={this.state.currentIndex === 1 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{this.props.dictionary.getWord('all_songs')}</Text>
           </View>
         </Touchable>
         <Touchable onPress={() => this.setState({ currentIndex: 2 })}>
           <View style={this.state.currentIndex === 2 ? styles.paginationHeaderButtonSelected : styles.paginationHeaderButton}>
-            <Text style={this.state.currentIndex === 2 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{'Albums'}</Text>
+            <Text style={this.state.currentIndex === 2 ? styles.paginationHeaderButtonSelectedText : styles.paginationHeaderButtonText}>{this.props.dictionary.getWord('albums')}</Text>
           </View>
         </Touchable>
       </View>
@@ -278,11 +291,10 @@ class Artist extends Component {
   }
 
   _renderSong(song) {
-    let isPlaying = this.props.isPlaying && this.props.playingSong.id === song.item.id;
+    let isPlaying = this.props.playing && this.props.currentSong.id === song.item.id;
 
     return (
       <SongCard
-        key={song.index}
         id={song.item.id}
         name={song.item.title}
         artist={song.item.artist}
@@ -298,7 +310,7 @@ class Artist extends Component {
     return (
       <CoverCard
         onPress={() => this.props.navigation.navigate('Album', { album: item })}
-        source={require('../images/music.png')}
+        source={require('../images/default-cover.png')}
         imageUri={item.cover}
         title={item.album}
         detail={item.artist} />
@@ -308,27 +320,35 @@ class Artist extends Component {
   _renderOverview() {
     return (
       <View style={styles.pageContainer}>
-        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Top Tracks'}</Text>
-        <FlatList
-          data={this.props.topSongs}
-          renderItem={this._renderSong}
-          keyExtractor={(item, index) => index}
-          style={styles.listContainer} />
+        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{this.props.dictionary.getWord('top_songs')}</Text>
+        {
+          this.props.topSongs.length === 0 ?
+            <Text style={[styles.noInfo, { alignSelf: 'center', marginBottom: 30 }]}>{this.props.dictionary.getWord('no_top_songs_yet')}</Text> :
+            <FlatList
+              data={this.props.topSongs}
+              renderItem={this._renderSong}
+              keyExtractor={(item, index) => index}
+              style={styles.listContainer} />
+        }
         {
           this.props.showFiveMore ?
             <Touchable onPress={() => this.props.showMore()}>
               <View style={styles.showMoreButton}>
-                <Text style={styles.showMoreButtonText}>{'Show 5 more'}</Text>
+                <Text style={styles.showMoreButtonText}>{this.props.dictionary.getWord('get_five_more')}</Text>
               </View>
             </Touchable> :
             null
         }
-        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Related Artists'}</Text>
-        <FlatList
-          horizontal={true}
-          data={this.props.relatedArtists}
-          renderItem={this._renderAlbum}
-          keyExtractor={(item, index) => index} />
+        <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{this.props.dictionary.getWord('related_artists')}</Text>
+        {
+          this.props.relatedArtists.length === 0 ?
+            <Text style={[styles.noInfo, { alignSelf: 'center', marginBottom: 30 }]}>{this.props.dictionary.getWord('no_related_artists_yet')}</Text> :
+            <FlatList
+              horizontal={true}
+              data={this.props.relatedArtists}
+              renderItem={this._renderAlbum}
+              keyExtractor={(item, index) => index} />
+        }
       </View>
     );
   }
@@ -340,7 +360,6 @@ class Artist extends Component {
           data={this.props.songs}
           renderItem={this._renderSong}
           keyExtractor={(item, index) => index}
-          initialNumToRender={10}
           style={styles.listContainer} />
       </View>
     );
@@ -360,7 +379,7 @@ class Artist extends Component {
   }
 
   _shufflePlay() {
-    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
+    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, shuffle: true });
   }
 
   _addToQueue(songs) {
@@ -388,7 +407,9 @@ const mapStateToProps = state => {
     showFiveMore: state.artist.showFiveMore,
     playlists: state.artist.playlists,
     showSongMenuForm: state.artist.showSongMenuForm,
-    targetMenu: state.artist.targetMenu
+    targetMenu: state.artist.targetMenu,
+    playing: state.player.playing,
+    currentSong: state.player.currentSong
   }
 }
 

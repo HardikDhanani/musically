@@ -15,7 +15,11 @@ const initialState = {
   genres: [],
   playlists: [],
   showMenu: false,
-  targetMenu: null
+  targetMenu: null,
+  language: 'english',
+  iosAppId: 'iosAppId',
+  androidAppId: 'androidAppId',
+  version: '0.0.1',
 };
 
 export default function app(state = initialState, action = {}) {
@@ -29,6 +33,7 @@ export default function app(state = initialState, action = {}) {
       return {
         ...state,
         dictionary: action.payload.dictionary,
+        language: action.payload.language,
         playlists: JSON.parse(JSON.stringify(state.playlists))
       }
     case 'APP_GO_HOME':

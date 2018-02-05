@@ -6,7 +6,7 @@ const initialState = {
   queue: [],
   showMenu: false,
   isLoading: false,
-  randomActive: false,
+  shuffleActive: false,
   playing: false,
   repeatMode: 'NONE'
 };
@@ -59,7 +59,7 @@ export default function player(state = initialState, action = {}) {
     case 'PLAYER_RAMDOM':
       return {
         ...state,
-        randomActive: !state.randomActive
+        shuffleActive: !state.shuffleActive
       }
     case 'PLAYER_REPEAT':
       let repeatMode = 'NONE';
@@ -99,12 +99,11 @@ export default function player(state = initialState, action = {}) {
         elapsedTime: action.payload.newElapsed
       }
     case 'PLAYER_ADD_TO_QUEUE':
-      let newQueue = state.queue.concat(action.payload.queue || []);
       return {
         ...state,
-        queue: newQueue,
-        currentIndex: state.queue.length === 0 ? 0 : state.currentIndex,
-        currentSong: state.queue.length === 0 ? newQueue[0] : state.currentSong,
+        queue: action.payload.queue,
+        currentIndex: action.payload.currentIndex,
+        currentSong: action.payload.queue[action.payload.currentIndex]
       }
     case 'PLAYER_QUEUE_UPDATED':
       return {

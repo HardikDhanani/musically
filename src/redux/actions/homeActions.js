@@ -1,5 +1,8 @@
 import LocalService from '../../services/LocalService';
 import * as appActions from './appActions';
+import { exports } from 'react-native';
+
+let itemViewMode = null;
 
 const showAddPlaylistSuccess = (song, playlist) => {
   return {
@@ -14,6 +17,15 @@ const showAddPlaylistSuccess = (song, playlist) => {
 const hideAddPlaylistSuccess = () => {
   return {
     type: 'HOME_HIDE_ADD_PLAYLIST_SUCCESS'
+  }
+}
+
+export const changeItemViewModeAction = (itemViewMode) => {
+  return {
+    type: 'HOME_ITEM_VIEW_MODE_CHANGED',
+    payload: {
+      itemViewMode
+    }
   }
 }
 
@@ -80,6 +92,30 @@ export const cancelAddNewPlaylistForm = () => {
   }
 }
 
+export const enableMultiSelectMode = (initialSongId) => {
+  return {
+    type: 'HOME_MULTI_SELECT_MODE_ENABLED',
+    payload: {
+      initialSongId
+    }
+  }
+}
+
+export const disableMultiSelectMode = () => {
+  return {
+    type: 'HOME_MULTI_SELECT_MODE_DISABLED'
+  }
+}
+
+export const selectSong = (song) => {
+  return {
+    type: 'HOME_SONG_SELECTED',
+    payload: {
+      song
+    }
+  }
+}
+
 export function selectedSectionChanged(section) {
   return dispatch => {
     dispatch(sectionChanged(section));
@@ -138,5 +174,29 @@ export function createNewPlaylistAndAddSong(playlistName, song) {
             console.log('error in homeActions.createNewPlaylistAndAddSong - line 134');
           });
       });
+  }
+}
+
+export function changeItemViewMode() {
+  return dispatch => {
+    itemViewMode = itemViewMode === 'card' ? 'row' : 'card';
+
+    LocalService.getSession()
+      .then(session => {
+        session.itemViewMode = itemViewMode;
+
+        return LocalService.saveSession(session);
+      })
+      .then(() => {
+        dispatch(changeItemViewModeAction(itemViewMode));
+      });
+  }
+}
+
+export function setItemViewMode(mode) {
+  return dispatch => {
+    itemViewMode = mode;
+
+    dispatch(changeItemViewModeAction(itemViewMode));
   }
 }

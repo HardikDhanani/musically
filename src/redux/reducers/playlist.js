@@ -31,14 +31,16 @@ export default function playlist(state = initialState, action = {}) {
       }
     case 'PLAYLIST_LOADING_SUCCESS':
       let songs = action.payload.playlist ? action.payload.playlist.songs : [];
-      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions);
+      songs = JSON.parse(JSON.stringify(songs));
+      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions).slice(0, 5);
+
       return {
         ...state,
         playlist: action.payload.playlist,
         isLoading: false,
         name: action.payload.playlist.name,
         songs,
-        topSongs: topSongs.slice(0, 5),
+        topSongs,
         showFiveMore: topSongs.length > 5
       }
     case 'PLAYLIST_LOADING_ERROR':

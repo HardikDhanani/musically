@@ -47,7 +47,7 @@ class PlayerFooter extends Component {
   render() {
     let title = this.props.currentSong ? this.props.currentSong.title : null;
     let artist = this.props.currentSong ? this.props.currentSong.artist : null;
-    let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/music.png')
+    let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/default-cover.png')
 
     return (
       <Footer>

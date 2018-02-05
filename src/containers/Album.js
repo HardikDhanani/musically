@@ -65,7 +65,7 @@ const styles = EStyleSheet.create({
   },
   listContainer: {
     flex: 1,
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   showMoreButton: {
     height: '$headerHeight * 0.9',
@@ -132,6 +132,17 @@ const styles = EStyleSheet.create({
     height: '$statusBarHeight',
     width: '$appWidth',
     backgroundColor: '$headerStartGradientBackgroundColor'
+  },
+  coverCard: {
+    height: '$coverCardHeight',
+  },
+  rowCard: {
+    height: '$rowCardHeight',
+  },
+  noInfo: {
+    color: 'rgba(152,152,152,1)',
+    alignSelf: 'center',
+    marginBottom: 25
   }
 });
 
@@ -160,6 +171,17 @@ class Album extends Component {
   componentWillMount() {
     const { album, albumName, artistName } = this.props.navigation.state.params;
     this.props.load(album || albumName, artistName);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.topSongs !== this.props.topSongs
+      || nextProps.showFiveMore !== this.props.showFiveMore
+      || nextProps.isFavorite !== this.props.isFavorite
+      || nextProps.playing !== this.props.playing
+      || nextProps.language !== this.props.language
+      || nextProps.showSongMenuForm !== this.props.showSongMenuForm
+      || nextProps.targetMenu !== this.props.targetMenu
+      || nextState.currentIndex !== this.state.currentIndex;
   }
 
   render() {
@@ -219,7 +241,9 @@ class Album extends Component {
         </HeaderLeftSection>
         <HeaderCenterSection />
         <HeaderRightSection>
-          <IconButton iconName="favorite" onPress={() => this.props.like('album', this.props.album)} style={favoriteStyle} iconSize={styles._headerButton.fontSize} />
+          <View style={{ marginRight: 20 }}>
+            <IconButton iconName="favorite" onPress={() => this.props.like('album', this.props.album)} style={favoriteStyle} iconSize={styles._headerButton.fontSize} />
+          </View>
           <IconButton iconName="search" onPress={() => this.props.navigation.navigate('Search', {})} style={styles._headerButton} iconSize={styles._headerButton.fontSize} />
         </HeaderRightSection>
       </View>
@@ -227,7 +251,7 @@ class Album extends Component {
   }
 
   _renderCover() {
-    let source = this.props.cover ? { uri: this.props.cover } : require('../images/music.png');
+    let source = this.props.cover ? { uri: this.props.cover } : require('../images/default-cover.png');
     return (
       <View style={styles.imageContainer}>
         <Image source={source} style={styles.image} />
@@ -269,11 +293,16 @@ class Album extends Component {
     return (
       <View style={styles.pageContainer}>
         <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Top Tracks'}</Text>
-        <FlatList
-          data={this.props.topSongs}
-          renderItem={this._renderSong}
-          keyExtractor={(item, index) => index}
-          style={styles.listContainer} />
+        {
+          this.props.topSongs.length === 0 ?
+            <Text style={[styles.noInfo, { alignSelf: 'center', marginBottom: 30 }]}>{'No songs yet'}</Text> :
+            <FlatList
+              data={this.props.topSongs}
+              renderItem={this._renderSong}
+              keyExtractor={(item, index) => index}
+              getItemLayout={(data, index) => ({ length: styles._rowCard.height, offset: styles._rowCard.height * index, index })}
+              style={styles.listContainer} />
+        }
         {
           this.props.showFiveMore ?
             <Touchable onPress={() => this.props.showMore()}>
@@ -284,11 +313,16 @@ class Album extends Component {
             null
         }
         <Text style={[styles.paginationHeaderButtonSelectedText, { marginLeft: 15 }]}>{'Related Albums'}</Text>
-        <FlatList
-          horizontal={true}
-          data={this.props.relatedAlbums}
-          renderItem={this._renderAlbum}
-          keyExtractor={(item, index) => index} />
+        {
+          this.props.relatedAlbums.length === 0 ?
+            <Text style={[styles.noInfo, { alignSelf: 'center', marginBottom: 30 }]}>{'No related albums'}</Text> :
+            <FlatList
+              horizontal={true}
+              data={this.props.relatedAlbums}
+              renderItem={this._renderAlbum}
+              keyExtractor={(item, index) => index}
+              getItemLayout={(data, index) => ({ length: styles._coverCard.height, offset: styles._coverCard.height * index, index })} />
+        }
       </View>
     );
   }
@@ -300,14 +334,14 @@ class Album extends Component {
           data={this.props.songs}
           renderItem={this._renderSong}
           keyExtractor={(item, index) => index}
-          initialNumToRender={10}
-          style={styles.listContainer} />
+          style={styles.listContainer}
+          getItemLayout={(data, index) => ({ length: styles._rowCard.height, offset: styles._rowCard.height * index, index })} />
       </View>
     );
   }
 
   _renderSong(song) {
-    let isPlaying = this.props.isPlaying && this.props.playingSong.id === song.item.id;
+    let isPlaying = this.props.playing && this.props.currentSong.id === song.item.id;
 
     return (
       <SongCard
@@ -327,7 +361,7 @@ class Album extends Component {
     return (
       <CoverCard
         onPress={() => this.props.navigation.navigate('Album', { album: item })}
-        source={require('../images/music.png')}
+        source={require('../images/default-cover.png')}
         imageUri={item.cover}
         title={item.album}
         detail={item.artist} />
@@ -335,7 +369,7 @@ class Album extends Component {
   }
 
   _shufflePlay() {
-    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
+    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, shuffle: true });
   }
 
   _addToQueue(songs) {
@@ -362,7 +396,9 @@ const mapStateToProps = state => {
     playlists: state.album.playlists,
     showFiveMore: state.album.showFiveMore,
     showSongMenuForm: state.album.showSongMenuForm,
-    targetMenu: state.album.targetMenu
+    targetMenu: state.album.targetMenu,
+    playing: state.player.playing,
+    currentSong: state.player.currentSong
   }
 }
 

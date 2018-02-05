@@ -90,10 +90,10 @@ class Player extends Component {
     if (this.props.navigation.state.params) {
       queue = this.props.navigation.state.params.queue;
       startPlaying = this.props.navigation.state.params.startPlaying;
-      random = this.props.navigation.state.params.random;
+      shuffle = this.props.navigation.state.params.shuffle;
     }
 
-    this.props.load(queue, startPlaying || false, random || false);
+    this.props.load(queue, startPlaying || false, shuffle || false);
   }
 
   render() {
@@ -106,7 +106,7 @@ class Player extends Component {
           style={styles.container}>
           <PlayerHeader
             title={this.props.dictionary.getWord('now_playing')}
-            onBackPress={() => this.props.navigation.goBack()}/>
+            onBackPress={() => this.props.navigation.goBack()} />
           {this._renderCover()}
           {this._renderControls()}
           {/*this._renderFloatMenu()*/}
@@ -117,7 +117,7 @@ class Player extends Component {
   }
 
   _renderCover() {
-    let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/music.png')
+    let source = (this.props.currentSong && this.props.currentSong.cover) ? { uri: this.props.currentSong.cover } : require('../images/default-cover.png')
 
     return (
       <View style={styles.coverContainer}>
@@ -148,8 +148,8 @@ class Player extends Component {
         elapsedTime={this.props.elapsedTime}
         total={total}
         liked={this.props.isFavorite}
-        onProgressChange={this._onProgressChange} 
-        onLikePress={() => this.props.like(this.props.currentSong)}/>
+        onProgressChange={this._onProgressChange}
+        onLikePress={() => this.props.like(this.props.currentSong)} />
     );
   }
 
@@ -180,11 +180,11 @@ class Player extends Component {
   _renderFooter() {
     return (
       <View style={[styles.footer, this.props.style]}>
-        <IconButton iconName={this._getRepeatIcon()} onPress={() => this.props.repeat()} style={this.props.repeatMode !== 'NONE' ? styles._buttonSelected : styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
+        <IconButton iconName={this._getRepeatIcon()} onPress={() => this.props.repeat()} style={this.props.repeatMode !== 'NONE' ? styles._buttonSelected : styles._buttonUnselected} iconSize={this.props.repeatMode !== 'NONE' ? styles._buttonSelected.fontSize + 3 : styles._buttonSelected.fontSize} />
         <IconButton iconName='fast-rewind' onPress={this.props.prev} style={styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
         <PlayPauseButtonWhite onPress={() => this.props.playPause(this.props.currentSong)} iconName={this.props.playing ? 'pause' : 'play-arrow'} />
         <IconButton iconName='fast-forward' onPress={this.props.next} style={styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
-        <IconButton iconName='shuffle' onPress={this.props.random} style={this.props.randomActive ? styles._buttonSelected : styles._buttonUnselected} iconSize={styles._buttonSelected.fontSize} />
+        <IconButton iconName='shuffle' onPress={this.props.shuffle} style={this.props.shuffleActive ? styles._buttonSelected : styles._buttonUnselected} iconSize={this.props.shuffleActive ? styles._buttonSelected.fontSize + 3 : styles._buttonSelected.fontSize} />
       </View>
     );
   }
@@ -207,7 +207,7 @@ const mapStateToProps = state => {
     currentIndex: state.player.currentIndex,
     elapsedTime: state.player.elapsedTime,
     queue: state.player.queue,
-    randomActive: state.player.randomActive,
+    shuffleActive: state.player.shuffleActive,
     playing: state.player.playing,
     repeatMode: state.player.repeatMode,
     showMenu: state.player.showMenu
@@ -216,9 +216,9 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    load: (queue, startPlaying) => playerActions.load(queue, startPlaying)(dispatch),
+    load: (queue, startPlaying, shuffle) => playerActions.load(queue, startPlaying, shuffle)(dispatch),
     setMenu: (target, positionX, positionY) => dispatch(appActions.setMenu({ ...target, caller: 'PLAYER' }, positionX, positionY)),
-    random: () => dispatch(playerActions.random()),
+    shuffle: () => dispatch(playerActions.shuffle()),
     repeat: () => dispatch(playerActions.repeat()),
     playPause: (currentSong) => playerActions.playPause(currentSong)(dispatch),
     next: () => playerActions.next()(dispatch),

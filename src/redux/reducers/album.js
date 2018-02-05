@@ -29,7 +29,8 @@ export default function album(state = initialState, action = {}) {
       }
     case 'ALBUM_LOADING_SUCCESS':
       let songs = action.payload.album ? action.payload.album.songs : [];
-      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions);
+      songs = JSON.parse(JSON.stringify(songs));
+      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions).slice(0, 5);
 
       return {
         ...state,
@@ -38,8 +39,8 @@ export default function album(state = initialState, action = {}) {
         cover: action.payload.album.cover,
         relatedAlbums: action.payload.relatedAlbums,
         songs,
-        topSongs: topSongs.slice(0, 5),
-        isFavorite: action.payload.album.isFavorite,
+        topSongs,
+        isFavorite: action.payload.album.isFavorite || false,
         isLoading: false,
         showFiveMore: topSongs.length > 5
       }

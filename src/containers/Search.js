@@ -153,7 +153,7 @@ class Search extends Component {
         name={album.album}
         artist={album.artist}
         songs={songCount}
-        source={require('../images/music.png')}
+        source={require('../images/default-cover.png')}
         imageUri={album.cover}
         onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
       />
@@ -181,7 +181,7 @@ class Search extends Component {
         name={artist.artist}
         albums={albumCount}
         songs={songCount}
-        source={require('../images/music.png')}
+        source={require('../images/default-cover.png')}
         imageUri={artist.cover}
         onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
       />
@@ -209,7 +209,7 @@ class Search extends Component {
         name={genre.genre}
         albums={albumCount}
         songs={songCount}
-        source={require('../images/music.png')}
+        source={require('../images/default-cover.png')}
         imageUri={genre.cover}
         onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
       />

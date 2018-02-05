@@ -191,24 +191,28 @@ export function like(type, target, removeFromFavorites = true) {
 
       case 'artist':
         LocalService.saveArtist(target)
-          .then(() => dispatch(likeSuccess(type, target)));
+          .then(() => {
+            dispatch(likeSuccess(type, target));
+            dispatch(artistUpdated(target));
+          });
         break;
 
       case 'album':
+        let artistObject = null;
         LocalService.saveAlbum(target)
           .then(() => LocalService.getArtistByName(target.artist))
           .then(artist => {
             let i = artist.albums.findIndex(a => a.id === target.id);
             artist.albums[i] = target;
 
+            artistObject = artist;
             return LocalService.saveArtist(artist);
           })
-          .then(() => dispatch(likeSuccess(type, target)));
-        break;
-
-      case 'genre':
-        LocalService.saveGenre(target)
-          .then(() => dispatch(likeSuccess(type, target)));
+          .then(() => {
+            dispatch(likeSuccess(type, target));
+            dispatch(artistUpdated(artistObject));
+            dispatch(albumUpdated(target));
+          });
         break;
 
       default:

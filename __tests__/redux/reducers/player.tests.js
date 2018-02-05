@@ -11,7 +11,7 @@ beforeEach(() => {
     queue: [],
     showMenu: false,
     isLoading: false,
-    randomActive: false,
+    shuffleActive: false,
     playing: false,
     repeatMode: 'NONE'
   };
@@ -27,7 +27,7 @@ it('Player reducer | State is undefined | Return initial state', () => {
   expect(state.elapsedTime).toEqual(0);
   expect(state.queue).toHaveLength(0);
   expect(state.showMenu).toEqual(false);
-  expect(state.randomActive).toEqual(false);
+  expect(state.shuffleActive).toEqual(false);
   expect(state.playing).toEqual(false);
   expect(state.repeatMode).toEqual('NONE');
 });
@@ -183,10 +183,10 @@ it('Player reducer | PLAYER_SONG_CHANGED action type | Return currentSong and se
 });
 
 it('Player reducer | PLAYER_RAMDOM action type | Return currentSong and set elapsedTime to 0', () => {
-  currentState.randomActive = false;
+  currentState.shuffleActive = false;
   let state = player(currentState, { type: 'PLAYER_RAMDOM' });
 
-  expect(state.randomActive).toEqual(!currentState.randomActive);
+  expect(state.shuffleActive).toEqual(!currentState.shuffleActive);
 });
 
 it('Player reducer | PLAYER_REPEAT action type and repeatMode NONE | Return repeatMode ONE', () => {

@@ -3,10 +3,11 @@ import playlist from "../reducers/playlist";
 let _setPlaylistLength = (playlists, value, playlistName, sortSongs) => {
   let i = playlists.findIndex(p => p.name === playlistName);
   if (i > -1) {
+    let length = value === 0 ? playlists[i].songs.length : value;
     if (!sortSongs) {
-      playlists[i].songs = playlists[i].songs.slice(0, value);
+      playlists[i].songs = playlists[i].songs.slice(0, length);
     } else {
-      playlists[i].songs = playlists[i].songs.sort(sortSongs).slice(0, value);
+      playlists[i].songs = playlists[i].songs.sort(sortSongs).slice(0, length);
     }
   }
 

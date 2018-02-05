@@ -13,7 +13,10 @@ const initialState = {
   songToAddToPlaylist: null,
   playlistModified: null,
   showAddNewPlaylistForm: false,
-  showAddToPlaylistConfirmationForm: false
+  showAddToPlaylistConfirmationForm: false,
+  itemViewMode: 'card',
+  selectedSongs: [],
+  multiSelectModeEnabled: false
 };
 
 export default function home(state = initialState, action = {}) {
@@ -39,6 +42,16 @@ export default function home(state = initialState, action = {}) {
       return {
         ...state,
         selectedSection: action.payload.section
+      }
+    case 'APP_STARTING_SUCCESS':
+      return {
+        ...state,
+        selectedSongs: action.payload.songs.map(s => {
+          return {
+            ...s,
+            selected: false
+          }
+        })
       }
     case 'HOME_CREATE_NEW_PLAYLIST':
       return {
@@ -138,6 +151,43 @@ export default function home(state = initialState, action = {}) {
       return {
         ...state,
         showAddNewPlaylistForm: false
+      }
+    case 'HOME_ITEM_VIEW_MODE_CHANGED':
+      return {
+        ...state,
+        itemViewMode: action.payload.itemViewMode
+      }
+    case 'HOME_MULTI_SELECT_MODE_ENABLED':
+      return {
+        ...state,
+        multiSelectModeEnabled: true,
+        selectedSongs: state.selectedSongs.map(s => {
+          return {
+            ...s,
+            selected: action.payload.initialSongId === s.id
+          }
+        })
+      }
+    case 'HOME_MULTI_SELECT_MODE_DISABLED':
+      return {
+        ...state,
+        multiSelectModeEnabled: false,
+        selectedSongs: state.selectedSongs.map(s => {
+          return {
+            ...s,
+            selected: false
+          }
+        })
+      }
+    case 'HOME_SONG_SELECTED':
+      return {
+        ...state,
+        selectedSongs: state.selectedSongs.map(s => {
+          return {
+            ...s,
+            selected: action.payload.song.id === s.id ? !s.selected : s.selected
+          }
+        })
       }
     default:
       return state;

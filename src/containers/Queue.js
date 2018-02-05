@@ -62,19 +62,19 @@ const styles = EStyleSheet.create({
 class SorteableItem extends Component {
   render() {
     return (
-      <TouchableOpacity {...this.props.sortHandlers} delayPressIn={2000}>
-        <SongCard
-          styles={{ container: styles.item, text: styles.itemText }}
-          id={this.props.song.id}
-          name={this.props.song.title}
-          artist={this.props.song.artist}
-          duration={this.props.song.duration}
-          isFavorite={this.props.song.isFavorite}
-          onOptionPress={this.props.onOptionPress}
-          onPlayPress={this.props.onPlayPress}
-          onLikePress={this.props.onLikePress} />
-      </TouchableOpacity>
-    )
+      <SongCard
+        {...this.props.sortHandlers}
+        styles={{ container: styles.item, text: styles.itemText }}
+        id={this.props.song.id}
+        name={this.props.song.title}
+        artist={this.props.song.artist}
+        duration={this.props.song.duration}
+        isFavorite={this.props.song.isFavorite}
+        isPlaying={this.props.isPlaying}
+        onOptionPress={this.props.onOptionPress}
+        onPlayPress={this.props.onPlayPress}
+        onLikePress={this.props.onLikePress} />
+    );
   }
 }
 
@@ -167,6 +167,8 @@ class Queue extends Component {
   }
 
   _renderSong(song) {
+    let isPlaying = this.props.playing && this.props.currentSong.id === song.id;
+
     let targetMenu = {
       type: 'SONG',
       payload: song
@@ -176,6 +178,7 @@ class Queue extends Component {
       <SorteableItem
         song={song}
         targetMenu={targetMenu}
+        isPlaying={isPlaying}
         onOptionPress={() => this.props.setMenu(targetMenu)}
         onPlayPress={() => this._playSong(song)}
         onLikePress={() => this.props.like('song', song)} />
@@ -235,6 +238,7 @@ class Queue extends Component {
 
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
     queue: state.queue.queue,
     queueDelete: state.queue.queueDelete,
     deleteMode: state.queue.deleteMode,
@@ -244,7 +248,8 @@ const mapStateToProps = state => {
     showConfirmation: state.queue.showConfirmation,
     showMenu: state.app.showMenu,
     targetMenu: state.app.targetMenu,
-    dictionary: state.app.dictionary
+    playing: state.player.playing,
+    currentSong: state.player.currentSong
   }
 }
 

@@ -30,8 +30,12 @@ export default function artist(state = initialState, action = {}) {
       }
     case 'ARTIST_LOADING_SUCCESS':
       let albums = action.payload.artist ? action.payload.artist.albums : [];
+      albums = JSON.parse(JSON.stringify(albums));
+
       let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
-      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions);
+      songs = JSON.parse(JSON.stringify(songs));
+      
+      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions).slice(0, 5);
 
       return {
         ...state,
@@ -40,7 +44,7 @@ export default function artist(state = initialState, action = {}) {
         cover: action.payload.artist.cover,
         songs,
         albums,
-        topSongs: topSongs.slice(0, 5),
+        topSongs,
         isFavorite: action.payload.artist.isFavorite || false,
         isLoading: false,
         showFiveMore: topSongs.length > 5

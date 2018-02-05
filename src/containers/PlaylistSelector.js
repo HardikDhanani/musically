@@ -150,7 +150,6 @@ class PlaylistSelector extends Component {
         actionEnabled={this.props.selectedPlaylist !== null}>
         <FlatList
           style={styles.contentContainer}
-          initialNumToRender={8}
           data={this.props.playlists}
           renderItem={this._renderPlaylist}
           keyExtractor={(item, index) => index} />

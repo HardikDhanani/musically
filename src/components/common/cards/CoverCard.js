@@ -10,24 +10,22 @@ import Text from '../Text';
 import Cover from '../../Cover';
 
 const styles = EStyleSheet.create({
-  $containerWidth: '$appWidth / 2',
-  $cardWidth: '$containerWidth * 0.9',
   container: {
     margin: 7,
     marginTop: 16,
-    width: '$cardWidth',
+    width: '$coverCardWidth',
   },
   imageContainer: {
     elevation: 5,
     backgroundColor: 'white',
-    height: '$cardWidth',
-    width: '$cardWidth',
+    height: '$coverCardHeight',
+    width: '$coverCardWidth',
     justifyContent: 'center',
     alignItems: 'center'
   },
   image: {
-    height: '$cardWidth',
-    width: '$cardWidth'
+    height: '$coverCardHeight',
+    width: '$coverCardWidth'
   },
   title: {
     fontSize: '$bigTextFontSize',

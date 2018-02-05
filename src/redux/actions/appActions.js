@@ -4,6 +4,7 @@ import songsSelector from '../selectors/songs';
 import playlistsSelector from '../selectors/playlists';
 import * as playerActions from './playerActions';
 import * as playlistActions from './playlistActions';
+import * as homeActions from './homeActions';
 import dictionaries from '../../dictionaries/index';
 import { languageChanged } from './settingsActions';
 import playlist from '../reducers/playlist';
@@ -41,6 +42,8 @@ function _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session) {
 async function _load(dispatch) {
   let session = await LocalService.getSession();
 
+  homeActions.setItemViewMode(session.itemViewMode)(dispatch);
+
   LocalService.getPlaylists()
     .then(playlists => {
       _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session);
@@ -50,9 +53,8 @@ async function _load(dispatch) {
   let songs = await LocalService.getSongs();
   let albums = await LocalService.getAlbums();
   let artists = await LocalService.getArtists();
-  let genres = await LocalService.getGenres();
 
-  dispatch(startingSuccess(songs, artists, albums, genres, null, session));
+  dispatch(startingSuccess(songs, artists, albums, null, null, session));
 }
 
 function _groupAndSaveArtists(songs) {
@@ -79,7 +81,7 @@ function _groupAndSaveMusic(songs) {
     try {
       duration = parseInt(song.duration);
     } catch (error) {
-      
+
     }
 
     return {
@@ -253,11 +255,12 @@ const songUpdatedInPlaylist = (playlists) => {
   }
 }
 
-const languageChangedAction = (dictionary) => {
+const languageChangedAction = (dictionary, language) => {
   return {
     type: 'APP_LANGUAGE_CHANGED',
     payload: {
-      dictionary
+      dictionary,
+      language
     }
   }
 }
@@ -436,7 +439,9 @@ export function removeSongFromPlaylist(song, playlist) {
 export function updatePlaylists() {
   return dispatch => {
     LocalService.getPlaylists()
-      .then(playlists => dispatch(playlistsUpdated(playlists)));
+      .then(playlists => {
+        dispatch(playlistsUpdated(playlists));
+      });
   }
 }
 
@@ -449,7 +454,7 @@ export function setLanguage(language) {
       })
       .then(session => {
         _languageManager.setLanguage(language);
-        dispatch(languageChangedAction(_languageManager.currentDictionary));
+        dispatch(languageChangedAction(_languageManager.currentDictionary, _languageManager.currentDictionary.language));
       });
   }
 }

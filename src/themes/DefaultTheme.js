@@ -56,6 +56,9 @@ const theme = {
   $bodySecondaryBackgroundColor: '#4c4c4c',
 
   $cardBackgroundColor: 'white',
+  $coverCardHeight: (appWidth / 2) * 0.9,
+  $coverCardWidth: (appWidth / 2) * 0.9,
+  $rowCardHeight: getHeaderHeight() * 1.5,
 
   $modalFormWidth: appWidth * 0.65,
   $modalFormHeight: appHeight * 0.5,

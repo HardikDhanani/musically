@@ -8,7 +8,8 @@ import {
 const styles = EStyleSheet.create({
   container: {
     alignSelf: 'flex-start',
-    alignItems: 'flex-end'
+    alignItems: 'flex-end',
+    flexDirection: 'row'
   }
 });
 

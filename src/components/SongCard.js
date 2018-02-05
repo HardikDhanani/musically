@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import {
-  View
+  View,
+  TouchableWithoutFeedback
 } from 'react-native';
 import Text from './common/Text';
 import IconButton from './common/buttons/IconButton';
@@ -69,19 +70,21 @@ class SongCard extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <PlayPauseButtonWhite iconName={this.props.isPlaying ? 'pause' : 'play-arrow'} style={styles.playPauseButton} onPress={this.props.onPlayPress} />
-        <View style={styles.infoContainer}>
-          <View style={styles.songInformation}>
-            <Text numberOfLines={1} style={styles.title}>{this.props.name}</Text>
-            <Text numberOfLines={1} style={styles.detail}>{this.props.artist}</Text>
+      <TouchableWithoutFeedback onLongPress={this.props.onLongPress} onPressIn={this.props.onPressIn} onPressOut={this.props.onPressOut} delayLongPress={1200}>
+        <View style={styles.container}>
+          <PlayPauseButtonWhite iconName={this.props.isPlaying ? 'pause' : 'play-arrow'} style={styles.playPauseButton} onPress={this.props.onPlayPress} />
+          <View style={styles.infoContainer}>
+            <View style={styles.songInformation}>
+              <Text numberOfLines={1} style={styles.title}>{this.props.name}</Text>
+              <Text numberOfLines={1} style={styles.detail}>{this.props.artist}</Text>
+            </View>
           </View>
+          <View style={{ marginRight: 10 }}>
+            <IconButton iconName={'add'} onPress={this.props.onOptionPress} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
+          </View>
+          <IconButton iconName={'favorite'} onPress={this.props.onLikePress} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
         </View>
-        <View style={{marginRight: 10}}>
-          <IconButton iconName={'add'} onPress={this.props.onOptionPress} style={styles._plusButton} iconSize={styles._plusButton.fontSize} />
-        </View>
-        <IconButton iconName={'favorite'} onPress={this.props.onLikePress} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
-      </View>
+      </TouchableWithoutFeedback>
     );
   }
 }
@@ -92,10 +95,12 @@ SongCard.propTypes = {
   artist: PropTypes.string,
   isFavorite: PropTypes.bool,
   isPlaying: PropTypes.bool,
-  onPress: PropTypes.func,
   onOptionPress: PropTypes.func,
   onPlayPress: PropTypes.func,
-  onLikePress: PropTypes.func
+  onLikePress: PropTypes.func,
+  onLongPress: PropTypes.func,
+  onPressIn: PropTypes.func,
+  onPressOut: PropTypes.func
 };
 
 export default SongCard;

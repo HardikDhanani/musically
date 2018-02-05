@@ -80,6 +80,9 @@
   - [ ] Translate everything
   - [ ] Read songs in batches asynchronously
   - [ ] Songs that is actually playing should be identified everywhere
+  - [x] Can select a list of songs to play
+  - [ ] Can order songs by name, album or artist
+  - [x] Can list albums and artist with Cover cards or row cards
   
 ## Settings
 
@@ -88,13 +91,10 @@
 
 ## Bugs
 
- - [ ] 1. Start playing a song
-       Bug: Progress bar and elapsed time don't show correctly
-
  - [ ] Some images are throwing an exception in the native code
 
- - Los tracks parecen terminar antes de lo que deberian terminar
- - Escuchando con blueooth, al apagar el auticular, el sonido swiche a altavoz. Deberia pausar la reproduccion
+ - [ ] Escuchando con blueooth, al apagar el auticular, el sonido swiche a altavoz. Deberia pausar la
+       reproduccion
 
  - [ ] 0 songs in the queue, add one, start playing, add another one. The new song is added to the 
        beginning of the queue instead of at the end.

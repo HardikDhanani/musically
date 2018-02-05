@@ -10,7 +10,10 @@ import {
   TouchableOpacity,
   TouchableNativeFeedback,
   TextInput,
-  ScrollView
+  ScrollView,
+  Linking,
+  Image,
+  Platform
 } from 'react-native';
 import SettingsHeader from '../components/settings/SettingsHeader';
 import Section from '../components/settings/Section';
@@ -46,6 +49,12 @@ const styles = EStyleSheet.create({
   textInput: {
     fontSize: '$titleFontSize',
     color: '$textColor'
+  },
+  logo: {
+    borderRadius: 20,
+    height: 30,
+    width: 30,
+    marginRight: 10
   }
 });
 
@@ -55,9 +64,11 @@ class Settings extends Component {
 
     this._showSettingForm = this._showSettingForm.bind(this);
     this._renderLanguageSettingForm = this._renderLanguageSettingForm.bind(this);
+    this._navigateToDeveloperPage = this._navigateToDeveloperPage.bind(this);
+    this._rateThisApp = this._rateThisApp.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.props.load();
   }
 
@@ -75,7 +86,7 @@ class Settings extends Component {
                 <Text style={styles.sectionOptionText}>{this.props.dictionary.language}</Text>
               </RightColumn>
             </Option>
-            <Option style={styles.option}>
+            <Option>
               <LeftColumn>
                 <Text style={styles.sectionOptionText}>{this.props.dictionary.getWord('settings_lookAndFeel_theme')}</Text>
               </LeftColumn>
@@ -85,46 +96,47 @@ class Settings extends Component {
             </Option>
           </Section>
           <Section title={'Default Playlists'}>
-            <Option onPress={() => this.props.navigation.navigate('MostPlayedSettings')} style={styles.option}>
+            <Option onPress={() => this.props.navigation.navigate('MostPlayedSettings')}>
               <LeftColumn>
                 <Text style={styles.sectionOptionText}>{this.props.dictionary.getWord('mostPlayed')}</Text>
               </LeftColumn>
               <RightColumn>
-                <Text style={styles.sectionOptionEdit}>Edit</Text>
+                <Text style={styles.sectionOptionEdit}>{this.props.dictionary.getWord('edit')}</Text>
               </RightColumn>
             </Option>
-            <Option onPress={() => this.props.navigation.navigate('RecentlyPlayedSettings')} style={styles.option}>
+            <Option onPress={() => this.props.navigation.navigate('RecentlyPlayedSettings')} >
               <LeftColumn>
                 <Text style={styles.sectionOptionText}>{this.props.dictionary.getWord('recentlyPlayed')}</Text>
               </LeftColumn>
               <RightColumn>
-                <Text style={styles.sectionOptionEdit}>Edit</Text>
+                <Text style={styles.sectionOptionEdit}>{this.props.dictionary.getWord('edit')}</Text>
               </RightColumn>
             </Option>
           </Section>
           <Section title={this.props.dictionary.getWord('settings_sectionTitle_about')}>
-            <Option style={styles.option}>
+            <Option>
               <LeftColumn>
                 <Text style={styles.sectionOptionText}>{this.props.dictionary.getWord('settings_about_version')}</Text>
               </LeftColumn>
               <RightColumn>
-                <Text style={styles.sectionOptionDescription}>Musically 0.0.1</Text>
+                <Text style={styles.sectionOptionDescription}>{'Musically ' + this.props.version}</Text>
               </RightColumn>
             </Option>
-            <Option style={styles.option}>
+            <Option onPress={() => this._navigateToDeveloperPage()}>
               <LeftColumn>
                 <Text style={styles.sectionOptionText}>{this.props.dictionary.getWord('settings_about_developer')}</Text>
               </LeftColumn>
               <RightColumn>
-                <Text style={styles.sectionOptionDescription}>©2017 (t-3)</Text>
+                <Image style={styles.logo} source={require('../images/(t-3).png')} />
+                <Text style={styles.sectionOptionDescription}>©2017</Text>
               </RightColumn>
             </Option>
-            <Option style={styles.option}>
+            <Option>
               <LeftColumn>
                 <Text style={styles.sectionOptionEdit}>{this.props.dictionary.getWord('settings_about_sendFeedback')}</Text>
               </LeftColumn>
             </Option>
-            <Option style={styles.option}>
+            <Option onPress={() => this._rateThisApp()}>
               <LeftColumn>
                 <Text style={styles.sectionOptionEdit}>{this.props.dictionary.getWord('settings_about_rateApp')}</Text>
               </LeftColumn>
@@ -163,19 +175,40 @@ class Settings extends Component {
         title={this.props.dictionary.getWord('settings_lookAndFeel_select_languague')}
         onCancelPress={() => this.props.cancelShowSetSetting()}
         onConfirmPress={() => this.props.languageChanged(language)}
-        actionText={'SAVE'}>
+        actionText={this.props.dictionary.getWord('save')}>
         <LanguageSelector selectedOption={this.props.dictionary.id} items={items} onOptionChanged={optionSelected => language = optionSelected} />
       </ConfirmationForm>
     );
+  }
+
+  _navigateToDeveloperPage() {
+    Linking.canOpenURL('http://www.tmenos3.com').then(supported => {
+      if (supported) {
+        Linking.openURL('http://www.tmenos3.com');
+      } else {
+        console.log('Do not know how to open URI: http://www.tmenos3.com');
+      }
+    });
+  }
+
+  _rateThisApp() {
+    if (Platform.OS === 'ios') {
+      Linking.openURL(`itms://itunes.apple.com/us/app/apple-store/${this.props.iosAppId}?mt=8`);
+    } else {
+      Linking.openURL(`market://details?id=${this.props.androidAppId}`);
+    }
   }
 }
 
 const mapStateToProps = state => {
   return {
+    dictionary: state.app.dictionary,
+    iosAppId: state.app.iosAppId,
+    androidAppId: state.app.androidAppId,
+    version: state.app.version,
     settings: state.settings.settings,
     showSettingForm: state.settings.showSettingForm,
     showSetting: state.settings.showSetting,
-    dictionary: state.app.dictionary,
   }
 }
 
@@ -186,6 +219,20 @@ const mapDispatchToProps = dispatch => {
     cancelShowSetSetting: () => dispatch(settingsActions.cancelShowSetSetting()),
     languageChanged: (language) => settingsActions.languageChanged(language)(dispatch)
   }
+}
+
+Settings.propTypes = {
+  dictionary: PropTypes.object.isRequired,
+  iosAppId: PropTypes.string.isRequired,
+  androidAppId: PropTypes.string.isRequired,
+  version: PropTypes.string.isRequired,
+  settings: PropTypes.object.isRequired,
+  showSettingForm: PropTypes.bool.isRequired,
+  showSetting: PropTypes.bool.isRequired,
+  load: PropTypes.func.isRequired,
+  showSetSetting: PropTypes.func.isRequired,
+  cancelShowSetSetting: PropTypes.func.isRequired,
+  languageChanged: PropTypes.func.isRequired
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

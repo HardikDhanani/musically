@@ -15,6 +15,7 @@ import AddPlaylistButton from '../components/common/buttons/AddPlaylistButton';
 import ConfirmationForm from '../components/ConfirmationForm';
 import NewPlaylist from '../components/NewPlaylist';
 import FourCoverCard from '../components/common/cards/FourCoverCard';
+import RowCoverCard from '../components/common/cards/RowCoverCard';
 import CoverCard from '../components/common/cards/CoverCard';
 import BodyActivityIndicator from '../components/common/BodyActivityIndicator';
 
@@ -25,13 +26,42 @@ const styles = EStyleSheet.create({
   }
 });
 
+const FETCH_NUMBER = 40;
+
 class HomePlaylists extends Component {
   constructor(props) {
     super(props);
 
-    this._renderPlaylist = this._renderPlaylist.bind(this);
+    this.state = {
+      playlists: [],
+      lastPosition: 0
+    }
+
     this._showNewPlaylistForm = this._showNewPlaylistForm.bind(this);
     this._getPlaylistName = this._getPlaylistName.bind(this);
+    this._handleOnEndReached = this._handleOnEndReached.bind(this);
+    this._renderPlaylist = this._renderPlaylist.bind(this);
+    this._renderRowPlaylist = this._renderRowPlaylist.bind(this);
+    this._renderCardPlaylist = this._renderCardPlaylist.bind(this);
+  }
+
+  // componentWillReceiveProps(nextProps) {
+  //   if (nextProps.playlists && this.state.lastPosition === 0) {
+  //     this.setState({
+  //       playlists: nextProps.playlists.slice(0, FETCH_NUMBER),
+  //       lastPosition: FETCH_NUMBER
+  //     });
+  //   }
+  // }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.itemViewMode !== this.props.itemViewMode
+      || nextProps.playlists !== this.props.playlists
+      || nextProps.language !== this.props.language
+      || nextProps.isReady !== this.props.isReady
+      || nextProps.selectedSection !== this.props.selectedSection
+      || nextProps.showNewPlaylistForm !== this.props.showNewPlaylistForm
+      || nextState.lastPosition !== this.state.lastPosition;
   }
 
   render() {
@@ -42,12 +72,15 @@ class HomePlaylists extends Component {
             !this.props.isReady ?
               <BodyActivityIndicator /> :
               <FlatList
-                data={this.props.playlists}
-                renderItem={this._renderPlaylist}
-                keyExtractor={(item, index) => item.id}
-                initialNumToRender={8}
+                data={this.state.playlists}
+                showsVerticalScrollIndicator={false}
+                onEndReached={this._handleOnEndReached}
+                onEndReachedThreshold={0.5}
+                renderItem={({ item }) => this._renderPlaylist(item)}
+                keyExtractor={(item, index) => 'column_' + item.id}
                 style={{ flexDirection: 'column' }}
-                numColumns={2} />
+                numColumns={this.props.itemViewMode === 'row' ? 1 : 2}
+                key={this.props.itemViewMode} />
           }
         </Body>
         {
@@ -60,16 +93,38 @@ class HomePlaylists extends Component {
     );
   }
 
-  _renderPlaylist({ item }) {
-    let onPress = () => this.props.navigation.navigate('Playlist', { playlistId: item.id });
-    let name = this._getPlaylistName(item.name);
-    let detail = item.songs.length + ' ' + this.props.dictionary.getWord('songs');
-    let source = require('../images/music.png');
+  _renderPlaylist(playlist) {
+    if (this.props.itemViewMode === 'row') {
+      return this._renderRowPlaylist(playlist);
+    } else {
+      return this._renderCardPlaylist(playlist);
+    }
+  }
 
-    if (item.songs.length > 1) {
+  _renderRowPlaylist(playlist) {
+    let name = this._getPlaylistName(playlist.name);
+    let detail = playlist.songs.length + ' ' + this.props.dictionary.getWord('songs');
+
+    return (
+      <RowCoverCard
+        showFavoriteButton={false}
+        title={name}
+        detail={detail}
+        cover={this._getDefaultCover(playlist.songs)}
+        onPress={() => this.props.navigation.navigate('Playlist', { playlistId: playlist.id })} />
+    );
+  }
+
+  _renderCardPlaylist(playlist) {
+    let onPress = () => this.props.navigation.navigate('Playlist', { playlistId: playlist.id });
+    let name = this._getPlaylistName(playlist.name);
+    let detail = playlist.songs.length + ' ' + this.props.dictionary.getWord('songs');
+    let source = require('../images/default-cover.png');
+
+    if (playlist.songs.length > 1) {
       return (
         <FourCoverCard
-          items={this._getCovers(item.songs)}
+          items={this._getCovers(playlist.songs)}
           defaultSource={source}
           title={name}
           detail={detail}
@@ -81,10 +136,20 @@ class HomePlaylists extends Component {
       <CoverCard
         onPress={onPress}
         source={source}
-        imageUri={item.songs[0] ? item.songs[0].cover : null}
+        imageUri={this._getDefaultCover(playlist.songs)}
         title={name}
         detail={detail} />
     )
+  }
+
+  _getDefaultCover(songs) {
+    for (let i = 0; i < songs.length; i++) {
+      if (songs[i].cover) {
+        return songs[i].cover;
+      }
+    }
+
+    return null;
   }
 
   _showNewPlaylistForm() {
@@ -142,15 +207,27 @@ class HomePlaylists extends Component {
         return name;
     }
   }
+
+  _handleOnEndReached(info) {
+    if (this.state.playlists.length < this.props.playlists.length) {
+      let playlists = this.state.playlists.concat(this.props.playlists.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
+      this.setState({
+        playlists,
+        lastPosition: this.state.lastPosition + FETCH_NUMBER
+      });
+    }
+  }
 }
 
 const mapStateToProps = state => {
   return {
+    language: state.app.language,
     isReady: state.app.homePlaylistsReady,
     playlists: state.app.playlists,
     dictionary: state.app.dictionary,
     selectedSection: state.home.selectedSection,
     showNewPlaylistForm: state.home.showNewPlaylistForm,
+    itemViewMode: state.home.itemViewMode
   }
 }
 
@@ -163,15 +240,17 @@ const mapDispatchToProps = dispatch => {
 }
 
 HomePlaylists.propTypes = {
-  isReady: PropTypes.bool,
+  navigation: PropTypes.object.isRequired,
+  dictionary: PropTypes.object.isRequired,
+  isReady: PropTypes.bool.isRequired,
   playlists: PropTypes.array.isRequired,
-  navigation: PropTypes.any.isRequired,
-  dictionary: PropTypes.any.isRequired,
-  selectedSection: PropTypes.string,
-  showNewPlaylistForm: PropTypes.bool,
-  createNewPlaylistForm: PropTypes.func,
-  closeNewPlaylistForm: PropTypes.func,
-  newPlaylistConfirmed: PropTypes.func,
+  selectedSection: PropTypes.string.isRequired,
+  showNewPlaylistForm: PropTypes.bool.isRequired,
+  language: PropTypes.string.isRequired,
+  itemViewMode: PropTypes.string.isRequired,
+  createNewPlaylistForm: PropTypes.func.isRequired,
+  closeNewPlaylistForm: PropTypes.func.isRequired,
+  newPlaylistConfirmed: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePlaylists);

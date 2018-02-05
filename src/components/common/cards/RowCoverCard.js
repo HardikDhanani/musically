@@ -52,6 +52,7 @@ const styles = EStyleSheet.create({
 
 class RowCoverCard extends PureComponent {
   render() {
+    let showFavoriteButton
     return (
       <RowCard onPress={this.props.onPress}>
         <View style={styles.coverContainer}>
@@ -67,7 +68,11 @@ class RowCoverCard extends PureComponent {
             }
           </View>
         </View>
-        <IconButton iconName={'favorite'} onPress={this.props.onLikePress} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} />
+        {
+          this.props.showFavoriteButton !== false ?
+            <IconButton iconName={'favorite'} onPress={this.props.onLikePress} style={this.props.isFavorite ? styles._buttonEnabled : styles._buttonDisabled} iconSize={styles._buttonEnabled.fontSize} /> :
+            null
+        }
       </RowCard>
     );
   }

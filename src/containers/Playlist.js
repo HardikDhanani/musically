@@ -381,14 +381,13 @@ class Playlist extends Component {
           data={songs}
           renderItem={this._renderSong}
           keyExtractor={(item, index) => index}
-          initialNumToRender={10}
           style={styles.listContainer} />
       </View>
     );
   }
 
   _renderSong(song) {
-    let isPlaying = this.props.isPlaying && this.props.playingSong.id === song.item.id;
+    let isPlaying = this.props.playing && this.props.currentSong.id === song.item.id;
 
     return (
       <SongCard
@@ -469,7 +468,7 @@ class Playlist extends Component {
   }
 
   _getCovers(items) {
-    let defaultSource = require('../images/music.png');
+    let defaultSource = require('../images/default-cover.png');
     let ret = [];
     for (let i = 0; i < items.length; i++) {
       if (items[i].cover) {
@@ -518,7 +517,7 @@ class Playlist extends Component {
   }
 
   _shufflePlay() {
-    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, random: true });
+    this.props.navigation.navigate('Player', { queue: this.props.songs, startPlaying: true, shuffle: true });
   }
 
   _addToQueue(songs) {
@@ -542,7 +541,6 @@ const mapStateToProps = state => {
     dictionary: state.app.dictionary,
     playlist: state.playlist.playlist,
     name: state.playlist.name,
-    cover: state.playlist.cover,
     songs: state.playlist.songs,
     topSongs: state.playlist.topSongs,
     showFiveMore: state.playlist.showFiveMore,
@@ -552,7 +550,9 @@ const mapStateToProps = state => {
     showDeletePlaylistConfirmationForm: state.playlist.showDeletePlaylistConfirmationForm,
     showDeletePlaylistSuccessConfirmation: state.playlist.showDeletePlaylistSuccessConfirmation,
     closeForm: state.playlist.closeForm,
-    deletingPlaylist: state.playlist.deletingPlaylist
+    deletingPlaylist: state.playlist.deletingPlaylist,
+    playing: state.player.playing,
+    currentSong: state.player.currentSong
   }
 }
 

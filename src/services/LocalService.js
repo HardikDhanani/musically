@@ -203,10 +203,11 @@ class LocalService {
             currentSong: null,
             currentIndex: -1,
             queue: [],
-            language: null,
+            language: 'english',
             mostPlayedLength: 0,
             recentlyPlayedLength: 0,
-            mostPlayedReproductions: 0
+            mostPlayedReproductions: 0,
+            itemViewMode: 'card'
           };
 
         default:

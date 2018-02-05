@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Swiper from 'react-native-swiper';
@@ -41,11 +42,18 @@ class Home extends Component {
     this._changeSection = this._changeSection.bind(this);
     this._renderPagination = this._renderPagination.bind(this);
     this._onIndexChanged = this._onIndexChanged.bind(this);
+    this._disableMultiSelectMode = this._disableMultiSelectMode.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedSection !== this.props.selectedSection)
       this._changeSection(this._getSectionIndex(nextProps.selectedSection));
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.itemViewMode !== this.props.itemViewMode
+      || nextProps.selectedSection !== this.props.selectedSection
+      || nextProps.language !== this.props.language;
   }
 
   render() {
@@ -54,9 +62,10 @@ class Home extends Component {
         <Container fillStatusBar={false}>
           <HomeHeader
             title={this.props.dictionary.getWord('my_music')}
-            onMenuPress={() => this._drawer.open()}
-            onMorePress={() => this.props.setMenu({ type: 'MENU' })}
-            onSearchPress={() => this.props.navigation.navigate('Search', {})} />
+            itemViewMode={this.props.itemViewMode}
+            onMenuPress={() => this._disableMultiSelectMode(() => this._drawer.open())}
+            onSearchPress={() => this._disableMultiSelectMode(() => this.props.navigation.navigate('Search', {}))}
+            onChangeItemViewPress={() => this._disableMultiSelectMode(() => this.props.changeItemViewMode())} />
           <Swiper
             showsPagination={true}
             loop={false}
@@ -143,20 +152,40 @@ class Home extends Component {
   _onIndexChanged(index) {
     var text = this._getSectionTextId(index).toLowerCase();
     this.props.selectedSectionChanged(text);
+    this.props.disableMultiSelectMode();
+  }
+
+  _disableMultiSelectMode(callback) {
+    this.props.disableMultiSelectMode();
+    callback();
   }
 }
 
 const mapStateToProps = state => {
   return {
     dictionary: state.app.dictionary,
+    language: state.app.language,
     selectedSection: state.home.selectedSection,
+    itemViewMode: state.home.itemViewMode
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    selectedSectionChanged: (section) => homeActions.selectedSectionChanged(section)(dispatch)
+    selectedSectionChanged: (section) => homeActions.selectedSectionChanged(section)(dispatch),
+    changeItemViewMode: (secton) => homeActions.changeItemViewMode()(dispatch),
+    disableMultiSelectMode: () => dispatch(homeActions.disableMultiSelectMode()),
   }
 }
+
+Home.propTypes = {
+  navigation: PropTypes.object.isRequired,
+  dictionary: PropTypes.object.isRequired,
+  language: PropTypes.string.isRequired,
+  selectedSection: PropTypes.string.isRequired,
+  itemViewMode: PropTypes.string.isRequired,
+  selectedSectionChanged: PropTypes.func.isRequired,
+  changeItemViewMode: PropTypes.func.isRequired
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

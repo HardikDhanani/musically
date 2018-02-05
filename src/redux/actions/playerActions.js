@@ -73,20 +73,21 @@ const songChangedAction = (currentSong, currentIndex) => {
   }
 }
 
-const addToQueueAction = (queue) => {
+const addToQueueAction = (queue, currentIndex) => {
   return {
     type: 'PLAYER_ADD_TO_QUEUE',
     payload: {
-      queue
+      queue,
+      currentIndex
     }
   }
 }
 
-const randomAction = (randomValue) => {
+const shuffleAction = (shuffle) => {
   return {
     type: 'PLAYER_RAMDOM',
     payload: {
-      random: randomValue
+      shuffle
     }
   }
 }
@@ -152,16 +153,17 @@ const _updateMostPlayedPlaylist = (song, dispatch) => {
       let playlist = results[0];
       let session = results[1];
 
-      if (session.mostPlayedReproductions === 0 || session.mostPlayedReproductions > song.reproductions) {
-        return;
-      }
-
       let index = playlist.songs.findIndex(s => s.id === song.id);
       if (index !== -1) {
-        appActions.updateSongInPlaylist(song, playlist)(dispatch);
+        playlist.songs[index] = song;
       } else {
-        appActions.addSongToPlaylist(song, playlist)(dispatch);
+        playlist.songs.push(song);
       }
+
+      return LocalService.savePlaylist(playlist);
+    })
+    .then(() => {
+      appActions.updatePlaylists()(dispatch);
     });
 }
 
@@ -173,11 +175,13 @@ const _updateRecentPlayedPlaylist = (song, dispatch) => {
         playlist.songs.splice(index, 1);
       }
 
-      playlist.songs = [song].concat(playlist.songs).slice(0, 20);
+      playlist.songs = [song].concat(playlist.songs)
 
       return LocalService.savePlaylist(playlist)
     })
-    .then(() => appActions.updatePlaylists()(dispatch));
+    .then(() => {
+      appActions.updatePlaylists()(dispatch);
+    });
 }
 
 const _trackChanged = (song, position, dispatch) => {
@@ -223,7 +227,7 @@ export const progressChanged = (newElapsed) => {
 }
 
 /* Public Functions Actions */
-export const load = (queue, startPlaying) => {
+export const load = (queue, startPlaying, shuffle) => {
   return dispatch => {
     dispatch(loading())
 
@@ -250,6 +254,14 @@ export const load = (queue, startPlaying) => {
               } else {
                 return Promise.resolve();
               }
+            })
+            .then(() => {
+              if (shuffle && !_musicPlayerService.random) {
+                _musicPlayerService.toggleRandom();
+              }
+
+              dispatch(shuffleAction(_musicPlayerService.random))
+              return Promise.resolve();
             });
         } else {
           currentQueue = session.queue;
@@ -276,18 +288,16 @@ export const addToQueue = (queue) => {
         newSession = session;
         let tracks = queue.map(_mapTrack);
 
-        // if (_musicPlayerService.queue.length > 0) {
         return _musicPlayerService.appendToQueue(tracks, _musicPlayerService.currentIndex + 1);
-        // } else {
-        //   return _musicPlayerService.setQueue(tracks);
-        // }
       })
       .then(returnedQueue => {
         newSession.queue = returnedQueue.map(t => t.additionalInfo);
+        newSession.currentIndex = _musicPlayerService.currentIndex;
+        newSession.currentSong = newSession.queue[newSession.currentIndex];
         return LocalService.saveSession(newSession);
       })
       .then(() => {
-        dispatch(addToQueueAction(newSession.queue));
+        dispatch(addToQueueAction(newSession.queue, newSession.currentIndex));
       })
       .catch(error => {
         console.log(error);
@@ -381,10 +391,10 @@ export const initPlayer = () => {
   }
 }
 
-export const random = () => {
+export const shuffle = () => {
   return dispatch => {
     let isRandom = _musicPlayerService.toggleRandom();
-    dispatch(randomAction(isRandom));
+    dispatch(shuffleAction(isRandom));
   }
 }
 
