@@ -16,7 +16,7 @@ const initialState = {
   playlists: [],
   showMenu: false,
   targetMenu: null,
-  language: 'english',
+  language: null,
   iosAppId: 'iosAppId',
   androidAppId: 'androidAppId',
   version: '0.0.1',
@@ -27,7 +27,8 @@ export default function app(state = initialState, action = {}) {
     case 'APP_INITIALIZED':
       return {
         ...state,
-        dictionary: action.payload.dictionary
+        dictionary: action.payload.dictionary,
+        language: action.payload.language
       }
     case 'APP_LANGUAGE_CHANGED':
       return {
@@ -73,8 +74,6 @@ export default function app(state = initialState, action = {}) {
     case 'APP_PLAYLIST_DELETED':
     case 'APP_PLAYLISTS_UPDATED':
     case 'SETTINGS_RESET_MOST_PLAYED_SUCCESS':
-    case 'SETTINGS_RESET_RECENTLY_PLAYED_SUCCESS':
-    case 'SETTINGS_SET_RECENTLY_PLAYED_LENGTH_SUCCESS':
     case 'SETTINGS_SET_MOST_PLAYED_LENGTH_SUCCESS':
     case 'PLAYLIST_UPDATED':
       return {

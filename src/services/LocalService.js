@@ -3,9 +3,9 @@ import Storage from 'react-native-storage';
 
 import Cache from './Cache';
 
-const FAVORITES_PLAYLIST_NAME = 'favorites';
-const RECENTLY_PLAYED_PLAYLIST_NAME = 'recently played';
-const MOST_PLAYED_PLAYLIST_NAME = 'most played';
+// const FAVORITES_PLAYLIST_NAME = 'favorites';
+// const RECENTLY_PLAYED_PLAYLIST_NAME = 'recently played';
+// const MOST_PLAYED_PLAYLIST_NAME = 'most played';
 
 class LocalService {
   constructor() {
@@ -16,12 +16,10 @@ class LocalService {
     this.saveSongs = this.saveSongs.bind(this);
     this.saveArtists = this.saveArtists.bind(this);
     this.saveAlbums = this.saveAlbums.bind(this);
-    this.saveGenres = this.saveGenres.bind(this);
     this.savePlaylists = this.savePlaylists.bind(this);
     this.getSongs = this.getSongs.bind(this);
     this.getArtists = this.getArtists.bind(this);
     this.getAlbums = this.getAlbums.bind(this);
-    this.getGenres = this.getGenres.bind(this);
     this.getPlaylists = this.getPlaylists.bind(this);
     this.getSession = this.getSession.bind(this);
     this.isFirstTime = this.isFirstTime.bind(this);
@@ -105,15 +103,6 @@ class LocalService {
       .then(() => this._cache.save('ALBUMS', albums));
   }
 
-  saveGenres(genres) {
-    return this._getStorage().save({
-      key: 'GENRES',
-      data: genres,
-      expires: null
-    })
-      .then(() => this._cache.save('GENRES', genres));
-  }
-
   savePlaylists(playlists) {
     return this._getStorage().save({
       key: 'PLAYLISTS',
@@ -121,6 +110,24 @@ class LocalService {
       expires: null
     })
       .then(() => this._cache.save('PLAYLISTS', playlists));
+  }
+
+  saveMostPlayed(mostPlayed) {
+    return this._getStorage().save({
+      key: 'MOSTPLAYED',
+      data: mostPlayed,
+      expires: null
+    })
+      .then(() => this._cache.save('MOSTPLAYED', mostPlayed));
+  }
+
+  saveRecentlyPlayed(recentlyPlayed) {
+    return this._getStorage().save({
+      key: 'RECENTLYPLAYED',
+      data: recentlyPlayed,
+      expires: null
+    })
+      .then(() => this._cache.save('RECENTLYPLAYED', recentlyPlayed));
   }
 
   saveSong(song) {
@@ -147,15 +154,6 @@ class LocalService {
         let index = artists.findIndex(a => a.id === artist.id);
         artists[index] = artist;
         return this.saveArtists(artists);
-      });
-  }
-
-  saveGenre(genre) {
-    return this.getGenres()
-      .then(genres => {
-        let index = genres.findIndex(g => g.id === genre.id);
-        genres[index] = genre;
-        return this.saveGenres(genres);
       });
   }
 
@@ -276,15 +274,15 @@ class LocalService {
     });
   }
 
-  getGenres() {
-    if (this._cache.exists('GENRES'))
-      return Promise.resolve(this._cache.get('GENRES'));
+  getPlaylists() {
+    if (this._cache.exists('PLAYLISTS'))
+      return Promise.resolve(this._cache.get('PLAYLISTS'));
 
     return this._getStorage().load({
-      key: 'GENRES'
-    }).then(genres => {
-      this._cache.save('GENRES', genres);
-      return genres;
+      key: 'PLAYLISTS'
+    }).then(playlists => {
+      this._cache.save('PLAYLISTS', playlists);
+      return playlists;
     }).catch(err => {
       switch (err.name) {
         case 'NotFoundError':
@@ -296,15 +294,35 @@ class LocalService {
     });
   }
 
-  getPlaylists() {
-    if (this._cache.exists('PLAYLISTS'))
-      return Promise.resolve(this._cache.get('PLAYLISTS'));
+  getMostPlayed() {
+    if (this._cache.exists('MOSTPLAYED'))
+      return Promise.resolve(this._cache.get('MOSTPLAYED'));
 
     return this._getStorage().load({
-      key: 'PLAYLISTS'
-    }).then(playlists => {
-      this._cache.save('PLAYLISTS', playlists);
-      return playlists;
+      key: 'MOSTPLAYED'
+    }).then(mostPlayed => {
+      this._cache.save('MOSTPLAYED', mostPlayed);
+      return mostPlayed;
+    }).catch(err => {
+      switch (err.name) {
+        case 'NotFoundError':
+          return [];
+
+        default:
+          throw new Exception(err);
+      }
+    });
+  }
+
+  getRecentlyPlayed() {
+    if (this._cache.exists('RECENTLYPLAYED'))
+      return Promise.resolve(this._cache.get('RECENTLYPLAYED'));
+
+    return this._getStorage().load({
+      key: 'RECENTLYPLAYED'
+    }).then(recentlyPlayed => {
+      this._cache.save('RECENTLYPLAYED', recentlyPlayed);
+      return recentlyPlayed;
     }).catch(err => {
       switch (err.name) {
         case 'NotFoundError':
@@ -343,16 +361,12 @@ class LocalService {
     let artistsPromise = this.getArtists()
       .then(artists => artists.filter(a => a.isFavorite));
 
-    let genresPromise = this.getGenres()
-      .then(genres => genres.filter(g => g.isFavorite));
-
-    return Promise.all([songsPromise, artistsPromise, albumsPromise, genresPromise])
+    return Promise.all([songsPromise, artistsPromise, albumsPromise])
       .then(result => {
         return {
           songs: result[0],
           artists: result[1],
-          albums: result[2],
-          genres: result[3],
+          albums: result[2]
         }
       });
   }

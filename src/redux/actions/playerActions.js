@@ -2,6 +2,8 @@ import LocalService from '../../services/LocalService';
 import MusicPlayerService, { Events, RepeatModes, Track } from 'react-native-music-player-service';
 
 import * as appActions from './appActions';
+import * as mostPlayedActions from './mostPlayedActions';
+import * as recentlyPlayedActions from './recentlyPlayedActions';
 
 let _musicPlayerService = new MusicPlayerService(true, { color: 0x2E2E2E });
 let timer = null;
@@ -144,43 +146,54 @@ const _updateSong = (song, dispatch) => {
     });
 }
 
-const _updateMostPlayedPlaylist = (song, dispatch) => {
-  let playlistPromise = LocalService.getPlaylistByName('Most played');
-  let sessionPromise = LocalService.getSession();
+const _updateQueue = (song, dispatch) => {
+  LocalService.getSession()
+    .then(session => {
 
-  Promise.all([playlistPromise, sessionPromise])
-    .then(results => {
-      let playlist = results[0];
-      let session = results[1];
-
-      let index = playlist.songs.findIndex(s => s.id === song.id);
+      let index = session.queue.findIndex(s => s.id === song.id);
       if (index !== -1) {
-        playlist.songs[index] = song;
-      } else {
-        playlist.songs.push(song);
+        session.queue[index] = song;
       }
 
-      return LocalService.savePlaylist(playlist);
+      return LocalService.saveSession(session);
+    })
+    .then(session => {
+      dispatch(queueUpdated(session.queue, session.queue[session.currentIndex], session.currentIndex));
+    });
+}
+
+const _updateMostPlayedPlaylist = (song, dispatch) => {
+  LocalService.getMostPlayed()
+    .then(mostPlayed => {
+
+      let index = mostPlayed.findIndex(s => s.id === song.id);
+      if (index !== -1) {
+        mostPlayed[index] = song;
+      } else {
+        mostPlayed.push(song);
+      }
+
+      return LocalService.saveMostPlayed(mostPlayed);
     })
     .then(() => {
-      appActions.updatePlaylists()(dispatch);
+      mostPlayedActions.update()(dispatch);
     });
 }
 
 const _updateRecentPlayedPlaylist = (song, dispatch) => {
-  return LocalService.getPlaylistByName('Recently played')
-    .then(playlist => {
-      let index = playlist.songs.findIndex(s => s.id === song.id);
+  return LocalService.getRecentlyPlayed()
+    .then(recentlyPlayed => {
+      let index = recentlyPlayed.findIndex(s => s.id === song.id);
       if (index !== -1) {
-        playlist.songs.splice(index, 1);
+        recentlyPlayed.splice(index, 1);
       }
 
-      playlist.songs = [song].concat(playlist.songs)
+      recentlyPlayed = [song].concat(recentlyPlayed)
 
-      return LocalService.savePlaylist(playlist)
+      return LocalService.saveRecentlyPlayed(recentlyPlayed)
     })
     .then(() => {
-      appActions.updatePlaylists()(dispatch);
+      recentlyPlayedActions.update()(dispatch);
     });
 }
 
@@ -210,6 +223,7 @@ const _udpdateStatistics = (song, dispatch) => {
   song.reproductions += 1;
 
   _updateSong(song, dispatch);
+  _updateQueue(song, dispatch);
   _updateMostPlayedPlaylist(song, dispatch);
   _updateRecentPlayedPlaylist(song, dispatch);
 

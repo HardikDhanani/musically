@@ -5,13 +5,14 @@ import app from './app';
 import search from './search';
 import artist from './artist';
 import album from './album';
-import genre from './genre';
 import player from './player';
 import queue from './queue';
 import favorites from './favorites';
 import playlist from './playlist';
 import settings from './settings';
 import playlistSelector from './playlistSelector';
+import mostPlayed from './mostPlayed';
+import recentlyPlayed from './recentlyPlayed';
 
 const reducer = combineReducers({
   app,
@@ -19,13 +20,14 @@ const reducer = combineReducers({
   search,
   artist,
   album,
-  genre,
   player,
   queue,
   favorites,
   playlist,
   settings,
-  playlistSelector
+  playlistSelector,
+  mostPlayed,
+  recentlyPlayed
 });
 
 export default reducer;

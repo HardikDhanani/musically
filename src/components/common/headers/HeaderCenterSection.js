@@ -7,11 +7,9 @@ import {
 
 const styles = EStyleSheet.create({
   container: {
-    flex: 1,
+    flex: 3,
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center'
+    alignContent: 'center'
   }
 });
 

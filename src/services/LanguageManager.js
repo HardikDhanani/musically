@@ -6,7 +6,7 @@ class Dictionary {
   }
 
   getWord(word) {
-    return this.words[word];
+    return this.words[word] || '';
   }
 }
 

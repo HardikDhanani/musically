@@ -10,7 +10,7 @@ import {
   View,
   FlatList
 } from 'react-native';
-import Container from '../components/Container';
+import Container from '../components/common/containers/Container';
 import Text from '../components/common/Text';
 import ModalForm from '../components/common/forms/ModalForm';
 import ModalFormWithActionContainer from '../components/common/containers/ModalFormWithActionContainer';

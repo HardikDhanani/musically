@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   View
 } from 'react-native';
-import Touchable from '../common/buttons/Touchable';
+import Touchable from './Touchable';
 
 const styles = EStyleSheet.create({
   deleteButton: {

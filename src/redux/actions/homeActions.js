@@ -1,6 +1,5 @@
 import LocalService from '../../services/LocalService';
 import * as appActions from './appActions';
-import { exports } from 'react-native';
 
 let itemViewMode = null;
 

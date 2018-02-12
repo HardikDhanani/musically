@@ -72,7 +72,7 @@ class HomeAlbums extends Component {
               renderItem={({ item }) => this._renderAlbum(item)}
               keyExtractor={(item, index) => index}
               getItemLayout={(data, index) => ({ length: itemHeight, offset: itemHeight * index, index })}
-              style={{ flexDirection: 'column' }}
+              style={{ flexDirection: 'column', alignSelf: 'flex-start' }}
               numColumns={this.props.itemViewMode === 'row' ? 1 : 2}
               key={this.props.itemViewMode} />
         }

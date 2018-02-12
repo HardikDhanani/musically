@@ -9,7 +9,7 @@ import {
   View
 } from 'react-native';
 import RowCoverCard from '../components/common/cards/RowCoverCard';
-import Container from '../components/Container';
+import Container from '../components/common/containers/Container';
 import FavoritesHeader from '../components/favorites/FavoritesHeader';
 import Body from '../components/Body';
 import SongCard from '../components/SongCard';

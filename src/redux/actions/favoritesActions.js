@@ -41,11 +41,9 @@ const _saveSongAndAddOrRemoveToFavoritesPlaylist = (song, removeFromFavorites, d
   let updatePlaylistsPromise = LocalService.getPlaylists()
     .then(playlists => {
       for (let i = 0; i < playlists.length; i++) {
-        if (playlists[i].name !== 'favorites') {
-          let j = playlists[i].songs.findIndex(s => s.id === song.id);
-          if (j !== -1) {
-            playlists[i].songs[j] = song;
-          }
+        let j = playlists[i].songs.findIndex(s => s.id === song.id);
+        if (j !== -1) {
+          playlists[i].songs[j] = song;
         }
       }
 
@@ -53,24 +51,11 @@ const _saveSongAndAddOrRemoveToFavoritesPlaylist = (song, removeFromFavorites, d
     })
     .then(() => LocalService.getPlaylists())
     .then(playlists => dispatch(playlistsUpdated(playlists)));
-  let updateFavoritesPromise = LocalService.getPlaylistByName('favorites')
-    .then(playlist => {
-      if (removeFromFavorites) {
-        if (song.isFavorite) {
-          appActions.addSongToPlaylist(song, playlist)(dispatch);
-        } else {
-          appActions.removeSongFromPlaylist(song, playlist)(dispatch);
-        }
-      }
-
-      return Promise.resolve();
-    });
 
   let promises = [
     saveSongPromise,
     updateAlbumPromise,
     updateArtistPromise,
-    updateFavoritesPromise,
     updatePlaylistsPromise
   ];
 

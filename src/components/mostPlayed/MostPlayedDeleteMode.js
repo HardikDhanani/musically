@@ -6,14 +6,14 @@ import {
   FlatList,
   View
 } from 'react-native';
-import Container from '../Container';
-import QueueDeleteModeHeader from './QueueDeleteModeHeader';
+import Container from '../common/containers/Container';
+import MostPlayedDeleteModeHeader from './MostPlayedDeleteModeHeader';
 import Body from '../Body';
-import DeleteModeButton from './DeleteModeButton';
+import DeleteModeButton from '../common/buttons/DeleteModeButton';
 import Text from '../common/Text';
 import CheckBox from '../common/buttons/CheckBox';
 import RowCard from '../common/cards/RowCard';
-import ConfirmationForm from '../ConfirmationForm';
+import ConfirmationForm from '../common/forms/ConfirmationForm';
 
 const styles = EStyleSheet.create({
   infoContainer: {
@@ -43,7 +43,7 @@ const styles = EStyleSheet.create({
   }
 });
 
-class DeleteModeQueue extends Component {
+class MostPlayedDeleteMode extends Component {
   constructor(props) {
     super(props);
 
@@ -54,7 +54,7 @@ class DeleteModeQueue extends Component {
   render() {
     return (
       <Container fillStatusBar={false}>
-        <QueueDeleteModeHeader
+        <MostPlayedDeleteModeHeader
           title={this.props.selected + ' ' + this.props.dictionary.getWord('selected')}
           selectedAll={this.props.selectedAll}
           onBackPress={this.props.onBackPress}
@@ -103,12 +103,12 @@ class DeleteModeQueue extends Component {
 
     return (
       <ConfirmationForm
-        title={this.props.dictionary.getWord('delete_from_queue')}
+        title={this.props.dictionary.getWord('delete_from_most_played')}
         actionText={this.props.dictionary.getWord('delete')}
         onCancelPress={this.props.onCancelPress}
         onConfirmPress={this.props.onConfirmPress}>
         <View style={styles.confirmationTextContainer}>
-          <Text style={styles.confirmationText}>{this.props.dictionary.getWord('you_are_removing') + ' ' + this.props.selected + ' ' + this.props.dictionary.getWord('songs_from_the_queue') + '.\n'}</Text>
+          <Text style={styles.confirmationText}>{this.props.dictionary.getWord('you_are_removing') + ' ' + this.props.selected + ' ' + this.props.dictionary.getWord('songs_from_most_played') + '.\n'}</Text>
           <Text style={styles.confirmationText}>{this.props.dictionary.getWord('are_you_sure')}</Text>
         </View>
       </ConfirmationForm>
@@ -116,7 +116,7 @@ class DeleteModeQueue extends Component {
   }
 }
 
-DeleteModeQueue.propTypes = {
+MostPlayedDeleteMode.propTypes = {
   dictionary: PropTypes.object.isRequired,
   data: PropTypes.array.isRequired,
   selected: PropTypes.number.isRequired,
@@ -130,4 +130,4 @@ DeleteModeQueue.propTypes = {
   onConfirmPress: PropTypes.func.isRequired,
 };
 
-export default DeleteModeQueue;
+export default MostPlayedDeleteMode;

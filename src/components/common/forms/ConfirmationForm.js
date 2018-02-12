@@ -9,8 +9,8 @@ import {
   Modal,
   TouchableOpacity
 } from 'react-native';
-import Touchable from './common/buttons/Touchable';
-import Text from './common/Text';
+import Touchable from '../buttons/Touchable';
+import Text from '../Text';
 
 const styles = EStyleSheet.create({
   mainContainer: {

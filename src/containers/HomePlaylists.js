@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Body from '../components/Body';
 import AddPlaylistButton from '../components/common/buttons/AddPlaylistButton';
-import ConfirmationForm from '../components/ConfirmationForm';
+import ConfirmationForm from '../components/common/forms/ConfirmationForm';
 import NewPlaylist from '../components/NewPlaylist';
 import FourCoverCard from '../components/common/cards/FourCoverCard';
 import RowCoverCard from '../components/common/cards/RowCoverCard';
@@ -78,7 +78,7 @@ class HomePlaylists extends Component {
                 onEndReachedThreshold={0.5}
                 renderItem={({ item }) => this._renderPlaylist(item)}
                 keyExtractor={(item, index) => 'column_' + item.id}
-                style={{ flexDirection: 'column' }}
+                style={{ flexDirection: 'column', alignSelf: 'flex-start' }}
                 numColumns={this.props.itemViewMode === 'row' ? 1 : 2}
                 key={this.props.itemViewMode} />
           }

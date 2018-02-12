@@ -1,7 +1,6 @@
 import LocalService from '../../services/LocalService';
 import * as appActions from './appActions';
 import playlistsSelector from '../selectors/playlists';
-import playlist from '../reducers/playlist';
 
 function _setPlaylistLength(key, value, playlistName) {
   return new Promise((resolve, reject) => {
@@ -58,21 +57,15 @@ const languageChangedSuccess = () => {
   }
 }
 
-const mostPlayedReset = (playlists) => {
+const mostPlayedReset = () => {
   return {
-    type: 'SETTINGS_RESET_MOST_PLAYED_SUCCESS',
-    payload: {
-      playlists
-    }
+    type: 'SETTINGS_RESET_MOST_PLAYED_SUCCESS'
   }
 }
 
-const recentlyPlayedReset = (playlists) => {
+const recentlyPlayedReset = () => {
   return {
-    type: 'SETTINGS_RESET_RECENTLY_PLAYED_SUCCESS',
-    payload: {
-      playlists
-    }
+    type: 'SETTINGS_RESET_RECENTLY_PLAYED_SUCCESS'
   }
 }
 
@@ -148,28 +141,15 @@ export function languageChanged(language) {
 export function resetMostPlayed() {
   return dispatch => {
     let playlist = null;
-    LocalService.getPlaylistByName('Most Played')
-      .then(pl => {
-        playlist = pl;
-        playlist.songs = [];
-        return LocalService.savePlaylist(playlist);
-      })
-      .then(LocalService.getPlaylists)
-      .then(playlists => dispatch(mostPlayedReset(playlists)));
+    LocalService.saveMostPlayed([])
+      .then(() => dispatch(mostPlayedReset()));
   }
 }
 
 export function resetRecentlyPlayed() {
   return dispatch => {
-    let playlist = null;
-    LocalService.getPlaylistByName('Recently played')
-      .then(pl => {
-        playlist = pl;
-        playlist.songs = [];
-        return LocalService.savePlaylist(playlist);
-      })
-      .then(LocalService.getPlaylists)
-      .then(playlists => dispatch(recentlyPlayedReset(playlists)));
+    LocalService.saveRecentlyPlayed([])
+      .then(() => dispatch(recentlyPlayedReset()));
   }
 }
 

@@ -13,10 +13,10 @@ import HomeAlbums from './HomeAlbums';
 import HomeSongs from './HomeSongs';
 
 import ControlPanel from './ControlPanel';
-import HomeHeader from '../components/HomeHeader';
+import HomeHeader from '../components/home/HomeHeader';
 import PlayerFooter from './PlayerFooter';
 import PaginationHeader from '../components/PaginationHeader';
-import Container from '../components/Container';
+import Container from '../components/common/containers/Container';
 
 const styles = EStyleSheet.create({
   container: {
@@ -57,11 +57,13 @@ class Home extends Component {
   }
 
   render() {
+    let title = this.props.dictionary.getWord('my_music');
+
     return (
       <ControlPanel onRef={this._onRef} navigation={this.props.navigation}>
         <Container fillStatusBar={false}>
           <HomeHeader
-            title={this.props.dictionary.getWord('my_music')}
+            title={title}
             itemViewMode={this.props.itemViewMode}
             onMenuPress={() => this._disableMultiSelectMode(() => this._drawer.open())}
             onSearchPress={() => this._disableMultiSelectMode(() => this.props.navigation.navigate('Search', {}))}

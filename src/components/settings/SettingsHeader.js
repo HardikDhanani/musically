@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import Header from '../common/headers/Header';
-import HeaderTitle from '../HeaderTitle';
-import HeaderLeftSection from '../HeaderLeftSection';
-import HeaderCenterSection from '../HeaderCenterSection';
-import HeaderRightSection from '../HeaderRightSection';
+import HeaderTitle from '../common/headers/HeaderTitle';
+import HeaderLeftSection from '../common/headers/HeaderLeftSection';
+import HeaderCenterSection from '../common/headers/HeaderCenterSection';
+import HeaderRightSection from '../common/headers/HeaderRightSection';
 import IconButton from '../common/buttons/IconButton';
 
 const styles = EStyleSheet.create({

@@ -1,3 +1,5 @@
+import songsSelector from '../selectors/songs';
+
 const initialState = {
   artist: null,
   name: null,
@@ -15,11 +17,6 @@ const initialState = {
   showAddToPlaylistForm: false
 };
 let topSongs = [];
-let sortSongsByReproductions = (a, b) => {
-  if (a.reproductions < b.reproductions) return -1;
-  if (a.reproductions > b.reproductions) return 1;
-  return 0;
-}
 
 export default function artist(state = initialState, action = {}) {
   switch (action.type) {
@@ -33,9 +30,8 @@ export default function artist(state = initialState, action = {}) {
       albums = JSON.parse(JSON.stringify(albums));
 
       let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
-      songs = JSON.parse(JSON.stringify(songs));
-      
-      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions).slice(0, 5);
+      songs = JSON.parse(JSON.stringify(songs.filter(song => song.reproductions > 0)));
+      topSongs = songsSelector.orderByReproductionsDesc(songs).slice(0, 5);
 
       return {
         ...state,

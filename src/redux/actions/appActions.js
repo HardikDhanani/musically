@@ -5,10 +5,8 @@ import playlistsSelector from '../selectors/playlists';
 import * as playerActions from './playerActions';
 import * as playlistActions from './playlistActions';
 import * as homeActions from './homeActions';
+import * as settingsActions from './settingsActions';
 import dictionaries from '../../dictionaries/index';
-import { languageChanged } from './settingsActions';
-import playlist from '../reducers/playlist';
-
 
 let _isLoaded = false;
 let _languageManager = new LanguageManager(dictionaries);
@@ -29,9 +27,10 @@ function _getCurrentLanguage() {
 }
 
 async function _initialize(dispatch) {
+  settingsActions.load()(dispatch);
   let session = await LocalService.getSession();
   _languageManager.setLanguage(session.language || _getCurrentLanguage());
-  dispatch(appInitialized(_languageManager.currentDictionary));
+  dispatch(appInitialized(_languageManager.currentDictionary, session.language));
 }
 
 function _setMostPlayedAndRecentlyPlayedPlaylists(playlists, session) {
@@ -69,12 +68,6 @@ function _groupAndSaveAlbums(songs) {
   return LocalService.saveAlbums(albums);
 }
 
-function _groupAndSaveGenres(songs) {
-  let genres = songsSelector.groupByGenre(songs);
-  genres = songsSelector.orderBy(genres, g => g.id);
-  return LocalService.saveGenres(genres);
-}
-
 function _groupAndSaveMusic(songs) {
   let ordererSongs = songsSelector.orderBy(songs, s => s.title).map(song => {
     let duration = 0;
@@ -91,38 +84,41 @@ function _groupAndSaveMusic(songs) {
       isFavorite: false
     };
   });
-  return LocalService.saveSongs(ordererSongs)
-    .then(() => _groupAndSaveArtists(ordererSongs))
-    .then(() => _groupAndSaveAlbums(ordererSongs))
-    .then(() => _groupAndSaveGenres(ordererSongs));
+
+  let p1 = LocalService.saveSongs(ordererSongs);
+  let p2 = _groupAndSaveArtists(ordererSongs);
+  let p3 = _groupAndSaveAlbums(ordererSongs);
+
+  return Promise.all([p1, p2, p3]);
 }
 
 function _createDefaultPlaylists() {
-  let mostPlayed = {
-    name: 'Most played',
+  let musically = {
+    name: 'Musically',
     songs: []
   }
 
-  let favorites = {
-    name: 'Favorites',
-    songs: []
-  }
+  // let favorites = {
+  //   name: 'Favorites',
+  //   songs: []
+  // }
 
-  let recentPlayed = {
-    name: 'Recently played',
-    songs: []
-  }
+  // let recentPlayed = {
+  //   name: 'Recently played',
+  //   songs: []
+  // }
 
-  return LocalService.savePlaylist(mostPlayed)
-    .then(() => LocalService.savePlaylist(favorites))
-    .then(() => LocalService.savePlaylist(recentPlayed));
+  return LocalService.savePlaylist(musically);
+  //   .then(() => LocalService.savePlaylist(favorites))
+  //   .then(() => LocalService.savePlaylist(recentPlayed));
 }
 
-const appInitialized = (dictionary) => {
+const appInitialized = (dictionary, language) => {
   return {
     type: 'APP_INITIALIZED',
     payload: {
-      dictionary
+      dictionary,
+      language
     }
   }
 }
@@ -315,14 +311,18 @@ export function start() {
 
         LocalService.isFirstTime()
           .then(resp => {
-            if (resp) {
+            if (!resp) {
               LocalService.scanForSongs()
-                .then(_groupAndSaveMusic)
-                .then(_createDefaultPlaylists)
-                .then(LocalService.firstTimeDone)
+                .then(songs => {
+                  let p1 = _groupAndSaveMusic(songs);
+                  let p2 = _createDefaultPlaylists();
+                  let p3 = LocalService.firstTimeDone();
+
+                  return Promise.all([p1, p2, p3]);
+                })
                 .then(() => _load(dispatch));
             } else {
-              _load(dispatch)
+              _load(dispatch);
             }
           });
       }

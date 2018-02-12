@@ -7,15 +7,15 @@ import * as playerActions from '../redux/actions/playerActions';
 import * as favoritesActions from '../redux/actions/favoritesActions';
 import * as appActions from '../redux/actions/appActions';
 
-import { StatusBar, StyleSheet, Image, View, Text, Dimensions, TouchableOpacity, Platform } from 'react-native';
-import Swiper from 'react-native-swiper';
-
-import Container from '../components/Container';
+import { 
+  Image,
+  View
+} from 'react-native';
+import Container from '../components/common/containers/Container';
 import PlayerHeader from '../components/PlayerHeader';
 import Header from '../components/common/headers/Header';
-import HeaderTitle from '../components/HeaderTitle';
+import HeaderTitle from '../components/common/headers/HeaderTitle';
 import ProgressBar from '../components/ProgressBar';
-import FloatMenu from '../components/FloatMenu';
 import PlayerControls from '../components/PlayerControls';
 import IconButton from '../components/common/buttons/IconButton';
 import PlayPauseButtonWhite from '../components/common/buttons/PlayPauseButtonWhite';

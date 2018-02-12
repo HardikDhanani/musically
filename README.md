@@ -84,6 +84,11 @@
   - [ ] Can order songs by name, album or artist
   - [x] Can list albums and artist with Cover cards or row cards
   
+## Pending
+
+ - [ ] When the queue is reorderer, same must happend in the player
+ - [ ] When the app initializes, read images asynchronously
+
 ## Settings
 
  - [x] How many reproductions before being Most Played

@@ -10,9 +10,9 @@ import {
   BackHandler,
   TouchableOpacity
 } from 'react-native';
-import Container from '../components/Container';
+import Container from '../components/common/containers/Container';
 import QueueHeader from '../components/queue/QueueHeader';
-import DeleteModeQueue from '../components/queue/DeleteModeQueue';
+import QueueDeleteMode from '../components/queue/QueueDeleteMode';
 import Body from '../components/Body';
 import SongCard from '../components/SongCard';
 import PlayerFooter from './PlayerFooter';
@@ -113,7 +113,7 @@ class Queue extends Component {
 
   _renderDeleteMode() {
     return (
-      <DeleteModeQueue
+      <QueueDeleteMode
         data={this.props.queueDelete}
         selected={this.props.selected}
         selectedAll={this.props.selectedAll}

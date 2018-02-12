@@ -5,12 +5,12 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import { 
   View 
 } from 'react-native';
-import Header from './common/headers/Header';
-import HeaderTitle from './HeaderTitle';
-import HeaderLeftSection from './HeaderLeftSection';
-import HeaderRightSection from './HeaderRightSection';
-import HeaderCenterSection from './HeaderCenterSection';
-import IconButton from './common/buttons/IconButton';
+import Header from '../common/headers/Header';
+import HeaderTitle from '../common/headers/HeaderTitle';
+import HeaderLeftSection from '../common/headers/HeaderLeftSection';
+import HeaderRightSection from '../common/headers/HeaderRightSection';
+import HeaderCenterSection from '../common/headers/HeaderCenterSection';
+import IconButton from '../common/buttons/IconButton';
 
 const styles = EStyleSheet.create({
   button: {

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -15,7 +14,6 @@ import {
 import Drawer from 'react-native-drawer';
 import ControlPanelSection from '../components/ControlPanelSection';
 import ControlPanelButton from '../components/ControlPanelButton';
-import ControlPanelCover from '../components/ControlPanelCover';
 
 const styles = EStyleSheet.create({
   container: {
@@ -34,6 +32,7 @@ const styles = EStyleSheet.create({
     left: 25
   },
   closeIcon: {
+    marginTop: 10,
     color: '$appMainTextColor'
   }
 });
@@ -44,7 +43,6 @@ class ControlPanel extends Component {
 
     this._renderControlPanel = this._renderControlPanel.bind(this);
     this._onRef = this._onRef.bind(this);
-    this._selectedSectionChanged = this._selectedSectionChanged.bind(this);
     this._navigateTo = this._navigateTo.bind(this);
     this._backHandler = this._backHandler.bind(this);
   }
@@ -69,19 +67,16 @@ class ControlPanel extends Component {
   }
 
   _renderControlPanel() {
-    let currentSongName = this.props.currentSong ? this.props.currentSong.title : null;
-    let currentSongArtist = this.props.currentSong ? this.props.currentSong.artist : null;
-
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={() => this._drawer.close()} style={styles.close}>
           <Icon size={30} style={styles.closeIcon} name={'close'} />
         </TouchableOpacity>
-        <ControlPanelButton onPress={() => this._drawer.close()} text={this.props.dictionary.getWord('my_music').toUpperCase()} icon='music-note' />
-        <ControlPanelButton onPress={() => this._selectedSectionChanged('playlists')} text={this.props.dictionary.getWord('playlists').toUpperCase()} icon='playlist-play' />
         <ControlPanelButton onPress={() => this._navigateTo('Favorites')} text={this.props.dictionary.getWord('favorites').toUpperCase()} icon='favorite' />
+        <ControlPanelButton onPress={() => this._navigateTo('MostPlayed')} text={this.props.dictionary.getWord('mostPlayed').toUpperCase()} icon='plus-one' />
+        <ControlPanelButton onPress={() => this._navigateTo('RecentlyPlayed')} text={this.props.dictionary.getWord('recentlyPlayed').toUpperCase()} icon='timelapse' />
+        <ControlPanelButton onPress={() => this._navigateTo('Folders')} text={this.props.dictionary.getWord('folders').toUpperCase()} icon='folder' />
         <ControlPanelButton onPress={() => this._navigateTo('Queue')} text={this.props.dictionary.getWord('queue').toUpperCase()} icon='queue-music' />
-        <ControlPanelButton onPress={() => { }} text={this.props.dictionary.getWord('equalizer').toUpperCase()} icon='equalizer' />
         <ControlPanelButton onPress={() => this._navigateTo('Settings')} text={this.props.dictionary.getWord('settings').toUpperCase()} icon='settings' />
       </View>
     );
@@ -90,11 +85,6 @@ class ControlPanel extends Component {
   _onRef(component) {
     this._drawer = component;
     this.props.onRef(component);
-  }
-
-  _selectedSectionChanged(section) {
-    this.props.selectedSectionChanged(section);
-    this._drawer.close();
   }
 
   _navigateTo(target) {
@@ -115,22 +105,14 @@ class ControlPanel extends Component {
 
 const mapStateToProps = state => {
   return {
-    selectedSection: state.home.selectedSection,
-    currentSong: state.player.currentSong,
     dictionary: state.app.dictionary
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    selectedSectionChanged: (section) => homeActions.selectedSectionChanged(section)(dispatch),
+
   }
 }
-
-ControlPanel.propTypes = {
-  selectedSection: PropTypes.string,
-  currentSong: PropTypes.object,
-  selectedSectionChanged: PropTypes.func
-};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ControlPanel);

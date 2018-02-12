@@ -20,9 +20,9 @@ import Section from '../components/settings/Section';
 import Option from '../components/settings/Option';
 import LeftColumn from '../components/settings/LeftColumn';
 import RightColumn from '../components/settings/RightColumn';
-import ConfirmationForm from '../components/ConfirmationForm';
+import ConfirmationForm from '../components/common/forms/ConfirmationForm';
 import LanguageSelector from '../components/settings/LanguageSelector';
-import Container from '../components/Container';
+import Container from '../components/common/containers/Container';
 import Text from '../components/common/Text';
 
 const styles = EStyleSheet.create({

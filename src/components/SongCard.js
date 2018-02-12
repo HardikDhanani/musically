@@ -64,6 +64,7 @@ const styles = EStyleSheet.create({
 class SongCard extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return this.props.id !== nextProps.id
+      || this.props.name !== nextProps.name
       || this.props.isFavorite !== nextProps.isFavorite
       || this.props.isPlaying !== nextProps.isPlaying;
   }

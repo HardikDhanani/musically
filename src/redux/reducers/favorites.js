@@ -4,7 +4,6 @@ const initialState = {
   songs: [],
   artists: [],
   albums: [],
-  genres: [],
   isLoading: false,
   update: false,
 };
@@ -23,8 +22,7 @@ export default function favorites(state = initialState, action = {}) {
         update: false,
         songs: songsSelector.orderBy(action.payload.favorites.songs, s => s.title),
         artists: songsSelector.orderBy(action.payload.favorites.artists, a => a.artist),
-        albums: songsSelector.orderBy(action.payload.favorites.albums, a => a.album),
-        genres: songsSelector.orderBy(action.payload.favorites.genres, a => a.genre),
+        albums: songsSelector.orderBy(action.payload.favorites.albums, a => a.album)
       }
     case 'FAVORITES_LOADING_ERROR':
       return {

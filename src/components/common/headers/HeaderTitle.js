@@ -8,14 +8,15 @@ const styles = EStyleSheet.create({
     fontSize: '$titleFontSize',
     color: '$headerColor',
     alignSelf: 'center',
-    justifyContent: 'flex-end',
+    lineHeight: '$titleFontSize * 1.2',
+    textAlign: 'left'
   }
 });
 
 export default class HeaderTitle extends Component {
   render() {
     return (
-      <Text style={styles.container}>
+      <Text numberOfLines={1} style={styles.container}>
         {this.props.children}
       </Text>
     );

@@ -9,19 +9,12 @@ import {
   View,
   Text
 } from 'react-native';
-import StyleManager from '../styles/StyleManager';
-import Container from '../components/Container';
+import Container from '../components/common/containers/Container';
 import Body from '../components/Body';
 import SearchHeader from '../components/SearchHeader';
 import GroupSection from '../components/GroupSection';
 import SongCard from '../components/SongCard';
-import AlbumCard from '../components/AlbumCard';
-import ArtistCard from '../components/ArtistCard';
-import GenreCard from '../components/GenreCard';
-import FloatMenu from '../components/FloatMenu';
-import FloatMenuOption from '../components/FloatMenuOption';
 import PlayerFooter from './PlayerFooter';
-import ThreeColumnContainer from '../components/ThreeColumnContainer';
 
 class Search extends Component {
   constructor(props) {
@@ -33,16 +26,7 @@ class Search extends Component {
     this._renderArtist = this._renderArtist.bind(this);
     this._renderAlbums = this._renderAlbums.bind(this);
     this._renderAlbum = this._renderAlbum.bind(this);
-    this._renderGenres = this._renderGenres.bind(this);
-    this._renderGenre = this._renderGenre.bind(this);
-    this._groupItems = this._groupItems.bind(this);
-    this._renderMenu = this._renderMenu.bind(this);
     this._playSongs = this._playSongs.bind(this);
-
-    this._container = StyleManager.getStyle('SearchContainer');
-    this._messageText = StyleManager.getStyle('SearchMessageText');
-    this._songCardContainer = StyleManager.getStyle('SearchSongCardContainer');
-    this._songCardItemText = StyleManager.getStyle('SearchSongCardItemText');
   }
 
   render() {
@@ -58,12 +42,11 @@ class Search extends Component {
         <Body>
           {
             this.props.mustCompleteCriteria ?
-              <Text style={this._messageText}>{'Enter some text to search...'}</Text> :
+              <Text>{'Enter some text to search...'}</Text> :
               <ScrollView>
                 {this.props.songs.length ? this._renderSongs() : null}
                 {this.props.albums.length ? this._renderAlbums() : null}
                 {this.props.artists.length ? this._renderArtists() : null}
-                {this.props.genres.length ? this._renderGenres() : null}
               </ScrollView>
           }
         </Body>
@@ -89,8 +72,8 @@ class Search extends Component {
       <GroupSection
         title={'Albums'}
         getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-        data={this._groupItems(this.props.albums)}
-        renderItem={album => this._renderItem(album, this._renderAlbum)}
+        data={this.props.albums}
+        renderItem={album => () => {}}
         keyExtractor={(item, index) => index} />
     );
   }
@@ -100,19 +83,8 @@ class Search extends Component {
       <GroupSection
         title={'Artists'}
         getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-        data={this._groupItems(this.props.artists)}
-        renderItem={artist => this._renderItem(artist, this._renderArtist)}
-        keyExtractor={(item, index) => index} />
-    );
-  }
-
-  _renderGenres() {
-    return (
-      <GroupSection
-        title={'Genres'}
-        getItemLayout={(data, index) => ({ length: 160, offset: 160 * index, index })}
-        data={this._groupItems(this.props.genres)}
-        renderItem={genre => this._renderItem(genre, this._renderGenre)}
+        data={this.props.artists}
+        renderItem={artist => () => {}}
         keyExtractor={(item, index) => index} />
     );
   }
@@ -126,7 +98,6 @@ class Search extends Component {
     return (
       <View key={song.index}>
         <SongCard
-          styles={{ container: this._songCardContainer, text: this._songCardItemText }}
           id={song.item.id}
           name={song.item.title}
           artist={song.item.artist}
@@ -146,18 +117,7 @@ class Search extends Component {
 
     let songCount = album.songs.length;
 
-    return (
-      <AlbumCard
-        onPress={() => this.props.navigation.navigate('Album', { album })}
-        id={album.id}
-        name={album.album}
-        artist={album.artist}
-        songs={songCount}
-        source={require('../images/default-cover.png')}
-        imageUri={album.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
-    );
+    return null;
   }
 
   _renderArtist(artist) {
@@ -174,60 +134,7 @@ class Search extends Component {
 
     let albumCount = (artist && artist.albums) ? artist.albums.length : 0;
 
-    return (
-      <ArtistCard
-        onPress={() => this.props.navigation.navigate('Artist', { artist })}
-        id={artist.id}
-        name={artist.artist}
-        albums={albumCount}
-        songs={songCount}
-        source={require('../images/default-cover.png')}
-        imageUri={artist.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
-    );
-  }
-
-  _renderGenre(genre) {
-    let targetMenu = {
-      type: 'GENRE',
-      payload: genre
-    };
-
-    let songCount = 0;
-
-    for (let i = 0; i < genre.albums.length; i++) {
-      songCount += genre.albums[i].songs.length;
-    }
-
-    let albumCount = (genre && genre.albums) ? genre.albums.length : 0;
-
-    return (
-      <GenreCard
-        onPress={() => this.props.navigation.navigate('Genre', { genre })}
-        id={genre.id}
-        name={genre.genre}
-        albums={albumCount}
-        songs={songCount}
-        source={require('../images/default-cover.png')}
-        imageUri={genre.cover}
-        onOptionPressed={measures => this.props.setMenu(targetMenu, measures.absoluteX, measures.absoluteY)}
-      />
-    );
-  }
-
-  _groupItems(items) {
-    let grupedItems = [];
-    for (let i = 0; i < items.length; i += 3) {
-      grupedItems.push(items.slice(i, 3 + i));
-    }
-    return grupedItems;
-  }
-
-  _renderItem(items, renderCard) {
-    return (
-      <ThreeColumnContainer items={items.item} renderItem={renderCard} />
-    );
+    return null;
   }
 
   _playSongs(song) {
@@ -242,47 +149,6 @@ class Search extends Component {
     }
 
     this.props.navigation.navigate('Player', { queue })
-  }
-
-  _renderMenu() {
-    if (!this.props.showMenu || this.props.targetMenu.caller !== 'SEARCH')
-      return null;
-
-    return (
-      <FloatMenu onPress={() => this.props.setMenu(null, 0, 0)}>
-        {this._getTargetMenu(this.props.targetMenu.type)}
-      </FloatMenu>
-    );
-  }
-
-  _getTargetMenu(target) {
-    switch (target) {
-      case 'ARTIST':
-      case 'ALBUM':
-      case 'GENRE':
-      case 'SONG':
-        return this._getArtistMenu();
-
-      default:
-        return this._getMenu();
-    }
-  }
-
-  _getMenu() {
-    return [
-      (<FloatMenuOption key={1} text={'Sort Order'} haveContent={true} />),
-      (<FloatMenuOption key={2} text={'View Mode'} haveContent={true} />),
-      (<FloatMenuOption key={3} text={'Rescan Library'} />),
-      (<FloatMenuOption key={4} text={'Playlist Queue'} />)
-    ];
-  }
-
-  _getArtistMenu() {
-    return [
-      (<FloatMenuOption key={1} text={'Play'} />),
-      (<FloatMenuOption key={2} text={'Add to playlist'} />),
-      (<FloatMenuOption key={3} text={'Add to queue'} />)
-    ]
   }
 }
 

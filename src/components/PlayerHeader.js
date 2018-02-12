@@ -6,9 +6,9 @@ import {
   View
 } from 'react-native';
 import Header from './common/headers/Header';
-import HeaderLeftSection from './HeaderLeftSection';
-import HeaderRightSection from './HeaderRightSection';
-import HeaderCenterSection from './HeaderCenterSection';
+import HeaderLeftSection from './common/headers/HeaderLeftSection';
+import HeaderRightSection from './common/headers/HeaderRightSection';
+import HeaderCenterSection from './common/headers/HeaderCenterSection';
 import IconButton from './common/buttons/IconButton';
 import Text from './common/Text';
 

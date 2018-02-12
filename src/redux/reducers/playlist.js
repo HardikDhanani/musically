@@ -1,3 +1,5 @@
+import songsSelector from '../selectors/songs';
+
 const initialState = {
   playlist: null,
   isLoading: false,
@@ -16,11 +18,6 @@ const initialState = {
   deletingPlaylist: false
 };
 let topSongs = [];
-let sortSongsByReproductions = (a, b) => {
-  if (a.reproductions < b.reproductions) return -1;
-  if (a.reproductions > b.reproductions) return 1;
-  return 0;
-}
 
 export default function playlist(state = initialState, action = {}) {
   switch (action.type) {
@@ -31,8 +28,9 @@ export default function playlist(state = initialState, action = {}) {
       }
     case 'PLAYLIST_LOADING_SUCCESS':
       let songs = action.payload.playlist ? action.payload.playlist.songs : [];
-      songs = JSON.parse(JSON.stringify(songs));
-      topSongs = songs.filter(song => song.reproductions > 0).sort(sortSongsByReproductions).slice(0, 5);
+
+      songs = JSON.parse(JSON.stringify(songs.filter(song => song.reproductions > 0)));
+      topSongs = songsSelector.orderByReproductionsDesc(songs).slice(0, 5);
 
       return {
         ...state,

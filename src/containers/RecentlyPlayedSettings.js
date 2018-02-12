@@ -14,8 +14,8 @@ import SettingsHeader from '../components/settings/SettingsHeader';
 import Option from '../components/settings/Option';
 import LeftColumn from '../components/settings/LeftColumn';
 import RightColumn from '../components/settings/RightColumn';
-import ConfirmationForm from '../components/ConfirmationForm';
-import Container from '../components/Container';
+import ConfirmationForm from '../components/common/forms/ConfirmationForm';
+import Container from '../components/common/containers/Container';
 import Text from '../components/common/Text';
 import ModalFormWithAction from '../components/common/forms/ModalFormWithAction';
 
@@ -80,7 +80,7 @@ class RecentlyPlayedSettings extends Component {
 
   render() {
     return (
-      <Container>
+      <Container fillStatusBar={false}>
         <SettingsHeader title={'Edit Recently Played'} onBackPress={() => this.props.navigation.goBack()} />
         <ScrollView style={styles.container}>
           <Option onPress={() => this.props.showSetSetting('setRecentlyPlayedLength')}>

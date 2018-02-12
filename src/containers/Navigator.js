@@ -15,6 +15,8 @@ import Settings from './Settings';
 import MostPlayedSettings from './MostPlayedSettings';
 import RecentlyPlayedSettings from './RecentlyPlayedSettings';
 import PlaylistSelector from './PlaylistSelector';
+import RecentlyPlayed from './RecentlyPlayed';
+import MostPlayed from './MostPlayed';
 
 const AppNavigator = StackNavigator(
     {
@@ -29,7 +31,9 @@ const AppNavigator = StackNavigator(
         Playlist: { screen: Playlist },
         Settings: { screen: Settings },
         MostPlayedSettings: { screen: MostPlayedSettings },
-        RecentlyPlayedSettings: { screen: RecentlyPlayedSettings }
+        RecentlyPlayedSettings: { screen: RecentlyPlayedSettings },
+        RecentlyPlayed: { screen: RecentlyPlayed },
+        MostPlayed: { screen: MostPlayed }
     },
     {
         initialRouteName: 'Splash',

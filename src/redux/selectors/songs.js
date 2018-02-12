@@ -79,9 +79,18 @@ const orderBy = (group, criteria) => {
   return _.sortBy(group, criteria);
 }
 
+const orderByReproductionsDesc = (songs) => {
+  return songs.filter((a, b) => {
+    if (a.reproductions < b.reproductions) return -1;
+    if (a.reproductions > b.reproductions) return 1;
+    return 0;
+  });
+}
+
 songs.groupByAlbum = groupByAlbum;
 songs.groupByArtists = groupByArtists;
 songs.groupByGenre = groupByGenre;
 songs.orderBy = orderBy;
+songs.orderByReproductionsDesc = orderByReproductionsDesc;
 
 module.exports = songs;

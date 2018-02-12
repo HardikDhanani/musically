@@ -1,6 +1,5 @@
 import LocalService from '../../services/LocalService';
 import * as appActions from './appActions';
-import playlist from '../reducers/playlist';
 
 const playlistsLoaded = (playlists) => {
   return {
