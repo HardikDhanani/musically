@@ -40,32 +40,33 @@ class HomeArtists extends Component {
     this._handleOnEndReached = this._handleOnEndReached.bind(this);
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   if (nextProps.artists && this.state.lastPosition === 0) {
-  //     this.setState({
-  //       artists: nextProps.artists.slice(0, FETCH_NUMBER),
-  //       lastPosition: FETCH_NUMBER
-  //     });
-  //   }
-  // }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.artists && this.state.lastPosition === 0) {
+      this.setState({
+        artists: nextProps.artists.slice(0, FETCH_NUMBER),
+        lastPosition: FETCH_NUMBER
+      });
+    }
+  }
 
   shouldComponentUpdate(nextProps, nextState) {
     return nextProps.itemViewMode !== this.props.itemViewMode
       || nextProps.artists !== this.props.artists
+      || nextProps.artists.length !== this.props.artists.length
       || nextProps.language !== this.props.language
       || nextState.lastPosition !== this.state.lastPosition;
   }
 
   render() {
     let itemHeight = this.props.itemViewMode === 'row' ? styles._rowCard.height : styles._coverCard.height;
-
     return (
       <Body hasPaginationHeader={true}>
         {
           !this.props.isReady ?
             <BodyActivityIndicator /> :
             <FlatList
-              data={this.state.artists}
+              extraData={this.props.artists.map(a => a)}
+              data={this.props.artists}
               showsVerticalScrollIndicator={false}
               onEndReached={this._handleOnEndReached}
               onEndReachedThreshold={0.5}
@@ -93,7 +94,7 @@ class HomeArtists extends Component {
 
     return (
       <RowCoverCard
-        title={artist.artist}
+        title={artist.artist !== 'null' ? artist.artist : this.props.dictionary.getWord('unknown_artist')}
         detail={artist.albums.length + ' ' + this.props.dictionary.getWord('albums') + ' - ' + songsCount + ' ' + this.props.dictionary.getWord('songs')}
         cover={artist.cover}
         isFavorite={artist.isFavorite}

@@ -123,6 +123,52 @@ const appInitialized = (dictionary, language) => {
   }
 }
 
+const songsAdded = (songs, total) => {
+  return {
+    type: 'APP_SONGS_ADDED',
+    payload: {
+      songs,
+      total
+    }
+  }
+}
+
+const albumEdited = (album) => {
+  return {
+    type: 'APP_ALBUM_EDITED',
+    payload: {
+      album
+    }
+  }
+}
+
+const artistEdited = (artist) => {
+  return {
+    type: 'APP_ARTIST_EDITED',
+    payload: {
+      artist
+    }
+  }
+}
+
+const startScanningForSongs = () => {
+  return {
+    type: 'APP_START_SCANNING_FOR_SONGS'
+  }
+}
+
+const scanningSongsStartedAction = () => {
+  return {
+    type: 'APP_SCANNING_SONGS_STARTED'
+  }
+}
+
+const scanningSongsFinishedAction = () => {
+  return {
+    type: 'APP_SCANNING_SONGS_FINISHED'
+  }
+}
+
 const starting = () => {
   return {
     type: 'APP_STARTING'
@@ -261,6 +307,16 @@ const languageChangedAction = (dictionary, language) => {
   }
 }
 
+const _processSongs = (newSongs, dispatch) => {
+  return new Promise(async () => {
+    let songs = await LocalService.getSongs()
+    songs = songs.concat(newSongs);
+    await LocalService.saveSongs(songs);
+    dispatch(songsAdded(newSongs));
+    return Promise.resolve();
+  })
+}
+
 export const playlistSaved = (playlists) => {
   return {
     type: 'APP_SAVING_NEW_PLAYLIST_SUCCEED',
@@ -295,7 +351,7 @@ export const playlistDeleted = (playlists) => {
 }
 
 export function start() {
-  return (dispatch) => {
+  return async dispatch => {
     try {
       if (_isLoaded) {
         dispatch(goHome());
@@ -311,16 +367,9 @@ export function start() {
 
         LocalService.isFirstTime()
           .then(resp => {
-            if (!resp) {
-              LocalService.scanForSongs()
-                .then(songs => {
-                  let p1 = _groupAndSaveMusic(songs);
-                  let p2 = _createDefaultPlaylists();
-                  let p3 = LocalService.firstTimeDone();
-
-                  return Promise.all([p1, p2, p3]);
-                })
-                .then(() => _load(dispatch));
+            if (resp) {
+              dispatch(startScanningForSongs());
+              _load(dispatch);
             } else {
               _load(dispatch);
             }
@@ -329,6 +378,214 @@ export function start() {
     } catch (error) {
       console.log(error);
     }
+  }
+}
+
+export function songsRead(newSongs) {
+  return async dispatch => {
+    await _processSongs(newSongs, dispatch);
+  }
+}
+
+export function scanningSongsStarted() {
+  return dispatch => {
+    dispatch(scanningSongsStartedAction());
+  }
+}
+
+export function scanningSongsFinished() {
+  return dispatch => {
+    let artists = [];
+    let albums = [];
+
+    LocalService.getSongs()
+      .then(songs => {
+        let album = null;
+        let artist = null;
+        let song = null;
+        let artistIndex = -1;
+        let albumIndex = -1;
+        let artistId = null;
+        let albumId = null;
+
+        for (let i = 0; i < songs.length; i++) {
+          song = songs[i];
+
+          if (!(!song.artist) && !(!song.album)) {
+            artistId = song.artist.replace(/\s/g, '').toLowerCase();
+            albumId = artistId + '#' + song.album.replace(/\s/g, '').toLowerCase();
+            artistIndex = artists.findIndex(a => a.id === artistId);
+
+            if (artistIndex === -1) {
+              album = {
+                id: albumId,
+                artist: song.artist,
+                album: song.album,
+                songs: [song]
+              }
+
+              artist = {
+                id: artistId,
+                artist: song.artist,
+                albums: [album]
+              }
+            } else {
+              artist = artists[artistIndex];
+              albumIndex = albums.findIndex(a => a.id === albumId);
+
+              if (albumIndex === -1) {
+                album = {
+                  id: albumId,
+                  artist: song.artist,
+                  album: song.album,
+                  songs: [song]
+                }
+
+                artist.albums.push(album);
+              } else {
+                album = albums[albumIndex];
+                album.songs.push(song);
+
+                let i = artist.albums.findIndex(a => a.id === albumId);
+                artist.albums[i] = album;
+              }
+            }
+          } else if (!(!song.artist)) {
+            artistId = song.artist.replace(/\s/g, '').toLowerCase();
+            albumId = artistId + '#null';
+            artistIndex = artists.findIndex(a => a.id === artistId);
+
+            if (artistIndex === -1) {
+              album = {
+                id: albumId,
+                artist: song.artist,
+                album: 'null',
+                songs: [song]
+              }
+
+              artist = {
+                id: artistId,
+                artist: song.artist,
+                albums: [album]
+              }
+            } else {
+              artist = artists[artistIndex];
+              albumIndex = albums.findIndex(a => a.id === albumId);
+
+              if (albumIndex === -1) {
+                album = {
+                  id: albumId,
+                  artist: song.artist,
+                  album: 'null',
+                  songs: [song]
+                }
+
+                artist.albums.push(album);
+              } else {
+                album = albums[albumIndex];
+                album.songs.push(song);
+
+                let i = artist.albums.findIndex(a => a.id === albumId);
+                artist.albums[i] = album;
+              }
+            }
+          } else if (!(!song.album)) {
+            albumId = 'null#' + song.album.replace(/\s/g, '').toLowerCase();
+            albumIndex = albums.findIndex(a => a.id === albumId);
+
+            if (albumIndex === -1) {
+              album = {
+                id: albumId,
+                artist: 'null',
+                album: song.album,
+                songs: [song]
+              }
+
+              artist = {
+                id: 'null',
+                artist: 'null',
+                albums: [album]
+              }
+            } else {
+              album = albums[albumIndex];
+              album.songs.push(song);
+
+              artistIndex = artists.findIndex(a => a.id === 'null');
+              artist = artists[artistIndex];
+
+              let i = artist.albums.findIndex(a => a.id === albumId);
+              artist.albums[i] = album;
+            }
+          } else {
+            artistId = 'null';
+            albumId = 'null#null';
+            artistIndex = artists.findIndex(a => a.id === artistId);
+
+            if (artistIndex === -1) {
+              album = {
+                id: albumId,
+                artist: 'null',
+                album: 'null',
+                songs: [song]
+              }
+
+              artist = {
+                id: artistId,
+                artist: 'null',
+                albums: [album]
+              }
+            } else {
+              artist = artists[artistIndex];
+              albumIndex = albums.findIndex(a => a.id === albumId);
+
+              if (albumIndex === -1) {
+                album = {
+                  id: albumId,
+                  artist: 'null',
+                  album: 'null',
+                  songs: [song]
+                }
+
+                artist.albums.push(album);
+              } else {
+                album = albums[albumIndex];
+                album.songs.push(song);
+
+                let i = artist.albums.findIndex(a => a.id === albumId);
+                artist.albums[i] = album;
+              }
+            }
+          }
+
+          artistIndex = artists.findIndex(a => a.id === artist.id);
+          if (artistIndex === -1) {
+            artists.push(artist);
+          } else {
+            artists[artistIndex] = artist;
+          }
+
+          albumIndex = albums.findIndex(a => a.id === album.id);
+          if (albumIndex === -1) {
+            albums.push(album);
+          } else {
+            albums[albumIndex] = album;
+          }
+
+          dispatch(artistEdited(artist));
+          dispatch(albumEdited(album));
+        }
+
+        return LocalService.saveArtists(artists);
+      })
+      .then(() => {
+        return LocalService.saveAlbums(albums);
+      })
+      .then(() => {
+        return LocalService.firstTimeDone();
+      })
+      .then(() => {
+        dispatch(scanningSongsFinishedAction());
+      });
   }
 }
 

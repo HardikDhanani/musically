@@ -174,7 +174,8 @@ class Album extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.topSongs !== this.props.topSongs
+    return nextProps.songs !== this.props.songs
+      || nextProps.topSongs !== this.props.topSongs
       || nextProps.showFiveMore !== this.props.showFiveMore
       || nextProps.isFavorite !== this.props.isFavorite
       || nextProps.playing !== this.props.playing

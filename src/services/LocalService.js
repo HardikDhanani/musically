@@ -1,5 +1,6 @@
 import { AsyncStorage, NativeModules } from 'react-native';
 import Storage from 'react-native-storage';
+import MusicFiles from 'react-native-get-music-files';
 
 import Cache from './Cache';
 
@@ -53,15 +54,37 @@ class LocalService {
     return this._storage;
   }
 
+  // scanForSongs() {
+  //   return new Promise((resolve, reject) => {
+  //     NativeModules.MusicFileManager.getAll(false, err => {
+  //       console.log('Error scaning songs: ' + err);
+  //       reject(err);
+  //     }, (response) => {
+  //       resolve(response);
+  //     });
+  //   });
+  // }
   scanForSongs() {
-    return new Promise((resolve, reject) => {
-      NativeModules.MusicFileManager.getAll(false, err => {
-        console.log('Error scaning songs: ' + err);
-        reject(err);
-      }, (response) => {
-        resolve(response);
-      });
-    });
+    // return MusicFiles.getAll({
+    //   id: true,
+    //   blured: false,
+    //   album: true,
+    //   artist: true,
+    //   duration: true, //default : true
+    //   cover: false, //default : true,
+    //   title: true,
+    //   date: false,
+    //   lyrics: false,
+    //   batchNumber: 5, //get 5 songs per batch
+    //   minimumSongDuration: 10000, //in miliseconds,
+    //   fields: ['title', 'artwork', 'duration', 'artist', 'genre', 'lyrics', 'albumTitle']
+    // })
+    //   .then(, (response) => {
+    //     alert(JSON.stringify(response));
+    //   })
+    //   .catch(, (error) => {
+    //     alert("ERROR: " + error);
+    //   });
   }
 
   saveSession(session) {
@@ -143,7 +166,11 @@ class LocalService {
     return this.getAlbums()
       .then(albums => {
         let index = albums.findIndex(a => a.id === album.id);
-        albums[index] = album;
+        if (index !== -1) {
+          albums[index] = album;
+        } else {
+          albums.push(album);
+        }
         return this.saveAlbums(albums);
       });
   }
@@ -152,7 +179,11 @@ class LocalService {
     return this.getArtists()
       .then(artists => {
         let index = artists.findIndex(a => a.id === artist.id);
-        artists[index] = artist;
+        if (index !== -1) {
+          artists[index] = artist;
+        } else {
+          artists.push(artist);
+        }
         return this.saveArtists(artists);
       });
   }

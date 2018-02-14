@@ -49,6 +49,8 @@ let words = {
   songs_from_recently_played: 'canciones de la lista de reproducciones recientes',
   delete_from_most_played: 'Eliminar de Más Reproducidos',
   delete_from_recently_played: 'Eliminar de Recientes',
+  unknown_artist: 'Artista desconocido',
+  unknown_album: 'Album desconocido',
 
   settings_sectionTitle_lookAndFeel: 'Apariencia',
   settings_lookAndFeel_languague: 'Idioma',

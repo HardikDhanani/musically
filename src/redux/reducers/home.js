@@ -189,6 +189,11 @@ export default function home(state = initialState, action = {}) {
           }
         })
       }
+    case 'APP_SONGS_ADDED':
+      return {
+        ...state,
+        selectedSongs: state.selectedSongs.concat(action.payload.songs)
+      }
     default:
       return state;
   }

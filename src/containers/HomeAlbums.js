@@ -52,6 +52,7 @@ class HomeAlbums extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return nextProps.itemViewMode !== this.props.itemViewMode
       || nextProps.albums !== this.props.albums
+      || nextProps.albums.length !== this.props.albums.length
       || nextProps.language !== this.props.language
       || nextState.lastPosition !== this.state.lastPosition;
   }
@@ -65,7 +66,8 @@ class HomeAlbums extends Component {
           !this.props.isReady ?
             <BodyActivityIndicator /> :
             <FlatList
-              data={this.state.albums}
+              extraData={this.props.albums.map(a => a)}
+              data={this.props.albums}
               showsVerticalScrollIndicator={false}
               onEndReached={this._handleOnEndReached}
               onEndReachedThreshold={0.5}
@@ -91,7 +93,7 @@ class HomeAlbums extends Component {
   _renderRowAlbum(album) {
     return (
       <RowCoverCard
-        title={album.album}
+        title={album.album !== 'null' ? album.album : this.props.dictionary.getWord('unknown_album')}
         detail={album.artist + ' - ' + album.songs.length + ' ' + this.props.dictionary.getWord('songs')}
         cover={album.cover}
         isFavorite={album.isFavorite}
@@ -106,8 +108,8 @@ class HomeAlbums extends Component {
         onPress={() => this.props.navigation.navigate('Album', { album })}
         source={require('../images/default-cover.png')}
         imageUri={album.cover}
-        title={album.album}
-        detail={album.artist} />
+        title={album.album !== 'null' ? album.album : this.props.dictionary.getWord('unknown_album')}
+        detail={album.artist !== 'null' ? album.artist : this.props.dictionary.getWord('unknown_artist')} />
     );
   }
 

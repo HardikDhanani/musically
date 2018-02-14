@@ -30,8 +30,8 @@ export default function artist(state = initialState, action = {}) {
       albums = JSON.parse(JSON.stringify(albums));
 
       let songs = albums ? [].concat.apply([], albums.map(a => a.songs)) : [];
-      songs = JSON.parse(JSON.stringify(songs.filter(song => song.reproductions > 0)));
-      topSongs = songsSelector.orderByReproductionsDesc(songs).slice(0, 5);
+      songs = JSON.parse(JSON.stringify(songs));
+      topSongs = songsSelector.orderByReproductionsDesc(songs.filter(song => song.reproductions > 0)).slice(0, 5);
 
       return {
         ...state,

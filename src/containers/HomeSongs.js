@@ -90,6 +90,7 @@ class HomeSongs extends Component {
     this._shufflePlay = this._shufflePlay.bind(this);
     this._handleOnEndReached = this._handleOnEndReached.bind(this);
     this._handleMultiSelecteModeOnEndReached = this._handleMultiSelecteModeOnEndReached.bind(this);
+    this._onLongPress = this._onLongPress.bind(this);
   }
 
   componentWillMount() {
@@ -101,27 +102,36 @@ class HomeSongs extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.songs && this.state.lastPosition === 0) {
-      this.setState({
-        songs: nextProps.songs.slice(0, FETCH_NUMBER),
-        lastPosition: FETCH_NUMBER
-      });
-    }
+    // if (this.props.scanningSongs) {
+    //   this.setState({
+    //     songs: nextProps.songs
+    //   });
+    // } else {
+    //   if (nextProps.songs && this.state.lastPosition === 0) {
+    //     this.setState({
+    //       songs: nextProps.songs.slice(0, FETCH_NUMBER),
+    //       lastPosition: FETCH_NUMBER
+    //     });
+    //   }
 
-    if (nextProps.selectedSongs && this.state.multiSelectModeLastPosition === 0) {
-      this.setState({
-        selectedSongs: nextProps.selectedSongs.slice(0, FETCH_NUMBER),
-        multiSelectModeLastPosition: FETCH_NUMBER
-      });
-    } else {
-      this.setState({
-        selectedSongs: nextProps.selectedSongs.slice(0, this.state.selectedSongs.length)
-      });
-    }
+    //   if (nextProps.selectedSongs && this.state.multiSelectModeLastPosition === 0) {
+    //     this.setState({
+    //       selectedSongs: nextProps.selectedSongs.slice(0, FETCH_NUMBER),
+    //       multiSelectModeLastPosition: FETCH_NUMBER
+    //     });
+    //   } else {
+    //     this.setState({
+    //       selectedSongs: nextProps.selectedSongs.slice(0, this.state.selectedSongs.length)
+    //     });
+    //   }
+    // }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.songs !== this.props.songs
+    return nextProps.songs.length !== this.props.songs.length
+      || nextProps.songs !== this.props.songs
+      || nextProps.scanningSongs !== this.props.scanningSongs
+      || nextProps.selectedSongs.length !== this.props.selectedSongs.length
       || nextProps.selectedSongs !== this.props.selectedSongs
       || nextProps.showMenu !== this.props.showMenu
       || nextProps.targetMenu !== this.props.targetMenu
@@ -152,25 +162,27 @@ class HomeSongs extends Component {
 
   _renderList() {
     if (this.props.multiSelectModeEnabled) {
+      // onEndReached={this._handleMultiSelecteModeOnEndReached}
+      // onEndReachedThreshold={0.5}
       return (
         <FlatList
-          data={this.state.selectedSongs}
+          data={this.props.selectedSongs}
           showsVerticalScrollIndicator={false}
-          onEndReached={this._handleMultiSelecteModeOnEndReached}
-          onEndReachedThreshold={0.5}
+
           renderItem={({ item }) => this._renderMultiSelectModeSong(item)}
           keyExtractor={(item, index) => index}
           getItemLayout={(data, index) => ({ length: styles._rowCard.height, offset: styles._rowCard.height * index, index })}
           style={styles.container} />
       );
     }
-
+    // onEndReached={this._handleOnEndReached}
+    // onEndReachedThreshold={0.5}
     return (
       <FlatList
-        data={this.state.songs}
+        extraData={this.props.songs.map(s => s)}
+        data={this.props.songs}
         showsVerticalScrollIndicator={false}
-        onEndReached={this._handleOnEndReached}
-        onEndReachedThreshold={0.5}
+
         renderItem={this._renderSong}
         keyExtractor={(item, index) => index}
         getItemLayout={(data, index) => ({ length: styles._rowCard.height, offset: styles._rowCard.height * index, index })}
@@ -190,21 +202,21 @@ class HomeSongs extends Component {
       <SongCard
         key={song.index}
         id={song.item.id}
-        name={song.item.title}
+        name={song.item.title || song.item.fileName}
         artist={song.item.artist}
         isFavorite={song.item.isFavorite}
         isPlaying={isPlaying}
         onOptionPress={() => this.props.setMenu(targetMenu)}
         onPlayPress={() => this._playSongs([song.item])}
         onLikePress={() => this.props.like('song', song.item)}
-        onLongPress={() => this.props.enableMultiSelectMode(song.item.id)} />
+        onLongPress={() => this._onLongPress(song.item)} />
     );
   }
 
   _renderMultiSelectModeSong(song) {
     return (
       <SongCardWithCheck
-        title={song.title}
+        title={song.title || song.fileName}
         artist={song.artist}
         duration={parseInt(song.duration)}
         selected={song.selected}
@@ -233,6 +245,12 @@ class HomeSongs extends Component {
     );
   }
 
+  _onLongPress(song) {
+    if (!this.props.scanningSongs) {
+      this.props.enableMultiSelectMode(song.id)
+    }
+  }
+
   _addToQueue(songs) {
     this.props.setMenu(null);
     this.props.addToQueue(songs);
@@ -259,13 +277,13 @@ class HomeSongs extends Component {
   }
 
   _handleOnEndReached(info) {
-    if (this.state.songs.length < this.props.songs.length) {
-      let songs = this.state.songs.concat(this.props.songs.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
-      this.setState({
-        songs,
-        lastPosition: this.state.lastPosition + FETCH_NUMBER
-      });
-    }
+    // if (this.state.songs.length < this.props.songs.length) {
+    //   let songs = this.state.songs.concat(this.props.songs.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
+    //   this.setState({
+    //     songs,
+    //     lastPosition: this.state.lastPosition + FETCH_NUMBER
+    //   });
+    // }
   }
 
   _handleMultiSelecteModeOnEndReached(info) {
@@ -282,6 +300,7 @@ class HomeSongs extends Component {
 const mapStateToProps = state => {
   return {
     dictionary: state.app.dictionary,
+    scanningSongs: state.app.scanningSongs,
     songs: state.app.songs,
     selectedSongs: state.home.selectedSongs,
     showMenu: state.app.showMenu,

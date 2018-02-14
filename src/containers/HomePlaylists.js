@@ -84,7 +84,7 @@ class HomePlaylists extends Component {
           }
         </Body>
         {
-          this.props.isReady ?
+          (this.props.isReady && !this.props.scanningSongs) ?
             <AddPlaylistButton hide={this.props.selectedSection !== 'playlists'} bottom={80} style={styles.addButton} onPress={this.props.createNewPlaylistForm} /> :
             null
         }
@@ -227,7 +227,8 @@ const mapStateToProps = state => {
     dictionary: state.app.dictionary,
     selectedSection: state.home.selectedSection,
     showNewPlaylistForm: state.home.showNewPlaylistForm,
-    itemViewMode: state.home.itemViewMode
+    itemViewMode: state.home.itemViewMode,
+    scanningSongs: state.app.scanningSongs
   }
 }
 
