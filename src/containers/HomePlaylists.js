@@ -26,20 +26,20 @@ const styles = EStyleSheet.create({
   }
 });
 
-const FETCH_NUMBER = 40;
+const FETCH_NUMBER = 10;
 
 class HomePlaylists extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      playlists: [],
-      lastPosition: 0
-    }
+    // this.state = {
+    //   playlists: [],
+    //   lastPosition: 0
+    // }
 
     this._showNewPlaylistForm = this._showNewPlaylistForm.bind(this);
     this._getPlaylistName = this._getPlaylistName.bind(this);
-    this._handleOnEndReached = this._handleOnEndReached.bind(this);
+    // this._handleOnEndReached = this._handleOnEndReached.bind(this);
     this._renderPlaylist = this._renderPlaylist.bind(this);
     this._renderRowPlaylist = this._renderRowPlaylist.bind(this);
     this._renderCardPlaylist = this._renderCardPlaylist.bind(this);
@@ -51,20 +51,28 @@ class HomePlaylists extends Component {
   //       playlists: nextProps.playlists.slice(0, FETCH_NUMBER),
   //       lastPosition: FETCH_NUMBER
   //     });
+  //   } else if (nextProps.playlists.length != this.props.playlists.length) {
+  //     let playlists = this.state.playlists.concat(this.props.playlists.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
+  //     this.setState({
+  //       playlists,
+  //       lastPosition: this.state.lastPosition + FETCH_NUMBER
+  //     });
   //   }
   // }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.itemViewMode !== this.props.itemViewMode
-      || nextProps.playlists !== this.props.playlists
-      || nextProps.language !== this.props.language
-      || nextProps.isReady !== this.props.isReady
-      || nextProps.selectedSection !== this.props.selectedSection
-      || nextProps.showNewPlaylistForm !== this.props.showNewPlaylistForm
-      || nextState.lastPosition !== this.state.lastPosition;
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return nextProps.itemViewMode !== this.props.itemViewMode
+  //     || nextProps.playlists !== this.props.playlists
+  //     || nextProps.language !== this.props.language
+  //     || nextProps.isReady !== this.props.isReady
+  //     || nextProps.selectedSection !== this.props.selectedSection
+  //     || nextProps.showNewPlaylistForm !== this.props.showNewPlaylistForm
+  //     || nextState.lastPosition !== this.state.lastPosition;
+  // }
 
   render() {
+// onEndReached={this._handleOnEndReached}
+// onEndReachedThreshold={0.5}
     return (
       <View>
         <Body hasPaginationHeader={true}>
@@ -72,10 +80,8 @@ class HomePlaylists extends Component {
             !this.props.isReady ?
               <BodyActivityIndicator /> :
               <FlatList
-                data={this.state.playlists}
+                data={this.props.playlists}
                 showsVerticalScrollIndicator={false}
-                onEndReached={this._handleOnEndReached}
-                onEndReachedThreshold={0.5}
                 renderItem={({ item }) => this._renderPlaylist(item)}
                 keyExtractor={(item, index) => 'column_' + item.id}
                 style={{ flexDirection: 'column', alignSelf: 'flex-start' }}

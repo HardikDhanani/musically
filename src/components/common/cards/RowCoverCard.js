@@ -81,6 +81,7 @@ class RowCoverCard extends PureComponent {
 RowCoverCard.propTypes = {
   imageUri: PropTypes.string,
   title: PropTypes.string.isRequired,
+  showFavoriteButton: PropTypes.bool,
   detail: PropTypes.string,
   isFavorite: PropTypes.bool,
   onPress: PropTypes.func,

@@ -37,7 +37,7 @@ export default function player(state = initialState, action = {}) {
     case 'PLAYER_LOADING_SUCCESS':
       return {
         ...state,
-        isFavorite: action.payload.currentSong.isFavorite,
+        isFavorite: action.payload.currentSong ? action.payload.currentSong.isFavorite : false,
         currentSong: action.payload.currentSong,
         currentIndex: action.payload.currentIndex,
         queue: action.payload.queue,
@@ -51,7 +51,6 @@ export default function player(state = initialState, action = {}) {
     case 'PLAYER_SONG_CHANGED':
       return {
         ...state,
-        isFavorite: action.payload.currentSong.isFavorite,
         currentSong: action.payload.currentSong,
         currentIndex: action.payload.currentIndex,
         elapsedTime: 0

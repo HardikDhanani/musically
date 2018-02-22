@@ -23,56 +23,53 @@ const styles = EStyleSheet.create({
   }
 });
 
-const FETCH_NUMBER = 40;
+const FETCH_NUMBER = 20;
 
 class HomeArtists extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      artists: [],
-      lastPosition: 0
-    }
+    // this.state = {
+    //   artists: [],
+    //   lastPosition: 0
+    // }
 
     this._renderArtist = this._renderArtist.bind(this);
     this._renderRowArtist = this._renderRowArtist.bind(this);
     this._renderCardArtist = this._renderCardArtist.bind(this);
-    this._handleOnEndReached = this._handleOnEndReached.bind(this);
+    // this._handleOnEndReached = this._handleOnEndReached.bind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.artists && this.state.lastPosition === 0) {
-      this.setState({
-        artists: nextProps.artists.slice(0, FETCH_NUMBER),
-        lastPosition: FETCH_NUMBER
-      });
-    }
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   if (nextProps.artists && this.state.lastPosition === 0) {
+  //     this.setState({
+  //       artists: nextProps.artists.slice(0, FETCH_NUMBER),
+  //       lastPosition: FETCH_NUMBER
+  //     });
+  //   }
+  // }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.itemViewMode !== this.props.itemViewMode
-      || nextProps.artists !== this.props.artists
-      || nextProps.artists.length !== this.props.artists.length
-      || nextProps.language !== this.props.language
-      || nextState.lastPosition !== this.state.lastPosition;
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return nextProps.itemViewMode !== this.props.itemViewMode
+  //     || nextProps.artists !== this.props.artists
+  //     || nextProps.artists.length !== this.props.artists.length
+  //     || nextProps.language !== this.props.language
+  //     || nextState.lastPosition !== this.state.lastPosition;
+  // }
 
   render() {
-    let itemHeight = this.props.itemViewMode === 'row' ? styles._rowCard.height : styles._coverCard.height;
+// onEndReached={this._handleOnEndReached}
+// onEndReachedThreshold={0.5}
     return (
       <Body hasPaginationHeader={true}>
         {
           !this.props.isReady ?
             <BodyActivityIndicator /> :
             <FlatList
-              extraData={this.props.artists.map(a => a)}
               data={this.props.artists}
-              showsVerticalScrollIndicator={false}
-              onEndReached={this._handleOnEndReached}
-              onEndReachedThreshold={0.5}
               renderItem={({ item }) => this._renderArtist(item)}
               keyExtractor={(item, index) => index}
-              getItemLayout={(data, index) => ({ length: itemHeight, offset: itemHeight * index, index })}
+              showsVerticalScrollIndicator={false}
               style={{ flexDirection: 'column', alignSelf: 'flex-start' }}
               numColumns={this.props.itemViewMode === 'row' ? 1 : 2}
               key={this.props.itemViewMode} />
@@ -98,7 +95,7 @@ class HomeArtists extends Component {
         detail={artist.albums.length + ' ' + this.props.dictionary.getWord('albums') + ' - ' + songsCount + ' ' + this.props.dictionary.getWord('songs')}
         cover={artist.cover}
         isFavorite={artist.isFavorite}
-        onPress={() => this.props.navigation.navigate('Artist', { album: artist })}
+        onPress={() => this.props.navigation.navigate('Artist', { artist })}
         onLikePress={() => this.props.like('artist', artist)} />
     );
   }
@@ -106,22 +103,22 @@ class HomeArtists extends Component {
   _renderCardArtist(artist) {
     return (
       <CoverCard
-        onPress={() => this.props.navigation.navigate('Artist', { artist: artist })}
+        onPress={() => this.props.navigation.navigate('Artist', { artist })}
         source={require('../images/default-cover.png')}
         imageUri={artist.cover}
         title={artist.artist} />
     );
   }
 
-  _handleOnEndReached(info) {
-    if (this.state.artists.length < this.props.artists.length) {
-      let artists = this.state.artists.concat(this.props.artists.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
-      this.setState({
-        artists,
-        lastPosition: this.state.lastPosition + FETCH_NUMBER
-      });
-    }
-  }
+  // _handleOnEndReached(info) {
+  //   if (this.state.artists.length < this.props.artists.length) {
+  //     let artists = this.state.artists.concat(this.props.artists.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
+  //     this.setState({
+  //       artists,
+  //       lastPosition: this.state.lastPosition + FETCH_NUMBER
+  //     });
+  //   }
+  // }
 }
 
 const mapStateToProps = state => {

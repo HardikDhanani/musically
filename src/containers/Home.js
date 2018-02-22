@@ -53,7 +53,8 @@ class Home extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return nextProps.itemViewMode !== this.props.itemViewMode
       || nextProps.selectedSection !== this.props.selectedSection
-      || nextProps.language !== this.props.language;
+      || nextProps.language !== this.props.language
+      || nextProps.scanningSongs !== this.props.scanningSongs;
   }
 
   render() {
@@ -174,7 +175,6 @@ const mapStateToProps = state => {
     language: state.app.language,
     selectedSection: state.home.selectedSection,
     itemViewMode: state.home.itemViewMode,
-    selectedSongs: state.home.selectedSongs,
     scanningSongs: state.app.scanningSongs
   }
 }

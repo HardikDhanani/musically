@@ -10,6 +10,83 @@ import dictionaries from '../../dictionaries/index';
 
 let _isLoaded = false;
 let _languageManager = new LanguageManager(dictionaries);
+const ONE_MINUTE = 60000;
+
+let timer = null;
+function _setTaskForImages(dispatch) {
+  timer = setInterval(() => {
+    let artistsPromise = LocalService.getArtists();
+    let albumsPromise = LocalService.getAlbums();
+    let songsPromise = LocalService.getSongs();
+
+    Promise.all([artistsPromise, albumsPromise, songsPromise])
+      .then(result => {
+        let artists = result[0];
+        let albums = result[1];
+        let songs = result[2];
+
+        let songsNoScanned = songs.filter(s => s.scanned !== true).slice(0, 20);
+        let ids = songsNoScanned.map(s => s.id);
+
+        if (songsNoScanned.length === 0) {
+          clearInterval(timer);
+        } else {
+          LocalService.scanCovers(ids)
+            .then(covers => {
+              for (let i = 0; i < songsNoScanned.length; i++) {
+                let j = covers.findIndex(c => c.id === songsNoScanned[i].id);
+                if (j !== -1) {
+                  songsNoScanned[i].cover = covers[j].file;
+                }
+
+                songsNoScanned[i].scanned = true;
+
+                j = songs.findIndex(s => s.id === songsNoScanned[i].id);
+                if (j !== -1) {
+                  songs[j] = songsNoScanned[i];
+                }
+
+                j = albums.findIndex(a => a.artist === songsNoScanned[i].artist && a.album === songsNoScanned[i].album);
+                if (j !== -1) {
+                  let k = albums[j].songs.findIndex(s => s.id === songsNoScanned[i].id);
+                  if (k !== -1) {
+                    albums[j].songs[k] = songsNoScanned[i];
+                  }
+
+                  if(songsNoScanned[i].cover){
+                    albums[j].cover = songsNoScanned[i].cover;
+
+                    k = artists.findIndex(a => a.artist === albums[j].artist);
+                    if(k !== -1) {
+                      let m = artists[k].albums.findIndex(a => a.id === albums[j].id);
+                      if(m !== -1) {
+                        artists[k].albums[m] = albums[j];
+                      }
+
+                      artists[k].cover = songsNoScanned[i].cover;
+                    }
+                  }
+                }
+              }
+
+              let saveArtistsPromise = LocalService.saveArtists(artists);
+              let saveAlbumsPromise = LocalService.saveAlbums(albums);
+              let saveSongsPromise = LocalService.saveSongs(songs);
+
+              return Promise.all([saveArtistsPromise, saveAlbumsPromise, saveSongsPromise]);
+            })
+            .then(() => {
+              dispatch(songsChanged(songsNoScanned));
+              dispatch(albumsChanged(albums));
+              dispatch(artistsChanged(artists));
+            });
+        }
+      })
+      .catch(err => {
+        console.log(JSON.stringify(err));
+      });
+  }, ONE_MINUTE);
+}
 
 function _getCurrentLanguage() {
   let DeviceInfo = require('react-native-device-info');
@@ -163,9 +240,13 @@ const scanningSongsStartedAction = () => {
   }
 }
 
-const scanningSongsFinishedAction = () => {
+const scanningSongsFinishedAction = (artists, albums) => {
   return {
-    type: 'APP_SCANNING_SONGS_FINISHED'
+    type: 'APP_SCANNING_SONGS_FINISHED',
+    payload: {
+      artists,
+      albums
+    }
   }
 }
 
@@ -307,9 +388,46 @@ const languageChangedAction = (dictionary, language) => {
   }
 }
 
+const songsChanged = (songs) => {
+  return {
+    type: 'APP_SONGS_CHANGED',
+    payload: {
+      songs
+    }
+  }
+}
+
+const albumsChanged = (albums) => {
+  return {
+    type: 'APP_ALBUMS_CHANGED',
+    payload: {
+      albums
+    }
+  }
+}
+
+const artistsChanged = (artists) => {
+  return {
+    type: 'APP_ARTISTS_CHANGED',
+    payload: {
+      artists
+    }
+  }
+}
+
 const _processSongs = (newSongs, dispatch) => {
   return new Promise(async () => {
     let songs = await LocalService.getSongs()
+    newSongs = newSongs.map(s => {
+      return {
+        ...s,
+        reproductions: 0,
+        isFavorite: false,
+        cover: null,
+        scanned: false
+      }
+    });
+    
     songs = songs.concat(newSongs);
     await LocalService.saveSongs(songs);
     dispatch(songsAdded(newSongs));
@@ -358,6 +476,7 @@ export function start() {
       } else {
         dispatch(starting());
         _initialize(dispatch);
+        _setTaskForImages(dispatch);
 
         setTimeout(() => {
           _isLoaded = true;
@@ -571,8 +690,8 @@ export function scanningSongsFinished() {
             albums[albumIndex] = album;
           }
 
-          dispatch(artistEdited(artist));
-          dispatch(albumEdited(album));
+          // dispatch(artistEdited(artist));
+          // dispatch(albumEdited(album));
         }
 
         return LocalService.saveArtists(artists);
@@ -584,7 +703,7 @@ export function scanningSongsFinished() {
         return LocalService.firstTimeDone();
       })
       .then(() => {
-        dispatch(scanningSongsFinishedAction());
+        dispatch(scanningSongsFinishedAction(artists, albums));
       });
   }
 }

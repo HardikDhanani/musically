@@ -67,18 +67,18 @@ const styles = EStyleSheet.create({
   }
 });
 
-const FETCH_NUMBER = 60;
+const FETCH_NUMBER = 100;
 
 class HomeSongs extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      songs: [],
-      selectedSongs: [],
-      lastPosition: 0,
-      multiSelectModeLastPosition: 0
-    }
+    // this.state = {
+    //   songs: [],
+    //   selectedSongs: [],
+    //   lastPosition: 0,
+    //   multiSelectModeLastPosition: 0
+    // }
 
     this._renderSong = this._renderSong.bind(this);
     this._renderMenu = this._renderMenu.bind(this);
@@ -88,8 +88,8 @@ class HomeSongs extends Component {
     this._renderMultiSelectModeSong = this._renderMultiSelectModeSong.bind(this);
     this._backHandler = this._backHandler.bind(this);
     this._shufflePlay = this._shufflePlay.bind(this);
-    this._handleOnEndReached = this._handleOnEndReached.bind(this);
-    this._handleMultiSelecteModeOnEndReached = this._handleMultiSelecteModeOnEndReached.bind(this);
+    // this._handleOnEndReached = this._handleOnEndReached.bind(this);
+    // this._handleMultiSelecteModeOnEndReached = this._handleMultiSelecteModeOnEndReached.bind(this);
     this._onLongPress = this._onLongPress.bind(this);
   }
 
@@ -101,46 +101,46 @@ class HomeSongs extends Component {
     BackHandler.removeEventListener('hardwareBackPress', this._backHandler);
   }
 
-  componentWillReceiveProps(nextProps) {
-    // if (this.props.scanningSongs) {
-    //   this.setState({
-    //     songs: nextProps.songs
-    //   });
-    // } else {
-    //   if (nextProps.songs && this.state.lastPosition === 0) {
-    //     this.setState({
-    //       songs: nextProps.songs.slice(0, FETCH_NUMBER),
-    //       lastPosition: FETCH_NUMBER
-    //     });
-    //   }
+  // componentWillReceiveProps(nextProps) {
+  //   if (this.props.scanningSongs) {
+  //     this.setState({
+  //       songs: nextProps.songs
+  //     });
+  //   } else {
+  //     if (nextProps.songs && this.state.lastPosition === 0) {
+  //       this.setState({
+  //         songs: nextProps.songs.slice(0, FETCH_NUMBER),
+  //         lastPosition: FETCH_NUMBER
+  //       });
+  //     }
 
-    //   if (nextProps.selectedSongs && this.state.multiSelectModeLastPosition === 0) {
-    //     this.setState({
-    //       selectedSongs: nextProps.selectedSongs.slice(0, FETCH_NUMBER),
-    //       multiSelectModeLastPosition: FETCH_NUMBER
-    //     });
-    //   } else {
-    //     this.setState({
-    //       selectedSongs: nextProps.selectedSongs.slice(0, this.state.selectedSongs.length)
-    //     });
-    //   }
-    // }
-  }
+  //     if (nextProps.selectedSongs && this.state.multiSelectModeLastPosition === 0) {
+  //       this.setState({
+  //         selectedSongs: nextProps.selectedSongs.slice(0, FETCH_NUMBER),
+  //         multiSelectModeLastPosition: FETCH_NUMBER
+  //       });
+  //     } else {
+  //       this.setState({
+  //         selectedSongs: nextProps.selectedSongs.slice(0, this.state.selectedSongs.length)
+  //       });
+  //     }
+  //   }
+  // }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.songs.length !== this.props.songs.length
-      || nextProps.songs !== this.props.songs
-      || nextProps.scanningSongs !== this.props.scanningSongs
-      || nextProps.selectedSongs.length !== this.props.selectedSongs.length
-      || nextProps.selectedSongs !== this.props.selectedSongs
-      || nextProps.showMenu !== this.props.showMenu
-      || nextProps.targetMenu !== this.props.targetMenu
-      || nextProps.playing !== this.props.playing
-      || nextProps.language !== this.props.language
-      || nextProps.multiSelectModeEnabled !== this.props.multiSelectModeEnabled
-      || nextState.lastPosition !== this.state.lastPosition
-      || nextState.multiSelectModeLastPosition !== this.state.multiSelectModeLastPosition;
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return nextProps.songs.length !== this.props.songs.length
+  //     || nextProps.songs !== this.props.songs
+  //     || nextProps.scanningSongs !== this.props.scanningSongs
+  //     || nextProps.selectedSongs.length !== this.props.selectedSongs.length
+  //     || nextProps.selectedSongs !== this.props.selectedSongs
+  //     || nextProps.showMenu !== this.props.showMenu
+  //     || nextProps.targetMenu !== this.props.targetMenu
+  //     || nextProps.playing !== this.props.playing
+  //     || nextProps.language !== this.props.language
+  //     || nextProps.multiSelectModeEnabled !== this.props.multiSelectModeEnabled
+  //     || nextState.lastPosition !== this.state.lastPosition
+  //     || nextState.multiSelectModeLastPosition !== this.state.multiSelectModeLastPosition;
+  // }
 
   render() {
     return (
@@ -151,7 +151,7 @@ class HomeSongs extends Component {
             this._renderList()
         }
         {
-          this.props.isReady ?
+          (this.props.isReady && !this.props.scanningSongs) ?
             <ShuffleSongsButton onPress={() => this._shufflePlay()} hide={!this.props.multiSelectModeEnabled} bottom={80} style={styles.shuffleButton} /> :
             null
         }
@@ -162,30 +162,26 @@ class HomeSongs extends Component {
 
   _renderList() {
     if (this.props.multiSelectModeEnabled) {
-      // onEndReached={this._handleMultiSelecteModeOnEndReached}
-      // onEndReachedThreshold={0.5}
+// onEndReached={this._handleMultiSelecteModeOnEndReached}
+// onEndReachedThreshold={0.5}
       return (
         <FlatList
           data={this.props.selectedSongs}
           showsVerticalScrollIndicator={false}
-
           renderItem={({ item }) => this._renderMultiSelectModeSong(item)}
           keyExtractor={(item, index) => index}
-          getItemLayout={(data, index) => ({ length: styles._rowCard.height, offset: styles._rowCard.height * index, index })}
           style={styles.container} />
       );
     }
-    // onEndReached={this._handleOnEndReached}
-    // onEndReachedThreshold={0.5}
+
+// onEndReached={this._handleOnEndReached}
+// onEndReachedThreshold={0.5}
     return (
       <FlatList
-        extraData={this.props.songs.map(s => s)}
         data={this.props.songs}
         showsVerticalScrollIndicator={false}
-
         renderItem={this._renderSong}
         keyExtractor={(item, index) => index}
-        getItemLayout={(data, index) => ({ length: styles._rowCard.height, offset: styles._rowCard.height * index, index })}
         style={styles.container} />
     );
   }
@@ -276,25 +272,25 @@ class HomeSongs extends Component {
     return false;
   }
 
-  _handleOnEndReached(info) {
-    // if (this.state.songs.length < this.props.songs.length) {
-    //   let songs = this.state.songs.concat(this.props.songs.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
-    //   this.setState({
-    //     songs,
-    //     lastPosition: this.state.lastPosition + FETCH_NUMBER
-    //   });
-    // }
-  }
+  // _handleOnEndReached(info) {
+  //   if (this.state.songs.length < this.props.songs.length) {
+  //     let songs = this.state.songs.concat(this.props.songs.slice(this.state.lastPosition, this.state.lastPosition + FETCH_NUMBER));
+  //     this.setState({
+  //       songs,
+  //       lastPosition: this.state.lastPosition + FETCH_NUMBER
+  //     });
+  //   }
+  // }
 
-  _handleMultiSelecteModeOnEndReached(info) {
-    if (this.state.selectedSongs.length < this.props.selectedSongs.length) {
-      let selectedSongs = this.state.selectedSongs.concat(this.props.selectedSongs.slice(this.state.multiSelectModeLastPosition, this.state.multiSelectModeLastPosition + FETCH_NUMBER));
-      this.setState({
-        selectedSongs,
-        multiSelectModeLastPosition: this.state.multiSelectModeLastPosition + FETCH_NUMBER
-      });
-    }
-  }
+  // _handleMultiSelecteModeOnEndReached(info) {
+  //   if (this.state.selectedSongs.length < this.props.selectedSongs.length) {
+  //     let selectedSongs = this.state.selectedSongs.concat(this.props.selectedSongs.slice(this.state.multiSelectModeLastPosition, this.state.multiSelectModeLastPosition + FETCH_NUMBER));
+  //     this.setState({
+  //       selectedSongs,
+  //       multiSelectModeLastPosition: this.state.multiSelectModeLastPosition + FETCH_NUMBER
+  //     });
+  //   }
+  // }
 }
 
 const mapStateToProps = state => {

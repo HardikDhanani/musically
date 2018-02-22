@@ -3,7 +3,6 @@ package com.musically;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.reactlibrary.RNReactNativeGetMusicFilesPackage;
 import com.horcrux.svg.SvgPackage;
 import com.zmxv.RNSound.RNSoundPackage;
 import com.tanguyantoine.react.MusicControl;
@@ -17,7 +16,7 @@ import com.facebook.soloader.SoLoader;
 import java.util.Arrays;
 import java.util.List;
 
-import com.musically.react.MusicFileManagerPackage; 
+import com.musically.MusicFilesManagerPackage; 
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -31,13 +30,12 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-          new RNReactNativeGetMusicFilesPackage(),
+          new MusicFilesManagerPackage(),
           new LinearGradientPackage(),
           new RNDeviceInfo(),
           new SvgPackage(),
           new RNSoundPackage(),
-          new MusicControl(),
-          new MusicFileManagerPackage()
+          new MusicControl()
       );
     }
   };

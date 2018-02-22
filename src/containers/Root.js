@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import MusicFiles from 'react-native-get-music-files';
+import MusicFilesManager from '../services/MusicFilesManager';
 
 import * as appActions from '../redux/actions/appActions';
 
@@ -31,19 +31,32 @@ class Root extends Component {
     if (nextProps.scanForSongs && !nextProps.scanningSongs) {
       this.props.scanningSongsStarted();
 
-      MusicFiles.getAll({
+      MusicFilesManager.getAll({
         id: true,
         blured: false,
         album: true,
         artist: true,
-        duration: true, //default : true
-        cover: false, //default : true,
+        duration: true,
+        cover: false,
         title: true,
         date: false,
         lyrics: false,
         batchNumber: 10,
-        minimumSongDuration: 10000, //in miliseconds
+        minimumSongDuration: 10000,
       });
+      // MusicFiles.getAll({
+      //   id: true,
+      //   blured: false,
+      //   album: true,
+      //   artist: true,
+      //   duration: true, //default : true
+      //   cover: false, //default : true,
+      //   title: true,
+      //   date: false,
+      //   lyrics: false,
+      //   batchNumber: 10,
+      //   minimumSongDuration: 10000, //in miliseconds
+      // });
     }
   }
 

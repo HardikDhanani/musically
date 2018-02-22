@@ -135,7 +135,8 @@ export default function app(state = initialState, action = {}) {
       }
 
       return {
-        ...state
+        ...state,
+        albums: JSON.parse(JSON.stringify(state.albums))
       }
     case 'APP_ARTIST_EDITED':
       let j = state.artists.findIndex(a => a.id === action.payload.artist.id);
@@ -146,7 +147,8 @@ export default function app(state = initialState, action = {}) {
       }
 
       return {
-        ...state
+        ...state,
+        artists: JSON.parse(JSON.stringify(state.artists))
       }
     case 'APP_START_SCANNING_FOR_SONGS':
       return {
@@ -162,7 +164,24 @@ export default function app(state = initialState, action = {}) {
       return {
         ...state,
         scanningSongs: false,
-        scanForSongs: false
+        scanForSongs: false,
+        artists: JSON.parse(JSON.stringify(action.payload.artists)),
+        albums: JSON.parse(JSON.stringify(action.payload.albums))
+      }
+    case 'APP_SONGS_CHANGED':
+      return {
+        ...state,
+        songs: JSON.parse(JSON.stringify(action.payload.songs))
+      }
+    case 'APP_ALBUMS_CHANGED':
+      return {
+        ...state,
+        albums: JSON.parse(JSON.stringify(action.payload.albums))
+      }
+    case 'APP_ARTISTS_CHANGED':
+      return {
+        ...state,
+        artists: JSON.parse(JSON.stringify(action.payload.artists))
       }
     default:
       return state;

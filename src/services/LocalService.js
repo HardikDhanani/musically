@@ -1,18 +1,14 @@
 import { AsyncStorage, NativeModules } from 'react-native';
 import Storage from 'react-native-storage';
-import MusicFiles from 'react-native-get-music-files';
+import MusicFilesManager from './MusicFilesManager';
 
 import Cache from './Cache';
-
-// const FAVORITES_PLAYLIST_NAME = 'favorites';
-// const RECENTLY_PLAYED_PLAYLIST_NAME = 'recently played';
-// const MOST_PLAYED_PLAYLIST_NAME = 'most played';
 
 class LocalService {
   constructor() {
     this.__initLocalStorage = this.__initLocalStorage.bind(this);
     this._getStorage = this._getStorage.bind(this);
-    this.scanForSongs = this.scanForSongs.bind(this);
+    this.scanCovers = this.scanCovers.bind(this);
     this.saveSession = this.saveSession.bind(this);
     this.saveSongs = this.saveSongs.bind(this);
     this.saveArtists = this.saveArtists.bind(this);
@@ -54,37 +50,14 @@ class LocalService {
     return this._storage;
   }
 
-  // scanForSongs() {
-  //   return new Promise((resolve, reject) => {
-  //     NativeModules.MusicFileManager.getAll(false, err => {
-  //       console.log('Error scaning songs: ' + err);
-  //       reject(err);
-  //     }, (response) => {
-  //       resolve(response);
-  //     });
-  //   });
-  // }
-  scanForSongs() {
-    // return MusicFiles.getAll({
-    //   id: true,
-    //   blured: false,
-    //   album: true,
-    //   artist: true,
-    //   duration: true, //default : true
-    //   cover: false, //default : true,
-    //   title: true,
-    //   date: false,
-    //   lyrics: false,
-    //   batchNumber: 5, //get 5 songs per batch
-    //   minimumSongDuration: 10000, //in miliseconds,
-    //   fields: ['title', 'artwork', 'duration', 'artist', 'genre', 'lyrics', 'albumTitle']
-    // })
-    //   .then(, (response) => {
-    //     alert(JSON.stringify(response));
-    //   })
-    //   .catch(, (error) => {
-    //     alert("ERROR: " + error);
-    //   });
+  scanCovers(ids) {
+    return MusicFilesManager.getCovers(ids)
+      .then((response) => {
+        return Promise.resolve(response);
+      })
+      .catch((error) => {
+        return Promise.reject(error);
+      });
   }
 
   saveSession(session) {
@@ -368,17 +341,7 @@ class LocalService {
   getUserPlaylists() {
     return this.getPlaylists()
       .then(playlists => {
-        return playlists.filter(p => {
-          switch (p.name.toLowerCase()) {
-            case FAVORITES_PLAYLIST_NAME:
-            case RECENTLY_PLAYED_PLAYLIST_NAME:
-            case MOST_PLAYED_PLAYLIST_NAME:
-              return false;
-
-            default:
-              return true;
-          }
-        });
+        return playlists;
       });
   }
 

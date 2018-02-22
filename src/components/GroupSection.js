@@ -33,15 +33,20 @@ class GroupSection extends Component {
   render() {
     return (
       <View>
-        <View style={styles.title}>
-          <Text style={styles.text}>{this.props.title}</Text>
-        </View>
+        {
+          (!this.props.data || this.props.data.length === 0) ?
+            null :
+            <View style={styles.title}>
+              <Text style={styles.text}>{this.props.title}</Text>
+            </View>
+        }
         <FlatList
           getItemLayout={this.props.getItemLayout}
           data={this.props.data}
           renderItem={this.props.renderItem}
           keyExtractor={this.props.keyExtractor}
-          numColumns={this.props.numColumns} />
+          numColumns={this.props.numColumns}
+          key={this.props.numColumns} />
       </View>
     );
   }

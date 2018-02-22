@@ -1,4 +1,4 @@
-package com.reactlibrary;
+package com.musically;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -27,14 +27,13 @@ import com.facebook.react.bridge.WritableNativeMap;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.reactlibrary.ReactNativeFileManager;
+import com.musically.FileManager;
 
 import org.farng.mp3.MP3File;
 
-public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule {
+public class MusicFilesManagerModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
-    private boolean getBluredImages = false;
     private boolean getArtistFromSong = false;
     private boolean getDurationFromSong = true;
     private boolean getTitleFromSong = true;
@@ -48,22 +47,18 @@ public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule
     private int minimumSongDuration = 0;
     private int songsPerIteration = 0;
 
-    public RNReactNativeGetMusicFilesModule(ReactApplicationContext reactContext) {
+    public MusicFilesManagerModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
     }
 
     @Override
     public String getName() {
-        return "RNReactNativeGetMusicFiles";
+        return "MusicFilesManager";
     }
 
     @ReactMethod
     public void getAll(ReadableMap options, final Callback errorCallback, final Callback successCallback) {
-
-        if (options.getBoolean("blured")) {
-            getBluredImages = options.getBoolean("blured");
-        }
 
         if (options.hasKey("artist")) {
             getArtistFromSong = options.getBoolean("artist");
@@ -120,7 +115,7 @@ public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule
         Thread bgThread = new Thread(null, new Runnable() {
             @Override
             public void run() {
-                ReactNativeFileManager fcm = new ReactNativeFileManager();
+                FileManager fcm = new FileManager();
                 ContentResolver musicResolver = getCurrentActivity().getContentResolver();
                 Uri musicUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
@@ -207,17 +202,9 @@ public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule
                                                     .extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DATE));
                                         }
 
-                                        // if (getLyricsFromSong) {
-                                        //     String lyrics = mp3file.getID3v2Tag().getSongLyric();
-                                        //     items.putString("lyrics", lyrics);
-                                        // }
-
                                         if (getCoverFromSong) {
 
-                                            // ReactNativeFileManager fcm = new ReactNativeFileManager();
-
                                             String encoded = "";
-                                            String blurred = "";
                                             byte[] albumImageData = mmr.getEmbeddedPicture();
 
                                             if (albumImageData != null) {
@@ -232,18 +219,6 @@ public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule
                                                 } catch (Exception e) {
                                                     // Just let images empty
                                                     Log.e("error in image", e.getMessage());
-                                                }
-
-                                                if (getBluredImages) {
-                                                    try {
-                                                        String pathToImg = Environment.getExternalStorageDirectory()
-                                                                + "/" + songId + "-blur.jpg";
-                                                        blurred = fcm.saveBlurImageToStorageAndGetPath(pathToImg,
-                                                                songImage);
-                                                        items.putString("blur", "file://" + blurred);
-                                                    } catch (Exception e) {
-                                                        Log.e("error in image-blured", e.getMessage());
-                                                    }
                                                 }
                                             }
                                         }
@@ -320,7 +295,7 @@ public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule
         Thread bgThread = new Thread(null, new Runnable() {
             @Override
             public void run() {
-                ReactNativeFileManager fcm = new ReactNativeFileManager();
+                FileManager fcm = new FileManager();
                 ContentResolver musicResolver = getCurrentActivity().getContentResolver();
                 Uri musicUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0 AND (";
@@ -366,7 +341,7 @@ public class RNReactNativeGetMusicFilesModule extends ReactContextBaseJavaModule
                                             item.putString("id", String.valueOf(songId));
                                             item.putString("file", finalPath);
                                             
-                                            items.putMap(item);
+                                            items.pushMap(item);
                                         }
                                     }
                                 } catch (Exception e) {
