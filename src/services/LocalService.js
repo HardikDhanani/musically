@@ -1,17 +1,14 @@
 import { AsyncStorage, NativeModules } from 'react-native';
 import Storage from 'react-native-storage';
+import MusicFilesManager from './MusicFilesManager';
 
 import Cache from './Cache';
-
-// const FAVORITES_PLAYLIST_NAME = 'favorites';
-// const RECENTLY_PLAYED_PLAYLIST_NAME = 'recently played';
-// const MOST_PLAYED_PLAYLIST_NAME = 'most played';
 
 class LocalService {
   constructor() {
     this.__initLocalStorage = this.__initLocalStorage.bind(this);
     this._getStorage = this._getStorage.bind(this);
-    this.scanForSongs = this.scanForSongs.bind(this);
+    this.scanCovers = this.scanCovers.bind(this);
     this.saveSession = this.saveSession.bind(this);
     this.saveSongs = this.saveSongs.bind(this);
     this.saveArtists = this.saveArtists.bind(this);
@@ -53,15 +50,14 @@ class LocalService {
     return this._storage;
   }
 
-  scanForSongs() {
-    return new Promise((resolve, reject) => {
-      NativeModules.MusicFileManager.getAll(false, err => {
-        console.log('Error scaning songs: ' + err);
-        reject(err);
-      }, (response) => {
-        resolve(response);
+  scanCovers(ids) {
+    return MusicFilesManager.getCovers(ids)
+      .then((response) => {
+        return Promise.resolve(response);
+      })
+      .catch((error) => {
+        return Promise.reject(error);
       });
-    });
   }
 
   saveSession(session) {
@@ -143,7 +139,11 @@ class LocalService {
     return this.getAlbums()
       .then(albums => {
         let index = albums.findIndex(a => a.id === album.id);
-        albums[index] = album;
+        if (index !== -1) {
+          albums[index] = album;
+        } else {
+          albums.push(album);
+        }
         return this.saveAlbums(albums);
       });
   }
@@ -152,7 +152,11 @@ class LocalService {
     return this.getArtists()
       .then(artists => {
         let index = artists.findIndex(a => a.id === artist.id);
-        artists[index] = artist;
+        if (index !== -1) {
+          artists[index] = artist;
+        } else {
+          artists.push(artist);
+        }
         return this.saveArtists(artists);
       });
   }
@@ -337,17 +341,7 @@ class LocalService {
   getUserPlaylists() {
     return this.getPlaylists()
       .then(playlists => {
-        return playlists.filter(p => {
-          switch (p.name.toLowerCase()) {
-            case FAVORITES_PLAYLIST_NAME:
-            case RECENTLY_PLAYED_PLAYLIST_NAME:
-            case MOST_PLAYED_PLAYLIST_NAME:
-              return false;
-
-            default:
-              return true;
-          }
-        });
+        return playlists;
       });
   }
 

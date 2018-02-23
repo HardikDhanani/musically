@@ -2,46 +2,42 @@ import songsSelector from '../selectors/songs';
 
 const initialState = {
   criteria: null,
-  result: {
-    byTitle: [],
-    byArtist: [],
-    byAlbum: [],
-    byGenre: [],
-  },
+  songs: [],
+  albums: [],
+  artists: [],
+  playlists: [],
   isSearching: false,
   mustCompleteCriteria: true,
 };
 
 export default function search(state = initialState, action = {}) {
   switch (action.type) {
-    case 'SEARCHING':
+    case 'SEARCH_SEARCHING':
       return {
         ...state,
         criteria: action.payload.criteria,
         isSearching: true,
         mustCompleteCriteria: false
       }
-    case 'SEARCHING_SUCCESS':
+    case 'SEARCH_SEARCHING_SUCCESS':
       return {
         ...state,
         criteria: action.payload.criteria,
-        result: {
-          byTitle: songsSelector.orderBy(action.payload.result.byTitle, s => s.title),
-          byAlbum: songsSelector.orderBy(songsSelector.groupByAlbum(action.payload.result.byAlbum), a => a.album),
-          byArtist: songsSelector.orderBy(songsSelector.groupByArtists(action.payload.result.byArtist), a => a.artist),
-          byGenre: songsSelector.orderBy(songsSelector.groupByGenre(action.payload.result.byGenre), g => g.genre),
-        },
+        songs: songsSelector.orderBy(action.payload.result.songs, s => s.title),
+        albums: songsSelector.orderBy(action.payload.result.albums, a => a.album),
+        artists: songsSelector.orderBy(action.payload.result.artists, a => a.artist),
+        playlists: songsSelector.orderBy(action.payload.result.playlists, p => p.name),
         isSearching: false,
         mustCompleteCriteria: false
       }
-    case 'SEARCHING_ERROR':
+    case 'SEARCH_SEARCHING_ERROR':
       return {
         ...state,
         criteria: action.payload.criteria,
         isSearching: false,
         mustCompleteCriteria: false
       }
-    case 'SEARCHING_MUST_COMPLETE_CRITERIA':
+    case 'SEARCH_SEARCHING_MUST_COMPLETE_CRITERIA':
       return {
         ...state,
         mustCompleteCriteria: true

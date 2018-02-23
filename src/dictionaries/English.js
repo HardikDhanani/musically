@@ -49,6 +49,10 @@ let words = {
   songs_from_recently_played: 'songs from recently played list',
   delete_from_most_played: 'Delete from most played list',
   delete_from_recently_played: 'Delete from recently played list',
+  unknown_artist: 'Unknown artist',
+  unknown_album: 'Unknown album',
+  start_typing_something: 'Start typing something',
+  find_music: 'Find songs, artists, albums and playlists',
 
   settings_sectionTitle_lookAndFeel: 'Look & Feel',
   settings_lookAndFeel_languague: 'Language',

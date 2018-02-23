@@ -16,7 +16,7 @@ import com.facebook.soloader.SoLoader;
 import java.util.Arrays;
 import java.util.List;
 
-import com.musically.react.MusicFileManagerPackage; 
+import com.musically.MusicFilesManagerPackage; 
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -30,12 +30,12 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+          new MusicFilesManagerPackage(),
           new LinearGradientPackage(),
           new RNDeviceInfo(),
           new SvgPackage(),
           new RNSoundPackage(),
-          new MusicControl(),
-          new MusicFileManagerPackage()
+          new MusicControl()
       );
     }
   };

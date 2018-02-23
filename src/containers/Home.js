@@ -11,12 +11,12 @@ import HomePlaylists from './HomePlaylists';
 import HomeArtists from './HomeArtists';
 import HomeAlbums from './HomeAlbums';
 import HomeSongs from './HomeSongs';
-
 import ControlPanel from './ControlPanel';
 import HomeHeader from '../components/home/HomeHeader';
 import PlayerFooter from './PlayerFooter';
 import PaginationHeader from '../components/PaginationHeader';
 import Container from '../components/common/containers/Container';
+import FadeInOutMessage from '../components/common/FadeInOutMessage';
 
 const styles = EStyleSheet.create({
   container: {
@@ -53,7 +53,8 @@ class Home extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     return nextProps.itemViewMode !== this.props.itemViewMode
       || nextProps.selectedSection !== this.props.selectedSection
-      || nextProps.language !== this.props.language;
+      || nextProps.language !== this.props.language
+      || nextProps.scanningSongs !== this.props.scanningSongs;
   }
 
   render() {
@@ -79,6 +80,11 @@ class Home extends Component {
             <HomeAlbums navigation={this.props.navigation} />
             <HomeSongs navigation={this.props.navigation} />
           </Swiper>
+          {
+            this.props.scanningSongs ?
+              <FadeInOutMessage text={'Scanning library...'} /> :
+              null
+          }
           <PlayerFooter navigation={this.props.navigation} />
         </Container>
       </ControlPanel>
@@ -168,7 +174,8 @@ const mapStateToProps = state => {
     dictionary: state.app.dictionary,
     language: state.app.language,
     selectedSection: state.home.selectedSection,
-    itemViewMode: state.home.itemViewMode
+    itemViewMode: state.home.itemViewMode,
+    scanningSongs: state.app.scanningSongs
   }
 }
 

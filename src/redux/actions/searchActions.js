@@ -2,7 +2,7 @@ import LocalService from '../../services/LocalService';
 
 export const searching = (criteria) => {
   return {
-    type: 'SEARCHING',
+    type: 'SEARCH_SEARCHING',
     payload: {
       criteria
     }
@@ -11,7 +11,7 @@ export const searching = (criteria) => {
 
 export const searchingSuccess = (criteria, result) => {
   return {
-    type: 'SEARCHING_SUCCESS',
+    type: 'SEARCH_SEARCHING_SUCCESS',
     payload: {
       result,
       criteria
@@ -21,7 +21,7 @@ export const searchingSuccess = (criteria, result) => {
 
 export const searchingError = (criteria) => {
   return {
-    type: 'SEARCHING_ERROR',
+    type: 'SEARCH_SEARCHING_ERROR',
     payload: {
       criteria
     }
@@ -30,39 +30,11 @@ export const searchingError = (criteria) => {
 
 export const searchingMustCompleteCriteria = () => {
   return {
-    type: 'SEARCHING_MUST_COMPLETE_CRITERIA',
+    type: 'SEARCH_SEARCHING_MUST_COMPLETE_CRITERIA',
     payload: {
       criteria: null
     }
   }
-}
-
-function _filter(songs, criteria) {
-  let byTitle = [];
-  let byArtist = [];
-  let byAlbum = [];
-  let byGenre = [];
-
-  songs.forEach(song => {
-    if (song.title && song.title.toLowerCase().includes(criteria.toLowerCase()))
-      byTitle.push(song);
-
-    if (song.artist && song.artist.toLowerCase().includes(criteria.toLowerCase()))
-      byArtist.push(song);
-
-    if (song.album && song.album.toLowerCase().includes(criteria.toLowerCase()))
-      byAlbum.push(song);
-
-    if (song.genre && song.genre.toLowerCase().includes(criteria.toLowerCase()))
-      byGenre.push(song);
-  });
-
-  return {
-    byTitle,
-    byArtist,
-    byAlbum,
-    byGenre
-  };
 }
 
 export function search(criteria) {
@@ -72,9 +44,24 @@ export function search(criteria) {
     if (!criteria) {
       dispatch(searchingMustCompleteCriteria());
     } else {
-      LocalService.getSongs()
-        .then(songs => {
-          let result = _filter(songs, criteria);
+      let artistsPromise = LocalService.getArtists();
+      let albumsPromise = LocalService.getAlbums();
+      let songsPromise = LocalService.getSongs();
+      let playlistsPromise = LocalService.getPlaylists();
+
+      Promise.all([artistsPromise, albumsPromise, songsPromise, playlistsPromise])
+        .then(promisesResult => {
+          let artists = promisesResult[0];
+          let albums = promisesResult[1];
+          let songs = promisesResult[2];
+          let playlists = promisesResult[3];
+
+          let result = {
+            artists:  artists.filter(a => a.artist && a.artist.toLowerCase().startsWith(criteria.toLowerCase())),
+            albums:  albums.filter(a => a.album && a.album.toLowerCase().startsWith(criteria.toLowerCase())),
+            songs:  songs.filter(s => s.title && s.title.toLowerCase().startsWith(criteria.toLowerCase())),
+            playlists:  playlists.filter(p => p.name && p.name.toLowerCase().startsWith(criteria.toLowerCase()))
+          };
 
           dispatch(searchingSuccess(criteria, result));
         })

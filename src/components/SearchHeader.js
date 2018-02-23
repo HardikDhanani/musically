@@ -8,9 +8,6 @@ import {
 } from 'react-native';
 import Header from './common/headers/Header';
 import HeaderTitle from './common/headers/HeaderTitle';
-import HeaderLeftSection from './common/headers/HeaderLeftSection';
-import HeaderRightSection from './common/headers/HeaderRightSection';
-import HeaderCenterSection from './common/headers/HeaderCenterSection';
 import IconButton from './common/buttons/IconButton';
 
 const styles = EStyleSheet.create({
@@ -24,13 +21,17 @@ const styles = EStyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: '$titleFontSize',
+    fontSize: '$textFontSize',
     color: '$headerColor',
   },
   button: {
     color: '$headerColor',
     backgroundColor: 'transparent',
     fontSize: '$headerIconSize'
+  },
+  left: {
+    flexDirection: 'row',
+    marginLeft: 10
   }
 });
 
@@ -42,29 +43,26 @@ class SearchHeader extends Component {
   render() {
     return (
       <Header>
-        <HeaderLeftSection>
+        <View style={styles.left}>
           <IconButton iconName='arrow-back' onPress={this.props.onBackPress} style={styles._button} iconSize={styles._button.fontSize} />
-        </HeaderLeftSection>
-        <HeaderCenterSection>
-          <View style={styles.container}>
-            <TextInput
-              placeholder={'Search'}
-              style={styles.input}
-              onChangeText={this.props.search}
-              value={this.props.criteria}
-              underlineColorAndroid={'transparent'}
-              placeholderTextColor={'gray'}
-            />
-            {
-              this.props.criteria
-                ? <IconButton iconName='close' onPress={this.props.deleteSearch} style={styles._button} iconSize={styles._button.fontSize} />
-                : null
-            }
-          </View>
-        </HeaderCenterSection>
-        <HeaderRightSection>
-          <IconButton iconName='more-vert' onPress={this.props.onMorePress} style={styles._button} iconSize={styles._button.fontSize} />
-        </HeaderRightSection>
+        </View>
+        <View style={styles.container}>
+          <TextInput
+            selectionColor={"white"}
+            autoGrow={true}
+            placeholder={this.props.placeholder}
+            style={styles.input}
+            onChangeText={this.props.search}
+            value={this.props.criteria}
+            underlineColorAndroid={'transparent'}
+            placeholderTextColor={'rgb(200, 200, 200)'}
+          />
+          {
+            this.props.criteria
+              ? <IconButton iconName='close' onPress={this.props.deleteSearch} style={styles._button} iconSize={styles._button.fontSize} />
+              : null
+          }
+        </View>
       </Header>
     );
   }
@@ -72,10 +70,10 @@ class SearchHeader extends Component {
 
 SearchHeader.propTypes = {
   criteria: PropTypes.string,
-  search: PropTypes.func,
-  onBackPress: PropTypes.func,
-  deleteSearch: PropTypes.func,
-  onMorePress: PropTypes.func
+  placeholder: PropTypes.string.isRequired,
+  search: PropTypes.func.isRequired,
+  onBackPress: PropTypes.func.isRequired,
+  deleteSearch: PropTypes.func.isRequired
 };
 
 export default SearchHeader;

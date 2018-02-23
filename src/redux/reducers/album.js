@@ -26,8 +26,8 @@ export default function album(state = initialState, action = {}) {
       }
     case 'ALBUM_LOADING_SUCCESS':
       let songs = action.payload.album ? action.payload.album.songs : [];
-      songs = JSON.parse(JSON.stringify(songs.filter(song => song.reproductions > 0)));
-      topSongs = songsSelector.orderByReproductionsDesc(songs).slice(0, 5);
+      songs = JSON.parse(JSON.stringify(songs));
+      topSongs = songsSelector.orderByReproductionsDesc(songs.filter(song => song.reproductions > 0)).slice(0, 5);
 
       return {
         ...state,

@@ -20,6 +20,9 @@ const initialState = {
   iosAppId: 'iosAppId',
   androidAppId: 'androidAppId',
   version: '0.0.1',
+  scanningSongs: false,
+  scanForSongs: false,
+  totalSongs: 0
 };
 
 export default function app(state = initialState, action = {}) {
@@ -115,6 +118,70 @@ export default function app(state = initialState, action = {}) {
       return {
         ...state,
         artists: JSON.parse(JSON.stringify(state.artists))
+      }
+    case 'APP_SONGS_ADDED':
+      let songs = state.songs.concat(action.payload.songs);
+      return {
+        ...state,
+        songs,
+        totalSongs: action.payload.total
+      }
+    case 'APP_ALBUM_EDITED':
+      let i = state.albums.findIndex(a => a.id === action.payload.album.id);
+      if (i !== -1) {
+        state.albums[i] = action.payload.album;
+      } else {
+        state.albums.push(action.payload.album);
+      }
+
+      return {
+        ...state,
+        albums: JSON.parse(JSON.stringify(state.albums))
+      }
+    case 'APP_ARTIST_EDITED':
+      let j = state.artists.findIndex(a => a.id === action.payload.artist.id);
+      if (j !== -1) {
+        state.artists[j] = action.payload.artist;
+      } else {
+        state.artists.push(action.payload.artist);
+      }
+
+      return {
+        ...state,
+        artists: JSON.parse(JSON.stringify(state.artists))
+      }
+    case 'APP_START_SCANNING_FOR_SONGS':
+      return {
+        ...state,
+        scanForSongs: true
+      }
+    case 'APP_SCANNING_SONGS_STARTED':
+      return {
+        ...state,
+        scanningSongs: true
+      }
+    case 'APP_SCANNING_SONGS_FINISHED':
+      return {
+        ...state,
+        scanningSongs: false,
+        scanForSongs: false,
+        artists: JSON.parse(JSON.stringify(action.payload.artists)),
+        albums: JSON.parse(JSON.stringify(action.payload.albums))
+      }
+    case 'APP_SONGS_CHANGED':
+      return {
+        ...state,
+        songs: JSON.parse(JSON.stringify(action.payload.songs))
+      }
+    case 'APP_ALBUMS_CHANGED':
+      return {
+        ...state,
+        albums: JSON.parse(JSON.stringify(action.payload.albums))
+      }
+    case 'APP_ARTISTS_CHANGED':
+      return {
+        ...state,
+        artists: JSON.parse(JSON.stringify(action.payload.artists))
       }
     default:
       return state;
